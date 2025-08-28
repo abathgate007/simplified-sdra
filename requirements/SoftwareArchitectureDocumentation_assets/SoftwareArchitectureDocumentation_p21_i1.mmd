@@ -1,0 +1,19 @@
+classDiagram
+    class DataAccessLayer {
+        +ObjectMapper
+    }
+    class DataMapper {
+        <<interface>>
+        +Insert()
+        +Update()
+        +Delete()
+        +GetOne()
+        +GetAll()
+    }
+    class DomainModelLayer
+    class DataSourceLayer
+
+    DataAccessLayer --> ObjectMapper
+    ObjectMapper --> DataMapper
+    DataMapper --> DomainModelLayer
+    DataMapper --> DataSourceLayer

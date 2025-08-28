@@ -1,0 +1,8 @@
+flowchart TD
+    A[Client Machine] -->|Uses| B[Web Browser]
+    B -->|Requests| C[Servlet]
+    B -->|Requests| D[JSP Page]
+    C -->|Processes| E[Tomcat]
+    D -->|Processes| E
+    E -->|Uses| F[Data Persistence Framework]
+    F -->|Queries| G[Oracle SQL Database]

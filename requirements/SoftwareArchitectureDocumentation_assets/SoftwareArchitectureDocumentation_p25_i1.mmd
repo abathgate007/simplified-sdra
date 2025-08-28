@@ -1,0 +1,11 @@
+classDiagram
+    class Client
+    class ExternalAPIs
+    class ServiceInterface <<interface>>
+    class ConcreteService
+    class ApplicationLayer
+
+    Client --> ConcreteService
+    ExternalAPIs --> ConcreteService
+    ConcreteService --> ApplicationLayer
+    ServiceInterface <|-- ConcreteService

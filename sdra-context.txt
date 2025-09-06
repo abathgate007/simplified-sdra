@@ -1,0 +1,240 @@
+Project: Simplified Security Design Review Agent (SDRA)
+
+Author: Andrew Bathgate
+Environment:
+  - Language: Python 3.11+
+  - Dependency manager: uv (with .venv checked in)
+  - IDE: Cursor
+  - Testing: pytest
+  - Entrypoint: myagents/simplified_sdra.py
+  - Launch: via VS Code launch.json (parse, review, joke smoke-test)
+
+Goal:
+  Build an ensemble, multi-model agent that can perform structured security design reviews on software artifacts.
+  It should produce proof-of-work, JSON-based outputs, and a final HTML report with annotated DFDs, risks, and mitigations.
+
+--------------------------------------------------------------------------------
+WORKFLOW PIPELINE
+--------------------------------------------------------------------------------
+
+Step 1: Identify trust boundaries
+  - Inputs: requirements, design docs, architecture diagrams
+  - Output: Trust Boundaries JSON
+  - Loop: merge-evaluate-improve (max 3 iterations)
+
+Step 2: Generate DFDs (in constrained Mermaid syntax)
+  - Output: DFD JSON with nodes, edges, boundaries
+  - Loop: merge-evaluate-improve
+
+Step 3: STRIDE analysis matrix
+  - For each DFD element, test applicability of STRIDE categories (S,T,R,I,D,E)
+  - Output: Threat matrix JSON
+  - Loop: merge-evaluate-improve
+
+Step 4: DREAD risk ratings
+  - For each threat, assign subscores (0–10) for Damage, Reproducibility, Exploitability, Affected Users, Discoverability
+  - Score = sum (0–50)
+  - Severity bins: Critical (≥35), High (25–34), Medium (15–24), Low (5–14), Info (<5)
+  - Output: DREAD Ratings JSON
+  - Loop: merge-evaluate-improve
+
+Step 5: Prioritized mitigations
+  - Map each mitigation to threats + NIST CSF controls
+  - Include effort estimate (S/M/L), dependencies
+  - Output: Mitigations JSON
+  - Loop: merge-evaluate-improve
+
+Step 6: Annotated DFDs
+  - Update DFDs with overlays linking threats and annotations
+  - Output: Annotated DFD JSON
+  - Loop: merge-evaluate-improve
+
+Final Deliverables:
+  - Trust Boundaries JSON
+  - DFD JSON
+  - STRIDE matrix JSON
+  - DREAD Ratings JSON
+  - Mitigations JSON
+  - Annotated DFD JSON
+  - HTML Report (static, portable)
+  - Manifest.json with analytics
+
+--------------------------------------------------------------------------------
+MERGE–EVALUATE–IMPROVE LOOP
+--------------------------------------------------------------------------------
+
+1. Fan-out:
+   - Call multiple LLMs asynchronously (OpenAI GPT, Anthropic Claude, Google Gemini)
+   - All must return JSON-only outputs
+
+2. Canonicalize:
+   - Normalize IDs, trim text, sort lists
+   - Stable IDs: TB-###, P-###, DS-###, EXT-###, TH-####, MIT-####, ANN-####
+
+3. Merge:
+   - Deduplicate identical or near-duplicate findings
+   - Combine into a superset JSON
+
+4. Merge adjudicator LLM:
+   - Removes duplicates
+   - Rejects invalid/unsupported findings
+   - Adds metadata: confidence, source_models
+
+5. Evaluator LLM:
+   - Certifies or proposes improvements
+   - If improvements: return diffs only
+
+6. Improve (feedback loop):
+   - Provide merged JSON + evaluator notes back to fan-out models
+   - Ask them for diffs only
+   - Repeat max 3 loops
+   - Early exit if stable or repeated hash
+
+--------------------------------------------------------------------------------
+JSON SCHEMAS (all include schema_version + run_id)
+--------------------------------------------------------------------------------
+
+1. Trust Boundaries
+   - id, name, description, elements
+   - evidence array (requirement, diagram, assumption)
+
+2. DFDs
+   - id, title, mermaid
+   - nodes: id, type (process/data_store/external_entity)
+   - edges: from, to, label
+   - boundaries: TB references
+
+3. STRIDE Matrix
+   - element_id, element_type, stride, applies (true/false), example
+   - evidence with source_type + source_id
+   - coverage_pct
+
+4. DREAD Ratings
+   - threat_id, element_id, stride
+   - dread subscores: damage, reproducibility, exploitability, affected_users, discoverability
+   - total score + severity + rationale
+
+5. Mitigations
+   - id, title, description
+   - threat_ids (array)
+   - priority (int)
+   - nist_csf (array of PR.AC-1 etc.)
+   - effort (S/M/L)
+   - dependencies (mitigation IDs)
+
+6. Annotated DFDs
+   - dfd_id
+   - annotations: annotation_id, target_id, threat_ids, note
+
+7. Final Deliverables Bundle
+   - dfds_updated
+   - threats
+   - dread
+   - mitigations
+   - manifests:
+       - artifact_manifest (path, bytes, sha256 optional)
+       - analytics: llm_calls, wall_time_ms required; cost_usd optional
+
+--------------------------------------------------------------------------------
+MERMAID DFD CONVENTIONS
+--------------------------------------------------------------------------------
+
+- Node IDs: P-### (process), DS-### (data store), EXT-### (external entity)
+- Boundaries: TB-###
+- All edges labeled
+- Layout: flowchart TB
+- Validation:
+  - All nodes referenced exist
+  - All DS nodes have producer + consumer
+  - Boundaries align with Step 1 trust boundaries
+  - Nodes referenced in STRIDE/DREAD exist
+
+--------------------------------------------------------------------------------
+IMPLEMENTATION PRINCIPLES
+--------------------------------------------------------------------------------
+
+- Model agnostic (adapters: OpenAIAdapter, AnthropicAdapter, GeminiAdapter)
+- Async fan-out with asyncio
+- JSON-only prompts, concise outputs
+- No fluffy language
+- Evidence field required for proof-of-work
+- Assumptions allowed but must be tagged
+- Local filesystem storage under artifacts/run_id/
+- Manifest.json includes artifact list + analytics
+- HTML report: static file with Mermaid rendering + tables
+- Analytics: count LLM calls, wall_time_ms required; cost_usd optional
+- sha256 optional (placeholder for future)
+
+--------------------------------------------------------------------------------
+REPORTING
+--------------------------------------------------------------------------------
+
+Minimal HTML report (artifacts/run_id/report.html):
+- Header with run_id, models used, loop iterations, llm_calls, wall_time
+- DFDs rendered with Mermaid
+- Threat list table (filterable by element/STRIDE)
+- DREAD table (sortable, tooltips for rationale)
+- Mitigation list (grouped by NIST CSF; quick wins section)
+- Download links for JSON artifacts + manifest
+
+--------------------------------------------------------------------------------
+RISK RUBRIC
+--------------------------------------------------------------------------------
+
+DREAD scoring:
+- Subscores: 0–10 each
+- Score = sum (0–50)
+- Severity bins:
+  - Critical: >=35
+  - High: 25–34
+  - Medium: 15–24
+  - Low: 5–14
+  - Info: <5
+- Examples for calibration:
+  - Exploitability 9–10: no auth, trivial exploit
+  - Discoverability 8–10: error messages or docs expose
+
+--------------------------------------------------------------------------------
+PRODUCT ANALYTICS
+--------------------------------------------------------------------------------
+
+Metrics per run:
+- llm_calls (required)
+- wall_time_ms (required)
+- cost_usd (optional)
+- number of loops per step
+- models used per step
+- artifact sizes
+- per-model latency & error rate (optional)
+
+--------------------------------------------------------------------------------
+STORAGE
+--------------------------------------------------------------------------------
+
+- Local filesystem under artifacts/run_id/
+- Example:
+  artifacts/2025-09-06T12-34-56Z/
+    trust_boundaries.json
+    dfds.json
+    stride_matrix.json
+    dread.json
+    mitigations.json
+    annotated_dfds.json
+    report.html
+    manifest.json
+
+--------------------------------------------------------------------------------
+FUTURE
+--------------------------------------------------------------------------------
+
+- Add RAG from curated AppSec knowledge base (ASVS, CWE, secure patterns)
+- Add cost tracking
+- Add sha256 hashing
+- Expand reporting with charts/graphs
+- Move storage to Box/S3
+- Build automated evaluation suite:
+  - Test SDRA output against known vulnerable apps
+  - Measure mitigation coverage, precision, completeness
+  - Compare ensembles vs. single models
+  - Measure merge uplift and loop utility
+  - Evaluate RAG uplift

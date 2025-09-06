@@ -1,0 +1,38 @@
+{
+    "$id": "dread.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "DreadRatings",
+    "type": "object",
+    "required": ["schema_version", "run_id", "ratings"],
+    "properties": {
+      "schema_version": { "type": "string", "const": "1.0" },
+      "run_id": { "type": "string" },
+      "ratings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["threat_id","element_id","stride","dread","score","severity","rationale"],
+          "properties": {
+            "threat_id": { "type": "string", "pattern": "^TH-[0-9]{4}$" },
+            "element_id": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+            "stride": { "type": "string", "enum": ["S","T","R","I","D","E"] },
+            "dread": {
+              "type": "object",
+              "required": ["damage","reproducibility","exploitability","affected_users","discoverability"],
+              "properties": {
+                "damage": { "type": "integer", "minimum": 0, "maximum": 10 },
+                "reproducibility": { "type": "integer", "minimum": 0, "maximum": 10 },
+                "exploitability": { "type": "integer", "minimum": 0, "maximum": 10 },
+                "affected_users": { "type": "integer", "minimum": 0, "maximum": 10 },
+                "discoverability": { "type": "integer", "minimum": 0, "maximum": 10 }
+              }
+            },
+            "score": { "type": "integer", "minimum": 0, "maximum": 50 },
+            "severity": { "type": "string", "enum": ["Critical","High","Medium","Low","Info"] },
+            "rationale": { "type": "string", "maxLength": 300 }
+          }
+        }
+      }
+    }
+  }
+  

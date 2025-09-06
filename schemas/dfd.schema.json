@@ -1,0 +1,52 @@
+{
+    "$id": "dfd.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "DFDs",
+    "type": "object",
+    "required": ["schema_version", "run_id", "dfds"],
+    "properties": {
+      "schema_version": { "type": "string", "const": "1.0" },
+      "run_id": { "type": "string" },
+      "dfds": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "title", "mermaid", "nodes", "edges", "boundaries"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^DFD-[0-9]{3}$" },
+            "title": { "type": "string" },
+            "mermaid": { "type": "string" },
+            "nodes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "type", "label"],
+                "properties": {
+                  "id": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+                  "type": { "type": "string", "enum": ["process", "data_store", "external_entity"] },
+                  "label": { "type": "string" }
+                }
+              }
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["from", "to", "label"],
+                "properties": {
+                  "from": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+                  "to": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+                  "label": { "type": "string" }
+                }
+              }
+            },
+            "boundaries": {
+              "type": "array",
+              "items": { "type": "string", "pattern": "^TB-[0-9]{3}$" }
+            }
+          }
+        }
+      }
+    }
+  }
+  

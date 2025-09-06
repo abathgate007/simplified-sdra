@@ -1,35 +1,70 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "SDRA: parse folder",
-        "type": "debugpy",
-        "request": "launch",
-        "module": "myagents.simplified_sdra",
-        "args": ["--parse", "D:/projects/simplified-sdra/requirements"],
-        "cwd": "${workspaceFolder}",
-        "console": "integratedTerminal",
-        "justMyCode": true,
-        "envFile": "${workspaceFolder}/.env",
-        "python": "${workspaceFolder}/.venv/Scripts/python.exe"
-      },
-      {
-        "name": "SDRA: joke smoke-test",
-        "type": "debugpy",
-        "request": "launch",
-        "module": "myagents.simplified_sdra",
-        "cwd": "${workspaceFolder}",
-        "console": "integratedTerminal",
-        "justMyCode": true,
-        "envFile": "${workspaceFolder}/.env",
-        "python": "${workspaceFolder}/.venv/Scripts/python.exe"
-      },
-      {
-        "name": "Attach to running (debugpy)",
-        "type": "debugpy",
-        "request": "attach",
-        "connect": { "host": "localhost", "port": 5678 }
-      }
-    ]
-  }
-  
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "SDRA: parse folder",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "myagents.simplified_sdra",
+      "args": ["--parse", "D:/projects/simplified-sdra/requirements"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe"
+    },
+    {
+      "name": "SDRA: review folder (pick model)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "myagents.simplified_sdra",
+      "args": [
+        "--review", "D:/projects/simplified-sdra/requirements",
+        "--model", "${input:modelName}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe"
+    },
+    {
+      "name": "SDRA: joke smoke-test",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "myagents.simplified_sdra",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe"
+    },
+    {
+      "name": "Attach to running (debugpy)",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": { "host": "localhost", "port": 5678 }
+    },
+    {
+      "name": "PyTest (quick)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "modelName",
+      "type": "pickString",
+      "description": "Choose review model",
+      "options": ["gpt-4o-mini", "gpt-4o", "o4-mini"],
+      "default": "gpt-4o-mini"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "id": "ALTORO-1",
+    "title": "SQL Injection in Login and Account Search",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Utilize parameterized queries or prepared statements for all database interactions. All user-supplied input must be validated and sanitized on the server side before being used in a query."
+  },
+  {
+    "id": "ALTORO-2",
+    "title": "Blind SQL Injection in User Feedback Submission",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Implement parameterized queries for all database operations. Avoid exposing different application behaviors (like time delays or content changes) based on database query results. Use consistent error handling."
+  },
+  {
+    "id": "ALTORO-3",
+    "title": "Stored Cross-Site Scripting (XSS) in Fund Transfer Description",
+    "category": "Cross-Site Scripting",
+    "cwe": "CWE-79",
+    "mitigation": "Sanitize all user-supplied input before it is stored in the database. Implement strict, context-aware output encoding on all data points before they are rendered in the browser to prevent script execution."
+  },
+  {
+    "id": "ALTORO-4",
+    "title": "Reflected Cross-Site Scripting (XSS) in Search and Error Pages",
+    "category": "Cross-Site Scripting",
+    "cwe": "CWE-79",
+    "mitigation": "Apply strong output encoding to all user-reflected data. Implement a robust Content Security Policy (CSP) to restrict the execution of inline scripts and untrusted script sources."
+  },
+  {
+    "id": "ALTORO-5",
+    "title": "Path Traversal / Arbitrary File Read via 'Admin.aspx' Page",
+    "category": "Path Traversal",
+    "cwe": "CWE-22",
+    "mitigation": "Do not use user-supplied input directly in file paths. Sanitize input to remove traversal sequences ('../', '..\\'). Implement a strict allow-list of files that can be accessed and run the application with the minimum necessary file system privileges."
+  },
+  {
+    "id": "ALTORO-6",
+    "title": "Cross-Site Request Forgery (CSRF) in Fund Transfer Functionality",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "Implement and validate anti-CSRF tokens (synchronizer token pattern) for all state-changing actions, particularly for sensitive operations like financial transactions. The token should be unique per user session."
+  },
+  {
+    "id": "ALTORO-7",
+    "title": "Insecure Direct Object Reference (IDOR) to View Other Users' Transactions",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "For every request that accesses a resource, implement a server-side check to confirm that the currently authenticated user is authorized to access that specific resource. Do not rely on client-side controls for enforcement."
+  },
+  {
+    "id": "ALTORO-8",
+    "title": "Information Disclosure via Verbose Error Messages and Stack Traces",
+    "category": "Information Disclosure",
+    "cwe": "CWE-209",
+    "mitigation": "Configure the application (via web.config) to use custom, generic error pages (`customErrors mode='On'`) in a production environment. Suppress detailed stack traces and system information from being sent to the client."
+  },
+  {
+    "id": "ALTORO-9",
+    "title": "Weak Credential Storage (Plain Text Passwords)",
+    "category": "Cryptographic Issues",
+    "cwe": "CWE-312",
+    "mitigation": "User passwords must never be stored in plain text. Implement a strong, salted, and modern one-way hashing algorithm (e.g., Argon2, bcrypt, PBKDF2) for all password storage."
+  },
+  {
+    "id": "ALTORO-10",
+    "title": "SOAP API SQL Injection in 'GetTransactions' Method",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Treat all input to web service methods with the same suspicion as user input from a web form. Implement parameterized queries within the SOAP API methods to prevent injection vulnerabilities."
+  },
+  {
+    "id": "ALTORO-11",
+    "title": "Predictable Session Identifiers",
+    "category": "Broken Authentication",
+    "cwe": "CWE-330",
+    "mitigation": "Use a cryptographically secure pseudo-random number generator to create all session identifiers. Ensure session IDs have sufficient length and entropy to be resistant to guessing."
+  },
+  {
+    "id": "ALTORO-12",
+    "title": "Missing Brute-Force Protection on Login Page",
+    "category": "Broken Authentication",
+    "cwe": "CWE-307",
+    "mitigation": "Implement an account lockout policy that temporarily or permanently locks an account after a configured number of failed login attempts. Use CAPTCHA challenges to deter automated attacks."
+  },
+  {
+    "id": "ALTORO-13",
+    "title": "Unvalidated Redirects and Forwards",
+    "category": "Unvalidated Redirects and Forwards",
+    "cwe": "CWE-601",
+    "mitigation": "Avoid using user-controlled data in redirection targets. If necessary, maintain a server-side allow-list of valid redirection URLs and only redirect to URLs on that list."
+  },
+  {
+    "id": "ALTORO-14",
+    "title": "Clickjacking (UI Redress Attack) on Sensitive Pages",
+    "category": "UI Redressing",
+    "cwe": "CWE-1021",
+    "mitigation": "Implement the `X-Frame-Options: DENY` or `X-Frame-Options: SAMEORIGIN` HTTP header. Alternatively, use a Content Security Policy (CSP) with the `frame-ancestors 'self'` directive to prevent the site from being embedded in a malicious iframe."
+  }
+]

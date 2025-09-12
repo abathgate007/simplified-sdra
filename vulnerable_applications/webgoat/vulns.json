@@ -1,0 +1,177 @@
+[
+  {
+    "id": "WG-1",
+    "title": "SQL Injection in login form",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use of parameterized queries and prepared statements"
+  },
+  {
+    "id": "WG-2",
+    "title": "Blind SQL Injection in search functionality",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Input validation and parameterized queries"
+  },
+  {
+    "id": "WG-3",
+    "title": "Command Injection via system calls",
+    "category": "Injection",
+    "cwe": "CWE-78",
+    "mitigation": "Avoid system calls with user input, use safe APIs"
+  },
+  {
+    "id": "WG-4",
+    "title": "Reflected Cross-Site Scripting (XSS)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Output encoding and Content Security Policy"
+  },
+  {
+    "id": "WG-5",
+    "title": "Stored Cross-Site Scripting (XSS)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Input sanitization and output encoding"
+  },
+  {
+    "id": "WG-6",
+    "title": "DOM-based Cross-Site Scripting",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Secure DOM manipulation practices"
+  },
+  {
+    "id": "WG-7",
+    "title": "Authentication bypass via parameter manipulation",
+    "category": "Broken Authentication",
+    "cwe": "CWE-287",
+    "mitigation": "Server-side authentication validation"
+  },
+  {
+    "id": "WG-8",
+    "title": "Session fixation vulnerability",
+    "category": "Broken Authentication",
+    "cwe": "CWE-384",
+    "mitigation": "Session regeneration after authentication"
+  },
+  {
+    "id": "WG-9",
+    "title": "Weak password recovery mechanism",
+    "category": "Broken Authentication",
+    "cwe": "CWE-640",
+    "mitigation": "Secure password reset process with proper validation"
+  },
+  {
+    "id": "WG-10",
+    "title": "Insecure Direct Object Reference",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "Access control validation and indirect references"
+  },
+  {
+    "id": "WG-11",
+    "title": "Missing function-level access control",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "Role-based access control implementation"
+  },
+  {
+    "id": "WG-12",
+    "title": "Cross-Site Request Forgery (CSRF)",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "CSRF tokens and SameSite cookie attributes"
+  },
+  {
+    "id": "WG-13",
+    "title": "Security misconfiguration with default credentials",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-521",
+    "mitigation": "Force password changes and secure defaults"
+  },
+  {
+    "id": "WG-14",
+    "title": "Information disclosure through error messages",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-209",
+    "mitigation": "Generic error messages and proper logging"
+  },
+  {
+    "id": "WG-15",
+    "title": "Weak cryptographic implementation",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-326",
+    "mitigation": "Use of strong, standard cryptographic algorithms"
+  },
+  {
+    "id": "WG-16",
+    "title": "Insecure data storage with weak encryption",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Proper encryption key management and strong ciphers"
+  },
+  {
+    "id": "WG-17",
+    "title": "HTTP parameter pollution",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-235",
+    "mitigation": "Proper parameter parsing and validation"
+  },
+  {
+    "id": "WG-18",
+    "title": "Path traversal vulnerability",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Input validation and path sanitization"
+  },
+  {
+    "id": "WG-19",
+    "title": "XML External Entity (XXE) injection",
+    "category": "Injection",
+    "cwe": "CWE-611",
+    "mitigation": "Disable external entity processing in XML parsers"
+  },
+  {
+    "id": "WG-20",
+    "title": "LDAP injection vulnerability",
+    "category": "Injection",
+    "cwe": "CWE-90",
+    "mitigation": "Input validation and LDAP query parameterization"
+  },
+  {
+    "id": "WG-21",
+    "title": "Business logic bypass via race condition",
+    "category": "Business Logic Errors",
+    "cwe": "CWE-362",
+    "mitigation": "Proper synchronization and transaction management"
+  },
+  {
+    "id": "WG-22",
+    "title": "Unvalidated redirects and forwards",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-601",
+    "mitigation": "Whitelist allowed redirect destinations"
+  },
+  {
+    "id": "WG-23",
+    "title": "Insufficient transport layer protection",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-319",
+    "mitigation": "Enforce HTTPS and proper TLS configuration"
+  },
+  {
+    "id": "WG-24",
+    "title": "JWT token manipulation",
+    "category": "Broken Authentication",
+    "cwe": "CWE-347",
+    "mitigation": "Proper JWT signature validation and secure algorithms"
+  },
+  {
+    "id": "WG-25",
+    "title": "Client-side authentication bypass",
+    "category": "Broken Authentication",
+    "cwe": "CWE-602",
+    "mitigation": "Server-side authentication enforcement"
+  }
+]

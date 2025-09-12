@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from openai import AsyncOpenAI
 from anthropic import AsyncAnthropic
 
@@ -21,6 +21,16 @@ class LLMModel:
         """Returns the first few chars of the API key for debugging."""
         return self.api_key[:6] + "..."
 
+    async def callwithmessages(self, messages: List[dict]) -> str:
+        if self.model_type == "openai" or self.model_type == "deepseek":
+            return await self._call_openai_stylewithmessages(messages)
+        elif self.model_type == "google":
+            return await self._call_geminiwithmessages(messages)
+        elif self.model_type == "anthropic":
+            return await self._call_claudewithmessages(messages)
+        else:
+            raise ValueError(f"Unsupported model type: {self.model_type}")
+
     async def call(self, prompt: str) -> str:
         if self.model_type == "openai" or self.model_type == "deepseek":
             return await self._call_openai_style(prompt)
@@ -30,7 +40,17 @@ class LLMModel:
             return await self._call_claude(prompt)
         else:
             raise ValueError(f"Unsupported model type: {self.model_type}")
-    
+     
+    async def _call_openai_stylewithmessages(self, messages: List[dict]) -> str:
+        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) if self.base_url \
+            else AsyncOpenAI(api_key=self.api_key)
+
+        response = await client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+        )
+        return response.choices[0].message.content or ""
+
     async def _call_openai_style(self, prompt: str) -> str:
         client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) if self.base_url \
             else AsyncOpenAI(api_key=self.api_key)
@@ -40,7 +60,17 @@ class LLMModel:
             messages=[{"role": "user", "content": prompt}],
         )
         return response.choices[0].message.content or ""
-    
+
+    async def _call_geminiwithmessages(self, messages: List[dict]) -> str:
+        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) if self.base_url \
+            else AsyncOpenAI(api_key=self.api_key)
+
+        response = await client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+        )
+        return response.choices[0].message.content or "" 
+
     async def _call_gemini(self, prompt: str) -> str:
         client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) if self.base_url \
             else AsyncOpenAI(api_key=self.api_key)
@@ -50,13 +80,44 @@ class LLMModel:
             messages=[{"role": "user", "content": prompt}],
         )
         return response.choices[0].message.content or ""
-    
+
+    async def _call_claudewithmessages(self, messages: List[Dict[str, Any]]) -> str:
+        client = AsyncAnthropic(api_key=self.api_key)
+
+        # Extract system messages (Anthropic requires top-level system param)
+        system_parts = []
+        new_messages = []
+        for m in messages:
+            role = m.get("role")
+            content = m.get("content", "")
+            if role == "system":
+                # Collect system text
+                if isinstance(content, str):
+                    system_parts.append(content)
+                elif isinstance(content, list):
+                    system_parts.extend(
+                        b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text"
+                    )
+            else:
+                # Pass through user/assistant messages unchanged
+                new_messages.append(m)
+
+        system_text = "\n".join(p for p in system_parts if p)
+
+        response = await client.messages.create(
+            model=self.model_name,
+            max_tokens=20000,
+            system=system_text or None,   # Top-level system field
+            messages=new_messages,        # Only user/assistant
+        )
+        return response.content[0].text
+
     async def _call_claude(self, prompt: str) -> str:
         client = AsyncAnthropic(api_key=self.api_key)
 
         response = await client.messages.create(
             model=self.model_name,
-            max_tokens=1000,
+            max_tokens=20000,
             messages=[{"role": "user", "content": prompt}],
         )
         return response.content[0].text

@@ -1,0 +1,100 @@
+[
+  {
+    "id": "ACUFORUM-1",
+    "title": "SQL Injection in 'thread' Parameter",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use parameterized queries or prepared statements for all database interactions. Sanitize and validate all user-supplied input, especially URL parameters. [1, 2]"
+  },
+  {
+    "id": "ACUFORUM-2",
+    "title": "Blind SQL Injection in 'User' Parameter",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Implement parameterized queries for all database lookups. Avoid returning different responses based on boolean conditions from the database and use standardized error responses. [2]"
+  },
+  {
+    "id": "ACUFORUM-3",
+    "title": "Reflected Cross-Site Scripting (XSS) in Search and Profile Functions",
+    "category": "Cross-Site Scripting",
+    "cwe": "CWE-79",
+    "mitigation": "Implement context-aware output encoding for all user-supplied data before it is rendered in the browser. Utilize a Content Security Policy (CSP) to restrict the sources of executable scripts. [3]"
+  },
+  {
+    "id": "ACUFORUM-4",
+    "title": "Stored Cross-Site Scripting (XSS) in Forum Posts and User Signatures",
+    "category": "Cross-Site Scripting",
+    "cwe": "CWE-79",
+    "mitigation": "Sanitize all user-generated content (posts, signatures) before storing it in the database. Apply robust output encoding when displaying this content to other users. [3]"
+  },
+  {
+    "id": "ACUFORUM-5",
+    "title": "Directory Traversal / Arbitrary File Read",
+    "category": "Path Traversal",
+    "cwe": "CWE-22",
+    "mitigation": "Do not use user-supplied input directly in file system calls. Use an allow-list of safe files and directories, and sanitize any input to prevent traversal sequences like '..'. [4]"
+  },
+  {
+    "id": "ACUFORUM-6",
+    "title": "Arbitrary File Upload Leading to Remote Code Execution",
+    "category": "Unrestricted File Upload",
+    "cwe": "CWE-434",
+    "mitigation": "Validate uploaded files by type, not just extension. Rename uploaded files, store them outside the web root, and serve them from a separate, non-privileged domain."
+  },
+  {
+    "id": "ACUFORUM-7",
+    "title": "Cross-Site Request Forgery (CSRF) on 'Add Post' and 'Update Profile'",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "Implement anti-CSRF tokens (e.g., synchronizer token pattern) for all state-changing requests and validate them on the server-side."
+  },
+  {
+    "id": "ACUFORUM-8",
+    "title": "Weak Session Management / Session Fixation",
+    "category": "Broken Authentication",
+    "cwe": "CWE-384",
+    "mitigation": "Regenerate the session ID immediately after a user successfully authenticates. Enforce secure session cookie attributes (HttpOnly, Secure) and provide a secure logout function."
+  },
+  {
+    "id": "ACUFORUM-9",
+    "title": "Information Disclosure via Verbose Error Messages",
+    "category": "Information Disclosure",
+    "cwe": "CWE-209",
+    "mitigation": "Configure PHP (`php.ini`) to disable `display_errors` in production. Implement custom, generic error pages that do not reveal file paths or database details. [1]"
+  },
+  {
+    "id": "ACUFORUM-10",
+    "title": "Insecure Credential Storage",
+    "category": "Cryptographic Issues",
+    "cwe": "CWE-312",
+    "mitigation": "Store user passwords using a strong, salted, and modern hashing algorithm like Argon2 or bcrypt. Never store passwords in plain text or with outdated hashes."
+  },
+  {
+    "id": "ACUFORUM-11",
+    "title": "Broken Access Control (IDOR) on User Profiles",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "On the server-side, verify that the currently authenticated user is authorized to access or modify the requested resource. Do not rely solely on client-side checks."
+  },
+  {
+    "id": "ACUFORUM-12",
+    "title": "Clickjacking (UI Redress Attack)",
+    "category": "UI Redressing",
+    "cwe": "CWE-1021",
+    "mitigation": "Implement the `X-Frame-Options` HTTP header (e.g., DENY or SAMEORIGIN) or a Content Security Policy (CSP) with the `frame-ancestors` directive to prevent the site from being framed."
+  },
+  {
+    "id": "ACUFORUM-13",
+    "title": "Missing Brute-Force Protection on Login",
+    "category": "Broken Authentication",
+    "cwe": "CWE-307",
+    "mitigation": "Implement account lockout policies after a certain number of failed login attempts. Use CAPTCHA challenges and monitor for anomalous login activity."
+  },
+  {
+    "id": "ACUFORUM-14",
+    "title": "Open Redirect",
+    "category": "Unvalidated Redirects and Forwards",
+    "cwe": "CWE-601",
+    "mitigation": "Avoid using user-controllable data in redirect targets. If redirection is necessary, use an allow-list of approved URLs rather than trying to sanitize the input."
+  }
+]

@@ -1,0 +1,127 @@
+graph TB
+    subgraph ClientLayer ["User/Browser Layer"]
+        WB[Web Browser]
+        US[User Search]
+        FM[File Management]
+        GB[Guestbook]
+        NT[Network Tools]
+    end
+    
+    subgraph WebLayer ["Web Server Layer"]
+        APACHE[Apache HTTP Server]
+        PHP[PHP Engine 7.4+]
+        
+        subgraph AppModules ["Application Modules"]
+            USEARCH[User Search Module]
+            GUESTBOOK[Guestbook Module]
+            NETTOOLS[Network Tools Module]
+            FILEUP[File Upload Module]
+            AUTH[Authentication Module]
+            SESSION[Session Management]
+            USERADMIN[User Admin Module]
+            SECURITY[Security Module]
+        end
+        
+        CONFIG[Configuration Manager]
+    end
+    
+    subgraph FileSystem ["File System"]
+        UPLOADDIR[Upload Directory]
+        CONFIGFILE[Config Files]
+        APPCODE[Application Code]
+    end
+    
+    subgraph DataLayer ["Database Layer"]
+        DB[(MySQL Database)]
+        
+        subgraph DBTables ["Database Tables"]
+            USERS[(users table)]
+            GUESTBOOKTBL[(guestbook table)]
+        end
+    end
+    
+    subgraph OSLayer ["Operating System Layer"]
+        OS[Operating System]
+        SYSSERV[System Services]
+        FILESYSTEM[File System]
+        NETSTACK[Network Stack]
+    end
+    
+    subgraph APILayer ["API Endpoints"]
+        APIUSERS[User API]
+        APIFILES[File API]
+        APIAUTH[Auth API]
+        APINET[Network API]
+    end
+    
+    %% User interactions
+    WB --> APACHE
+    US --> APACHE
+    FM --> APACHE
+    GB --> APACHE
+    NT --> APACHE
+    
+    %% Web server connections
+    APACHE --> PHP
+    
+    %% PHP to modules
+    PHP --> USEARCH
+    PHP --> GUESTBOOK
+    PHP --> NETTOOLS
+    PHP --> FILEUP
+    PHP --> AUTH
+    PHP --> SESSION
+    PHP --> USERADMIN
+    PHP --> SECURITY
+    
+    %% Module to database connections
+    USEARCH --> DB
+    GUESTBOOK --> DB
+    AUTH --> DB
+    USERADMIN --> DB
+    
+    %% Database to tables
+    DB --> USERS
+    DB --> GUESTBOOKTBL
+    
+    %% File system connections
+    FILEUP --> UPLOADDIR
+    PHP --> CONFIGFILE
+    PHP --> APPCODE
+    
+    %% Network tools to OS
+    NETTOOLS --> NETSTACK
+    
+    %% System connections
+    PHP --> SYSSERV
+    UPLOADDIR --> FILESYSTEM
+    CONFIGFILE --> FILESYSTEM
+    APPCODE --> FILESYSTEM
+    
+    %% API connections
+    PHP --> APIUSERS
+    PHP --> APIFILES
+    PHP --> APIAUTH
+    PHP --> APINET
+    
+    %% Configuration connections
+    CONFIG --> PHP
+    
+    %% Styling
+    classDef userLayer fill:#e8f4fd,stroke:#2196F3,stroke-width:2px
+    classDef webLayer fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    classDef appModule fill:#e8f5e8,stroke:#4caf50,stroke-width:1px
+    classDef fileLayer fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    classDef dataLayer fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef osLayer fill:#fafafa,stroke:#666,stroke-width:2px
+    classDef apiLayer fill:#ffffff,stroke:#666,stroke-width:1px
+    classDef database fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    
+    class WB,US,FM,GB,NT userLayer
+    class APACHE,PHP,CONFIG webLayer
+    class USEARCH,GUESTBOOK,NETTOOLS,FILEUP,AUTH,SESSION,USERADMIN,SECURITY appModule
+    class UPLOADDIR,CONFIGFILE,APPCODE fileLayer
+    class DB database
+    class USERS,GUESTBOOKTBL database
+    class OS,SYSSERV,FILESYSTEM,NETSTACK osLayer
+    class APIUSERS,APIFILES,APIAUTH,APINET apiLayer

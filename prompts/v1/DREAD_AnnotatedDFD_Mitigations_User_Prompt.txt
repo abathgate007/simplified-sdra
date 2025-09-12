@@ -1,0 +1,120 @@
+Context (inputs produced by earlier steps):
+- trust_boundaries (JSON): <<TRUST_BOUNDARIES_JSON>>
+- dfds (JSON): <<DFDS_JSON>>
+- stride_matrix (JSON): <<STRIDE_MATRIX_JSON>>
+
+Task:
+Using the three inputs above:
+1) Produce DREAD risk ratings only for threats that truly apply (derived from stride_matrix rows where applies==true).
+2) Produce Annotated DFD overlays (do not rewrite base Mermaid). Link annotations to threat_ids.
+3) Produce a prioritized list of Mitigations mapped to NIST CSF, referencing threat_ids.
+
+Constraints:
+- JSON only, one object with "dread", "annotated_dfds", "mitigations".
+- Be complete, concise, and clear. No duplicate items. No invalid references.
+- Severity MUST match DREAD score bins defined by the rubric provided to you.
+
+Schemas (must be satisfied EXACTLY):
+
+// --- dread.schema.json (v1.0) ---
+{
+  "type": "object",
+  "required": ["schema_version", "run_id", "ratings"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "run_id": { "type": "string" },
+    "ratings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["threat_id","element_id","stride","dread","score","severity","rationale"],
+        "properties": {
+          "threat_id": { "type": "string", "pattern": "^TH-[0-9]{4}$" },
+          "element_id": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+          "stride": { "type": "string", "enum": ["S","T","R","I","D","E"] },
+          "dread": {
+            "type": "object",
+            "required": ["damage","reproducibility","exploitability","affected_users","discoverability"],
+            "properties": {
+              "damage": { "type": "integer", "minimum": 0, "maximum": 10 },
+              "reproducibility": { "type": "integer", "minimum": 0, "maximum": 10 },
+              "exploitability": { "type": "integer", "minimum": 0, "maximum": 10 },
+              "affected_users": { "type": "integer", "minimum": 0, "maximum": 10 },
+              "discoverability": { "type": "integer", "minimum": 0, "maximum": 10 }
+            }
+          },
+          "score": { "type": "integer", "minimum": 0, "maximum": 50 },
+          "severity": { "type": "string", "enum": ["Critical","High","Medium","Low","Info"] },
+          "rationale": { "type": "string", "maxLength": 300 }
+        }
+      }
+    }
+  }
+}
+
+// --- annotated_dfd.schema.json (v1.0) ---
+// NOTE: You must output "annotated_dfds" as an ARRAY. Each ARRAY ITEM must conform to this object schema.
+{
+  "type": "object",
+  "required": ["schema_version","run_id","dfd_id","annotations"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "run_id": { "type": "string" },
+    "dfd_id": { "type": "string", "pattern": "^DFD-[0-9]{3}$" },
+      "annotations": {
+        "type": "array",
+        "description": "Overlay layer; do not mutate the base Mermaid layout.",
+        "items": {
+          "type": "object",
+          "required": ["annotation_id","target_id","threat_ids","note"],
+          "properties": {
+            "annotation_id": { "type": "string", "pattern": "^ANN-[0-9]{4}$" },
+            "target_id": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+            "threat_ids": { "type": "array", "items": { "type": "string", "pattern": "^TH-[0-9]{4}$" } },
+            "note": { "type": "string", "maxLength": 200 }
+          }
+        }
+      }
+  }
+}
+
+// --- mitigations.schema.json (v1.0) ---
+{
+  "type": "object",
+  "required": ["schema_version", "run_id", "items"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "run_id": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id","title","description","threat_ids","priority","nist_csf","effort","dependencies"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^MIT-[0-9]{4}$" },
+          "title": { "type": "string" },
+          "description": { "type": "string", "maxLength": 300 },
+          "threat_ids": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^TH-[0-9]{4}$" }
+          },
+          "priority": { "type": "integer", "minimum": 1, "maximum": 9999 },
+          "nist_csf": {
+            "type": "array",
+            "description": "NIST CSF function.category.subcategory (e.g., PR.AC-1).",
+            "items": { "type": "string", "pattern": "^(ID|PR|DE|RS|RC)\\.[A-Z]{2}-[0-9]+$" }
+          },
+          "effort": { "type": "string", "enum": ["S","M","L"] },
+          "dependencies": { "type": "array", "items": { "type": "string", "pattern": "^MIT-[0-9]{4}$" } }
+        }
+      }
+    }
+  }
+}
+
+Output (ONE JSON object):
+{
+  "dread": { ... DreadRatings per schema ... },
+  "annotated_dfds": [ ... array of AnnotatedDFDs objects ... ],
+  "mitigations": { ... Mitigations per schema ... }
+}

@@ -1,0 +1,68 @@
+{
+ "schema_version": "1.0",
+ "run_id": "RUN-20250907-001",
+ "boundaries": [
+   {
+     "id": "TB-001",
+     "name": "Public-Authenticated User Boundary",
+     "description": "Separates unauthenticated public users who can only access basic company information from authenticated users who can access sensitive account data and perform financial transactions.",
+     "elements": ["P-001", "P-002"]
+   },
+   {
+     "id": "TB-002", 
+     "name": "Customer-Admin Privilege Boundary",
+     "description": "Separates regular customers who can only access their own account data from admin users who have elevated privileges to view all user profiles, modify account status, and access system configuration.",
+     "elements": ["P-002", "P-003"]
+   },
+   {
+     "id": "TB-003",
+     "name": "Application-Database Trust Boundary",
+     "description": "Separates the web application layer from the database layer where sensitive credentials and financial data are stored, requiring proper authentication and access control.",
+     "elements": ["P-001", "DS-001"]
+   },
+   {
+     "id": "TB-004",
+     "name": "Internal-External Service Boundary",
+     "description": "Separates the internal banking application from external third-party services and APIs, controlling what data can be shared outside the organization's trust domain.",
+     "elements": ["P-001", "EXT-001"]
+   },
+   {
+     "id": "TB-005",
+     "name": "Client-Server Network Boundary",
+     "description": "Separates client-side components (browsers, mobile apps) from server-side processing, requiring HTTPS encryption and session management to protect data in transit.",
+     "elements": ["P-004", "P-001"]
+   }
+ ],
+ "evidence": [
+   {
+     "source_type": "requirement",
+     "source_id": "section-2.1",
+     "quote": "Public users can: View basic company information (About Us, Services, Contact). Access financial product pages. Submit a contact form for inquiries."
+   },
+   {
+     "source_type": "requirement", 
+     "source_id": "section-2.2",
+     "quote": "Registered users can log in using a username and password. Sessions are maintained using browser cookies."
+   },
+   {
+     "source_type": "requirement",
+     "source_id": "section-2.7", 
+     "quote": "Admin users can: View all user profiles and account data. Modify user account status (e.g., freeze account). Access system configuration options."
+   },
+   {
+     "source_type": "requirement",
+     "source_id": "section-3.3",
+     "quote": "Login required to access account data or perform transactions. All pages available over HTTPS. Credentials stored in the database."
+   },
+   {
+     "source_type": "diagram",
+     "source_id": "architecture-diagram",
+     "quote": "External APIs Third-party Services (Directory Services, Payment Gateway, Email Services, File Storage, Monitoring)"
+   },
+   {
+     "source_type": "diagram",
+     "source_id": "client-layer",
+     "quote": "Client Layer: Web Browser Desktop/Mobile, API Clients Third-party Apps, Mobile Apps iOS/Android, Web Services SOAP/REST"
+   }
+ ]
+}

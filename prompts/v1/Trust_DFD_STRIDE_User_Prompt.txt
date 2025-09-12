@@ -1,0 +1,133 @@
+Context:
+- Requirements and Design notes: <<REQUIREMENTS_AND_DESIGN_TEXT>>
+
+Constraints:
+- JSON only. No text outside JSON.
+- All three schemas must be satisfied exactly.
+- Provide proof-of-work by filling `evidence` arrays with requirement, diagram, or assumption.
+- Include all DFD elements × 6 STRIDE categories. If not applicable, set applies=false.
+
+Schemas:
+
+1) trust_boundaries.schema.json
+{
+  "type": "object",
+  "required": ["schema_version", "run_id", "boundaries", "evidence"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "run_id": { "type": "string" },
+    "boundaries": {
+      "type": "array",
+      "items": {
+        "required": ["id","name","description","elements"],
+        "properties": {
+          "id": { "pattern": "^TB-[0-9]{3}$" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "elements": { "type": "array","items": { "pattern": "^(P|DS|EXT)-[0-9]{3}$" } }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "required": ["source_type","source_id"],
+        "properties": {
+          "source_type": { "enum": ["requirement","diagram","assumption"] },
+          "source_id": { "type": "string" },
+          "quote": { "type": "string" }
+        }
+      }
+    }
+  }
+}
+
+2) dfd.schema.json
+{
+  "type": "object",
+  "required": ["schema_version","run_id","dfds"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "run_id": { "type": "string" },
+    "dfds": {
+      "type": "array",
+      "items": {
+        "required": ["id","title","mermaid","nodes","edges","boundaries"],
+        "properties": {
+          "id": { "pattern": "^DFD-[0-9]{3}$" },
+          "title": { "type": "string" },
+          "mermaid": { "type": "string" },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "required": ["id","type","label"],
+              "properties": {
+                "id": { "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+                "type": { "enum": ["process","data_store","external_entity"] },
+                "label": { "type": "string" }
+              }
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "required": ["from","to","label"],
+              "properties": {
+                "from": { "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+                "to":   { "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+                "label":{ "type": "string" }
+              }
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": { "pattern": "^TB-[0-9]{3}$" }
+          }
+        }
+      }
+    }
+  }
+}
+
+3) stride_matrix.schema.json
+{
+  "type": "object",
+  "required": ["schema_version","run_id","rows","coverage_pct"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "run_id": { "type": "string" },
+    "rows": {
+      "type": "array",
+      "items": {
+        "required": ["element_id","element_type","stride","applies","example"],
+        "properties": {
+          "element_id": { "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+          "element_type": { "enum": ["process","data_store","external_entity"] },
+          "stride": { "enum": ["S","T","R","I","D","E"] },
+          "applies": { "type": "boolean" },
+          "example": { "type": "string" },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "required": ["source_type","source_id"],
+              "properties": {
+                "source_type": { "enum": ["requirement","diagram","assumption"] },
+                "source_id": { "type": "string" },
+                "quote": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "coverage_pct": { "type": "number" }
+  }
+}
+
+OUTPUT
+Return exactly:
+{
+  "trust_boundaries": { ... },
+  "dfds": { ... },
+  "stride_matrix": { ... }
+}

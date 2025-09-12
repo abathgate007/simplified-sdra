@@ -1,0 +1,352 @@
+[
+  {
+    "id": "OVA-1",
+    "title": "SQL Injection via Error Based",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use parameterized queries and prepared statements"
+  },
+  {
+    "id": "OVA-2",
+    "title": "SQL Injection via Union Based",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Input validation and parameterized queries"
+  },
+  {
+    "id": "OVA-3",
+    "title": "SQL Injection via Boolean Based Blind",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Consistent response handling and parameterized queries"
+  },
+  {
+    "id": "OVA-4",
+    "title": "SQL Injection via Time Based Blind",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Query timeout controls and input validation"
+  },
+  {
+    "id": "OVA-5",
+    "title": "Command Injection",
+    "category": "Injection",
+    "cwe": "CWE-78",
+    "mitigation": "Avoid system calls with user input and use safe APIs"
+  },
+  {
+    "id": "OVA-6",
+    "title": "LDAP Injection",
+    "category": "Injection",
+    "cwe": "CWE-90",
+    "mitigation": "LDAP query parameterization and input validation"
+  },
+  {
+    "id": "OVA-7",
+    "title": "XPath Injection",
+    "category": "Injection",
+    "cwe": "CWE-643",
+    "mitigation": "XPath parameterization and input validation"
+  },
+  {
+    "id": "OVA-8",
+    "title": "XML External Entity (XXE) Injection",
+    "category": "Injection",
+    "cwe": "CWE-611",
+    "mitigation": "Disable external entity processing in XML parsers"
+  },
+  {
+    "id": "OVA-9",
+    "title": "Cross-Site Scripting (XSS) - Reflected",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Output encoding and Content Security Policy"
+  },
+  {
+    "id": "OVA-10",
+    "title": "Cross-Site Scripting (XSS) - Persistent",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Input sanitization and output encoding"
+  },
+  {
+    "id": "OVA-11",
+    "title": "Cross-Site Scripting (XSS) - DOM Based",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Secure DOM manipulation practices"
+  },
+  {
+    "id": "OVA-12",
+    "title": "Cross-Site Request Forgery (CSRF)",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "CSRF tokens and SameSite cookie attributes"
+  },
+  {
+    "id": "OVA-13",
+    "title": "Server-Side Request Forgery (SSRF)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-918",
+    "mitigation": "URL validation and network access restrictions"
+  },
+  {
+    "id": "OVA-14",
+    "title": "Path Traversal",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Path validation and access controls"
+  },
+  {
+    "id": "OVA-15",
+    "title": "File Upload Restriction Bypass",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-434",
+    "mitigation": "File type validation and upload restrictions"
+  },
+  {
+    "id": "OVA-16",
+    "title": "JWT Vulnerability (Algorithm Confusion)",
+    "category": "Broken Authentication",
+    "cwe": "CWE-347",
+    "mitigation": "Strict JWT algorithm validation and signature verification"
+  },
+  {
+    "id": "OVA-17",
+    "title": "JWT Vulnerability (Weak Secret)",
+    "category": "Broken Authentication",
+    "cwe": "CWE-347",
+    "mitigation": "Strong JWT signing keys and proper secret management"
+  },
+  {
+    "id": "OVA-18",
+    "title": "URL Redirection",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-601",
+    "mitigation": "Whitelist allowed redirect destinations"
+  },
+  {
+    "id": "OVA-19",
+    "title": "ForwardedHeaderFilter",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-20",
+    "mitigation": "Validate and sanitize forwarded headers"
+  },
+  {
+    "id": "OVA-20",
+    "title": "CORS Misconfiguration",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-942",
+    "mitigation": "Restrict CORS to trusted origins only"
+  },
+  {
+    "id": "OVA-21",
+    "title": "Insecure Deserialization",
+    "category": "Injection",
+    "cwe": "CWE-502",
+    "mitigation": "Avoid deserializing untrusted data or use safe serializers"
+  },
+  {
+    "id": "OVA-22",
+    "title": "Template Injection",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Template sandboxing and input validation"
+  },
+  {
+    "id": "OVA-23",
+    "title": "Email Injection",
+    "category": "Injection",
+    "cwe": "CWE-93",
+    "mitigation": "Email header validation and sanitization"
+  },
+  {
+    "id": "OVA-24",
+    "title": "Race Condition",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-362",
+    "mitigation": "Atomic operations and proper synchronization"
+  },
+  {
+    "id": "OVA-25",
+    "title": "Spring4Shell (CVE-2022-22965)",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Update Spring Framework and validate class access patterns"
+  },
+  {
+    "id": "OVA-26",
+    "title": "Log4j RCE (CVE-2021-44228)",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Update Log4j and disable JNDI lookup functionality"
+  },
+  {
+    "id": "OVA-27",
+    "title": "GraphQL IDOR",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "GraphQL authorization and access control validation"
+  },
+  {
+    "id": "OVA-28",
+    "title": "GraphQL Injection",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "GraphQL query validation and depth limiting"
+  },
+  {
+    "id": "OVA-29",
+    "title": "Authorization Bypass",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "Comprehensive authorization checks on all endpoints"
+  },
+  {
+    "id": "OVA-30",
+    "title": "Missing Authentication",
+    "category": "Broken Authentication",
+    "cwe": "CWE-287",
+    "mitigation": "Implement authentication on all protected resources"
+  },
+  {
+    "id": "OVA-31",
+    "title": "Weak Cryptography",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Use strong cryptographic algorithms and proper key management"
+  },
+  {
+    "id": "OVA-32",
+    "title": "Insecure Random Number Generation",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-330",
+    "mitigation": "Use cryptographically secure random number generators"
+  },
+  {
+    "id": "OVA-33",
+    "title": "Clickjacking",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-1021",
+    "mitigation": "X-Frame-Options header and frame-ancestors CSP directive"
+  },
+  {
+    "id": "OVA-34",
+    "title": "Content Security Policy Bypass",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-693",
+    "mitigation": "Strict CSP policy without unsafe-inline or unsafe-eval"
+  },
+  {
+    "id": "OVA-35",
+    "title": "SQL Injection via Hibernate",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use Hibernate parameterized queries and criteria API"
+  },
+  {
+    "id": "OVA-36",
+    "title": "NoSQL Injection (MongoDB)",
+    "category": "Injection",
+    "cwe": "CWE-943",
+    "mitigation": "Input validation and parameterized NoSQL queries"
+  },
+  {
+    "id": "OVA-37",
+    "title": "Session Management Issues",
+    "category": "Broken Authentication",
+    "cwe": "CWE-613",
+    "mitigation": "Configure session cookies with secure: true, httpOnly: true, sameSite: 'strict', and proper session timeout"
+  },
+  {
+    "id": "OVA-38",
+    "title": "Information Disclosure",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Remove sensitive information from responses and configure error handling"
+  },
+  {
+    "id": "OVA-39",
+    "title": "Improper Input Validation",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-20",
+    "mitigation": "Comprehensive input validation and sanitization"
+  },
+  {
+    "id": "OVA-40",
+    "title": "Business Logic Bypass",
+    "category": "Business Logic Errors",
+    "cwe": "CWE-840",
+    "mitigation": "Server-side business rule validation"
+  },
+  {
+    "id": "OVA-41",
+    "title": "Prototype Pollution",
+    "category": "Injection",
+    "cwe": "CWE-1321",
+    "mitigation": "Object.create(null) and input validation for object keys"
+  },
+  {
+    "id": "OVA-42",
+    "title": "Expression Language Injection",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Avoid dynamic expression evaluation with user input"
+  },
+  {
+    "id": "OVA-43",
+    "title": "OGNL Injection",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Disable OGNL evaluation and validate expressions"
+  },
+  {
+    "id": "OVA-44",
+    "title": "Mass Assignment",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-915",
+    "mitigation": "Whitelist allowed object properties for binding"
+  },
+  {
+    "id": "OVA-45",
+    "title": "HTTP Host Header Injection",
+    "category": "Injection",
+    "cwe": "CWE-20",
+    "mitigation": "Host header validation and whitelist"
+  },
+  {
+    "id": "OVA-46",
+    "title": "Parameter Pollution",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-235",
+    "mitigation": "Proper parameter parsing and validation"
+  },
+  {
+    "id": "OVA-47",
+    "title": "Regex DoS (ReDoS)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-1333",
+    "mitigation": "Safe regex patterns and input validation"
+  },
+  {
+    "id": "OVA-48",
+    "title": "XML Injection",
+    "category": "Injection",
+    "cwe": "CWE-91",
+    "mitigation": "XML input validation and safe parsing"
+  },
+  {
+    "id": "OVA-49",
+    "title": "CRLF Injection",
+    "category": "Injection",
+    "cwe": "CWE-93",
+    "mitigation": "Input validation and header sanitization"
+  },
+  {
+    "id": "OVA-50",
+    "title": "Zip Slip Vulnerability",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Validate zip entry paths and restrict extraction locations"
+  }
+]

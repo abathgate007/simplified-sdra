@@ -1,0 +1,39 @@
+{
+    "$id": "stride_matrix.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "StrideMatrix",
+    "type": "object",
+    "required": ["schema_version", "run_id", "rows", "coverage_pct"],
+    "properties": {
+      "schema_version": { "type": "string", "const": "1.0" },
+      "run_id": { "type": "string" },
+      "rows": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["element_id", "element_type", "stride", "applies", "example"],
+          "properties": {
+            "element_id": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+            "element_type": { "type": "string", "enum": ["process", "data_store", "external_entity"] },
+            "stride": { "type": "string", "enum": ["S","T","R","I","D","E"] },
+            "applies": { "type": "boolean" },
+            "example": { "type": "string", "maxLength": 220 },
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["source_type", "source_id"],
+                "properties": {
+                  "source_type": { "type": "string", "enum": ["requirement","diagram","assumption"] },
+                  "source_id": { "type": "string" },
+                  "quote": { "type": "string", "maxLength": 220 }
+                }
+              }
+            }
+          }
+        }
+      },
+      "coverage_pct": { "type": "number", "minimum": 0, "maximum": 100 }
+    }
+  }
+  

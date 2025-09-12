@@ -1,0 +1,62 @@
+graph TD
+    subgraph "Client Layer"
+        User("User / Browser")
+    end
+
+    subgraph "Web Server Layer"
+        WebServer("Apache Web Server")
+    end
+
+    subgraph "Application Layer"
+        AcuForumApp("AcuForum (PHP Application)")
+        subgraph "Application Components"
+            UserManagement("User Management (Login, Profiles)")
+            ForumCore("Forum Core (Threads & Posts)")
+            Search("Search Functionality")
+            FileUpload("File Upload Handler (Avatars)")
+            AdminPanel("Admin Panel")
+        end
+    end
+
+    subgraph "Data & Storage Layer"
+        Database("MySQL Database Server")
+        FileSystem("Server File System")
+        subgraph "AcuForum Database"
+            DB[(acuforum_db)]
+        end
+        subgraph "File Storage"
+            Uploads[(/uploads/avatars)]
+        end
+    end
+
+    %% Connections
+    User -- HTTP/HTTPS Request --> WebServer
+    WebServer -- PHP Request --> AcuForumApp
+
+    AcuForumApp --- UserManagement
+    AcuForumApp --- ForumCore
+    AcuForumApp --- Search
+    AcuForumApp --- FileUpload
+    AcuForumApp --- AdminPanel
+
+    UserManagement -- SQL Query --> Database
+    ForumCore -- SQL Query --> Database
+    Search -- SQL Query --> Database
+    AdminPanel -- SQL Query --> Database
+    Database -- Stores/Retrieves Data --> DB
+
+    FileUpload -- Writes File --> FileSystem
+    FileSystem -- Stores File In --> Uploads
+
+
+    %% Styling
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef client fill:#c9daf8,stroke:#666,stroke-width:2px;
+    classDef web fill:#f4cccc,stroke:#666,stroke-width:2px;
+    classDef app fill:#d9ead3,stroke:#666,stroke-width:2px;
+    classDef data fill:#fff2cc,stroke:#666,stroke-width:2px;
+
+    class User client;
+    class WebServer web;
+    class AcuForumApp,UserManagement,ForumCore,Search,FileUpload,AdminPanel app;
+    class Database,FileSystem,DB,Uploads data;

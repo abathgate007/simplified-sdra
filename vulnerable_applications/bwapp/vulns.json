@@ -1,0 +1,457 @@
+[
+  {
+    "id": "BWAPP-1",
+    "title": "SQL Injection (GET/Search)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use of parameterized queries and prepared statements"
+  },
+  {
+    "id": "BWAPP-2",
+    "title": "SQL Injection (POST/Select)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Input validation and parameterized queries"
+  },
+  {
+    "id": "BWAPP-3",
+    "title": "SQL Injection (AJAX/JSON/jQuery)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Server-side validation and prepared statements"
+  },
+  {
+    "id": "BWAPP-4",
+    "title": "SQL Injection (Login Form/Hero)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Authentication logic with parameterized queries"
+  },
+  {
+    "id": "BWAPP-5",
+    "title": "SQL Injection (Login Form/User)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Secure authentication implementation"
+  },
+  {
+    "id": "BWAPP-6",
+    "title": "SQL Injection (SQLite)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Database-agnostic secure query practices"
+  },
+  {
+    "id": "BWAPP-7",
+    "title": "SQL Injection (Blind - Time-Based)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Query timeout controls and input validation"
+  },
+  {
+    "id": "BWAPP-8",
+    "title": "SQL Injection (Blind - Boolean-Based)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Consistent response handling and parameterized queries"
+  },
+  {
+    "id": "BWAPP-9",
+    "title": "SQL Injection (Stored)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Input sanitization for stored data"
+  },
+  {
+    "id": "BWAPP-10",
+    "title": "Cross-Site Scripting (Reflected)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Output encoding and Content Security Policy"
+  },
+  {
+    "id": "BWAPP-11",
+    "title": "Cross-Site Scripting (Stored)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Input sanitization and output encoding"
+  },
+  {
+    "id": "BWAPP-12",
+    "title": "Cross-Site Scripting (AJAX/JSON/jQuery)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Secure AJAX handling and DOM manipulation"
+  },
+  {
+    "id": "BWAPP-13",
+    "title": "Cross-Site Scripting (AJAX/XML)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "XML parsing security and output encoding"
+  },
+  {
+    "id": "BWAPP-14",
+    "title": "Cross-Site Scripting (href)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "URL validation and attribute encoding"
+  },
+  {
+    "id": "BWAPP-15",
+    "title": "Cross-Site Scripting (phpMyAdmin)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Third-party component security updates"
+  },
+  {
+    "id": "BWAPP-16",
+    "title": "HTML Injection (Reflected)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "HTML encoding and input validation"
+  },
+  {
+    "id": "BWAPP-17",
+    "title": "HTML Injection (Stored)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Content filtering and sanitization"
+  },
+  {
+    "id": "BWAPP-18",
+    "title": "iFrame Injection",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Frame-src CSP directive and input validation"
+  },
+  {
+    "id": "BWAPP-19",
+    "title": "LDAP Injection (Search)",
+    "category": "Injection",
+    "cwe": "CWE-90",
+    "mitigation": "LDAP query parameterization and input validation"
+  },
+  {
+    "id": "BWAPP-20",
+    "title": "Mail Header Injection (SMTP)",
+    "category": "Injection",
+    "cwe": "CWE-93",
+    "mitigation": "Email header validation and sanitization"
+  },
+  {
+    "id": "BWAPP-21",
+    "title": "NoSQL Injection (MongoDB)",
+    "category": "Injection",
+    "cwe": "CWE-943",
+    "mitigation": "NoSQL query parameterization and input validation"
+  },
+  {
+    "id": "BWAPP-22",
+    "title": "OS Command Injection",
+    "category": "Injection",
+    "cwe": "CWE-78",
+    "mitigation": "Avoid system calls with user input"
+  },
+  {
+    "id": "BWAPP-23",
+    "title": "OS Command Injection (Blind)",
+    "category": "Injection",
+    "cwe": "CWE-78",
+    "mitigation": "Input validation and safe API usage"
+  },
+  {
+    "id": "BWAPP-24",
+    "title": "PHP Code Injection",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Avoid eval() and dynamic code execution"
+  },
+  {
+    "id": "BWAPP-25",
+    "title": "Server-Side Includes (SSI) Injection",
+    "category": "Injection",
+    "cwe": "CWE-97",
+    "mitigation": "Disable SSI or validate user input"
+  },
+  {
+    "id": "BWAPP-26",
+    "title": "XML/XPath Injection (Login Form)",
+    "category": "Injection",
+    "cwe": "CWE-643",
+    "mitigation": "XPath parameterization and input validation"
+  },
+  {
+    "id": "BWAPP-27",
+    "title": "XML/XPath Injection (Search)",
+    "category": "Injection",
+    "cwe": "CWE-643",
+    "mitigation": "Secure XPath query construction"
+  },
+  {
+    "id": "BWAPP-28",
+    "title": "XML External Entity (XXE)",
+    "category": "Injection",
+    "cwe": "CWE-611",
+    "mitigation": "Disable external entity processing"
+  },
+  {
+    "id": "BWAPP-29",
+    "title": "XML External Entity (XXE) - SOAP",
+    "category": "Injection",
+    "cwe": "CWE-611",
+    "mitigation": "Secure SOAP parser configuration"
+  },
+  {
+    "id": "BWAPP-30",
+    "title": "Cross-Site Request Forgery (CSRF)",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "CSRF tokens and SameSite cookies"
+  },
+  {
+    "id": "BWAPP-31",
+    "title": "Cross-Site Request Forgery (CSRF) - Stored",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "Token validation for stored actions"
+  },
+  {
+    "id": "BWAPP-32",
+    "title": "Clickjacking (UI Redressing)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-1021",
+    "mitigation": "X-Frame-Options and frame-ancestors CSP"
+  },
+  {
+    "id": "BWAPP-33",
+    "title": "Session Management - Cookies (HTTPOnly)",
+    "category": "Broken Authentication",
+    "cwe": "CWE-1004",
+    "mitigation": "Set HTTPOnly and Secure cookie flags"
+  },
+  {
+    "id": "BWAPP-34",
+    "title": "Session Management - Cookies (Secure)",
+    "category": "Broken Authentication",
+    "cwe": "CWE-614",
+    "mitigation": "Enforce HTTPS and secure cookie attributes"
+  },
+  {
+    "id": "BWAPP-35",
+    "title": "Session Management - Session ID in URL",
+    "category": "Broken Authentication",
+    "cwe": "CWE-598",
+    "mitigation": "Use cookies for session management"
+  },
+  {
+    "id": "BWAPP-36",
+    "title": "Broken Authentication - CAPTCHA Bypassing",
+    "category": "Broken Authentication",
+    "cwe": "CWE-287",
+    "mitigation": "Secure CAPTCHA implementation and validation"
+  },
+  {
+    "id": "BWAPP-37",
+    "title": "Broken Authentication - Forgot Password",
+    "category": "Broken Authentication",
+    "cwe": "CWE-640",
+    "mitigation": "Secure password reset process"
+  },
+  {
+    "id": "BWAPP-38",
+    "title": "Broken Authentication - Insecure Login Forms",
+    "category": "Broken Authentication",
+    "cwe": "CWE-287",
+    "mitigation": "Strong authentication mechanisms"
+  },
+  {
+    "id": "BWAPP-39",
+    "title": "Broken Authentication - Logout Management",
+    "category": "Broken Authentication",
+    "cwe": "CWE-613",
+    "mitigation": "Proper session termination"
+  },
+  {
+    "id": "BWAPP-40",
+    "title": "Broken Authentication - Password Attacks",
+    "category": "Broken Authentication",
+    "cwe": "CWE-521",
+    "mitigation": "Strong password policy and rate limiting"
+  },
+  {
+    "id": "BWAPP-41",
+    "title": "Broken Authentication - Weak Passwords",
+    "category": "Broken Authentication",
+    "cwe": "CWE-521",
+    "mitigation": "Password complexity requirements"
+  },
+  {
+    "id": "BWAPP-42",
+    "title": "Insecure Direct Object Reference",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "Access control validation and indirect references"
+  },
+  {
+    "id": "BWAPP-43",
+    "title": "Missing Functional Level Access Control",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "Role-based access control implementation"
+  },
+  {
+    "id": "BWAPP-44",
+    "title": "Privilege Escalation",
+    "category": "Broken Access Control",
+    "cwe": "CWE-269",
+    "mitigation": "Proper privilege management and validation"
+  },
+  {
+    "id": "BWAPP-45",
+    "title": "Remote & Local File Inclusion (RFI/LFI)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-98",
+    "mitigation": "Input validation and disable remote includes"
+  },
+  {
+    "id": "BWAPP-46",
+    "title": "Unrestricted File Upload",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-434",
+    "mitigation": "File type validation and upload restrictions"
+  },
+  {
+    "id": "BWAPP-47",
+    "title": "Directory Traversal",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Path validation and access controls"
+  },
+  {
+    "id": "BWAPP-48",
+    "title": "Local File Inclusion (LFI)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Input sanitization and path restrictions"
+  },
+  {
+    "id": "BWAPP-49",
+    "title": "Remote File Inclusion (RFI)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-98",
+    "mitigation": "Disable allow_url_include and validate inputs"
+  },
+  {
+    "id": "BWAPP-50",
+    "title": "Information Disclosure - Robots.txt",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Secure robots.txt configuration"
+  },
+  {
+    "id": "BWAPP-51",
+    "title": "Information Disclosure - PHP Info",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Remove debugging information from production"
+  },
+  {
+    "id": "BWAPP-52",
+    "title": "Information Disclosure - Comments",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Remove sensitive comments from code"
+  },
+  {
+    "id": "BWAPP-53",
+    "title": "Information Disclosure - Headers",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Configure secure HTTP headers"
+  },
+  {
+    "id": "BWAPP-54",
+    "title": "Cryptographic Issues - Hashing",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Use strong hashing algorithms"
+  },
+  {
+    "id": "BWAPP-55",
+    "title": "Cryptographic Issues - Insecure Randomness",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-330",
+    "mitigation": "Use cryptographically secure random functions"
+  },
+  {
+    "id": "BWAPP-56",
+    "title": "Cryptographic Issues - Old/Insecure Algorithms",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Use current cryptographic standards"
+  },
+  {
+    "id": "BWAPP-57",
+    "title": "SSL/TLS Issues - Heartbleed",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-119",
+    "mitigation": "Update OpenSSL and security patches"
+  },
+  {
+    "id": "BWAPP-58",
+    "title": "SSL/TLS Issues - Insecure Configurations",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-326",
+    "mitigation": "Secure SSL/TLS configuration"
+  },
+  {
+    "id": "BWAPP-59",
+    "title": "Drupal SQL Injection (Drupageddon)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Keep CMS and modules updated"
+  },
+  {
+    "id": "BWAPP-60",
+    "title": "Heartbleed Vulnerability (OpenSSL)",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-119",
+    "mitigation": "Update OpenSSL to patched version"
+  },
+  {
+    "id": "BWAPP-61",
+    "title": "Shellshock Vulnerability (Bash)",
+    "category": "Injection",
+    "cwe": "CWE-78",
+    "mitigation": "Update Bash to patched version"
+  },
+  {
+    "id": "BWAPP-62",
+    "title": "Man-in-the-Middle Attack (HTTP)",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-319",
+    "mitigation": "Enforce HTTPS and HSTS"
+  },
+  {
+    "id": "BWAPP-63",
+    "title": "Man-in-the-Middle Attack (SMTP)",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-319",
+    "mitigation": "Use encrypted email protocols"
+  },
+  {
+    "id": "BWAPP-64",
+    "title": "XML/XPath Injection (Login Form)",
+    "category": "Injection",
+    "cwe": "CWE-643",
+    "mitigation": "Parameterized XPath queries"
+  },
+  {
+    "id": "BWAPP-65",
+    "title": "Unvalidated Redirects",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-601",
+    "mitigation": "Whitelist allowed redirect destinations"
+  }
+]

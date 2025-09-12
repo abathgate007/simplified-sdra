@@ -1,0 +1,158 @@
+graph TB
+    subgraph "Client Layer"
+        WB[Web Browser<br/>Desktop/Mobile]
+        API[API Clients<br/>Third-party Apps]
+        MOB[Mobile Apps<br/>iOS/Android]
+        WS[Web Services<br/>SOAP/REST]
+    end
+    
+    subgraph "Web Server Layer (Apache + PHP)"
+        LB[Load Balancer<br/>Apache/Nginx]
+        AS[Apache Server<br/>HTTP/HTTPS]
+        PHP[PHP Engine<br/>7.4+ Runtime]
+        
+        subgraph "Application Modules"
+            AUTH[Authentication<br/>Login/Session]
+            EMPDIR[Employee Directory<br/>User Lookup]
+            BLOG[Blog Platform<br/>Content Management]
+            DOC[Document Manager<br/>File Upload]
+            NET[Network Tools<br/>DNS/Ping]
+            WEBSERV[Web Services<br/>REST/SOAP]
+            ADMIN[Admin Panel<br/>User Management]
+            REPORT[Reporting<br/>Analytics]
+        end
+        
+        CONFIG[Configuration<br/>Environment Settings<br/>• Development Level 0<br/>• Testing Level 1<br/>• Staging Level 2<br/>• Production Level 3]
+    end
+    
+    subgraph "Business Logic Layer"
+        CORE[Core Classes<br/>User Management<br/>Authentication]
+        DATA[Data Access<br/>Database Queries<br/>ORM Integration]
+        RULES[Business Rules<br/>Validation Logic<br/>Workflow Engine]
+        SEC[Security Services<br/>Access Control<br/>Token Management]
+        INT[Integration<br/>External APIs<br/>Web Services]
+        LOG[Logging<br/>Audit Trails<br/>Error Tracking]
+        CACHE[Cache Layer<br/>Session Cache<br/>Data Cache]
+    end
+    
+    subgraph "Data Storage Layer"
+        DB[(MySQL/MariaDB<br/>Primary Database<br/>Port 3306)]
+        
+        subgraph "Database Tables"
+            ACCOUNTS[(accounts<br/>cid, username,<br/>password, firstname,<br/>lastname, is_admin)]
+            BLOGS[(blogs_table<br/>cid, blog_entry,<br/>author, date)]
+            CARDS[(credit_cards<br/>ccid, ccnumber,<br/>ccv, expiration)]
+            HITLOG[(hitlog<br/>cid, hostname,<br/>ip, browser, date)]
+            PAGES[(page_lookup<br/>cid, page_name,<br/>page_url)]
+        end
+    end
+    
+    subgraph "File System Layer"
+        UPLOAD[Upload Directory<br/>./uploads/<br/>Document Storage<br/>Public Access]
+        CONFIGF[Config Files<br/>includes/<br/>System Settings<br/>Database Config]
+    end
+    
+    subgraph "Operating System & Infrastructure Layer"
+        OS[Linux/Windows OS]
+        SYSSERV[System Services]
+        NETSTACK[Network Stack]
+        SECFRAME[Security Framework]
+        MONITOR[Monitoring Tools]
+        BACKUP[Backup Services]
+        CONTAINER[Container Support]
+    end
+    
+    subgraph "External Services"
+        EXTAPI[External APIs<br/>• Directory Services<br/>• Authentication<br/>• Email Services<br/>• File Storage<br/>• Monitoring]
+    end
+    
+    %% Client Layer Connections
+    WB --> LB
+    API --> LB
+    MOB --> LB
+    WS --> LB
+    
+    %% Web Server Layer Connections
+    LB --> AS
+    AS --> PHP
+    PHP --> AUTH
+    PHP --> EMPDIR
+    PHP --> BLOG
+    PHP --> DOC
+    PHP --> NET
+    PHP --> WEBSERV
+    PHP --> ADMIN
+    PHP --> REPORT
+    
+    %% Business Logic Connections
+    AUTH --> CORE
+    EMPDIR --> CORE
+    BLOG --> CORE
+    DOC --> CORE
+    NET --> CORE
+    WEBSERV --> INT
+    ADMIN --> CORE
+    REPORT --> CORE
+    
+    CORE --> DATA
+    CORE --> RULES
+    CORE --> SEC
+    CORE --> LOG
+    CORE --> CACHE
+    
+    %% Data Layer Connections
+    DATA --> DB
+    DB --> ACCOUNTS
+    DB --> BLOGS
+    DB --> CARDS
+    DB --> HITLOG
+    DB --> PAGES
+    
+    %% File System Connections
+    DOC --> UPLOAD
+    CORE --> CONFIGF
+    LOG --> CONFIGF
+    
+    %% External API Connections
+    INT --> EXTAPI
+    WEBSERV --> EXTAPI
+    
+    %% Network Tools to OS
+    NET --> NETSTACK
+    
+    %% Security Services to Framework
+    SEC --> SECFRAME
+    
+    %% Logging to Monitoring
+    LOG --> MONITOR
+    
+    %% Config to System Services
+    CONFIG --> SYSSERV
+    
+    %% Backup Connections
+    DB --> BACKUP
+    UPLOAD --> BACKUP
+    
+    %% Container Support
+    PHP --> CONTAINER
+    DB --> CONTAINER
+    
+    %% Styling
+    classDef clientLayer fill:#e3f2fd,stroke:#2196F3,stroke-width:2px
+    classDef webLayer fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    classDef businessLayer fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef dataLayer fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    classDef fileLayer fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef osLayer fill:#fafafa,stroke:#666,stroke-width:2px
+    classDef appModule fill:#e8f5e8,stroke:#4caf50,stroke-width:1px
+    classDef database fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    
+    class WB,API,MOB,WS clientLayer
+    class LB,AS,PHP,CONFIG webLayer
+    class AUTH,EMPDIR,BLOG,DOC,NET,WEBSERV,ADMIN,REPORT appModule
+    class CORE,DATA,RULES,SEC,INT,LOG,CACHE businessLayer
+    class DB database
+    class ACCOUNTS,BLOGS,CARDS,HITLOG,PAGES database
+    class UPLOAD,CONFIGF fileLayer
+    class OS,SYSSERV,NETSTACK,SECFRAME,MONITOR,BACKUP,CONTAINER osLayer
+    class EXTAPI clientLayer

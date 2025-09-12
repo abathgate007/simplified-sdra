@@ -1,0 +1,1384 @@
+{
+  "trust_boundaries": {
+    "schema_version": "1.0",
+    "run_id": "coop-eval-system-analysis-001",
+    "boundaries": [
+      {
+        "id": "TB-001",
+        "name": "Web Client/Server Boundary",
+        "description": "Separates end-users' web browsers from the application server; all inbound HTTP(S) requests cross this boundary.",
+        "elements": [
+          "EXT-001",
+          "P-001"
+        ]
+      },
+      {
+        "id": "TB-002",
+        "name": "Application Server/Data Store Boundary",
+        "description": "Separates the application/server logic from the persistent database; trusted server code has direct access, clients do not.",
+        "elements": [
+          "P-001",
+          "DS-001",
+          "P-002",
+          "P-003",
+          "P-004",
+          "P-005"
+        ]
+      },
+      {
+        "id": "TB-003",
+        "name": "Application Server/External Services Boundary",
+        "description": "Boundary between application server and external systems (authentication, email, external reporting/APIs); potentially different administration.",
+        "elements": [
+          "P-001",
+          "EXT-002",
+          "EXT-003",
+          "EXT-004"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "source_type": "diagram",
+        "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=12",
+        "quote": "flowchart TD\n    A[ITS DNS/Web Server] -->|connects to| B[Co-op Evaluation System]..."
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=18",
+        "quote": "classDiagram\n    class Users\n    class ExternalAPIs\n    class Client {...}\n    class Server {...}\n\n    Users --> Client\n    ExternalAPIs --> Server\n    Client --> Server"
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=14",
+        "quote": "G[Shibboleth Authentication] --> H[Co-op Evaluation System]\nH --> J[Co-op Evaluation Database]\nH --> K[Jim's Reporting]\nH --> L[ITS Mail Server]"
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "Fig4-LayeredView",
+        "quote": "The large rectangles with blue borders demonstrates the physical separation of the layers between the client and the server."
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "Fig5-ClientServerView",
+        "quote": "A client-server view of the Co-op Evaluation System"
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "Fig1-ContextDiagram",
+        "quote": "The above diagram outlines the major components of the overall system, subsystem interconnections, and external interfaces."
+      }
+    ]
+  },
+  "dfds": {
+    "schema_version": "1.0",
+    "run_id": "coop-eval-system-analysis-001",
+    "dfds": [
+      {
+        "id": "DFD-001",
+        "title": "Co-op Evaluation System Context DFD",
+        "mermaid": "flowchart TD\n    EXT-001[User] -->|Authentication/Requests| P-001[Client Interface]\n    P-001 -->|Requests/Data| P-002[Application Logic]\n    P-002 -->|Queries/Updates| DS-001[Oracle Database]\n    DS-001 -->|Data| P-002\n    P-002 -->|Responses| P-001\n    P-002 -->|Authentication Requests| EXT-002[Shibboleth]\n    EXT-002 -->|Authentication Response| P-002\n    P-002 -->|Email Notifications| EXT-003[ITS Mail Server]\n    P-002 <--> |Data Exchange| EXT-004[External APIs]\n    \n    subgraph TB-001[Client Boundary]\n        EXT-001\n        P-001\n    end\n    \n    subgraph TB-002[Server Boundary]\n        P-002\n        DS-001\n    end\n    \n    subgraph TB-003[External Services Boundary]\n        EXT-002\n        EXT-003\n        EXT-004\n    end",
+        "nodes": [
+          {
+            "id": "EXT-001",
+            "type": "external_entity",
+            "label": "User (Student/Employer/Admin)"
+          },
+          {
+            "id": "EXT-002",
+            "type": "external_entity",
+            "label": "Shibboleth Authentication"
+          },
+          {
+            "id": "EXT-003",
+            "type": "external_entity",
+            "label": "ITS Mail Server"
+          },
+          {
+            "id": "EXT-004",
+            "type": "external_entity",
+            "label": "External APIs/Reporting Tools"
+          },
+          {
+            "id": "P-001",
+            "type": "process",
+            "label": "Co-op Evaluation System Application Server"
+          },
+          {
+            "id": "P-002",
+            "type": "process",
+            "label": "Application Logic"
+          },
+          {
+            "id": "DS-001",
+            "type": "data_store",
+            "label": "Oracle SQL Database"
+          }
+        ],
+        "edges": [
+          {
+            "from": "EXT-001",
+            "to": "P-001",
+            "label": "HTTP(S) Request"
+          },
+          {
+            "from": "P-001",
+            "to": "EXT-001",
+            "label": "HTTP(S) Response"
+          },
+          {
+            "from": "EXT-002",
+            "to": "P-001",
+            "label": "Auth Request"
+          },
+          {
+            "from": "P-001",
+            "to": "EXT-002",
+            "label": "Auth Response"
+          },
+          {
+            "from": "P-001",
+            "to": "DS-001",
+            "label": "SQL Queries"
+          },
+          {
+            "from": "DS-001",
+            "to": "P-001",
+            "label": "Query Results"
+          },
+          {
+            "from": "P-001",
+            "to": "EXT-003",
+            "label": "Send Email"
+          },
+          {
+            "from": "EXT-003",
+            "to": "P-001",
+            "label": "Email Transmission Status"
+          },
+          {
+            "from": "P-001",
+            "to": "EXT-004",
+            "label": "API Call/Report Request"
+          },
+          {
+            "from": "EXT-004",
+            "to": "P-001",
+            "label": "API/Report Response"
+          },
+          {
+            "from": "EXT-001",
+            "to": "P-001",
+            "label": "Authentication/Requests"
+          },
+          {
+            "from": "P-001",
+            "to": "P-002",
+            "label": "Requests/Data"
+          },
+          {
+            "from": "P-002",
+            "to": "DS-001",
+            "label": "Queries/Updates"
+          },
+          {
+            "from": "DS-001",
+            "to": "P-002",
+            "label": "Data"
+          },
+          {
+            "from": "P-002",
+            "to": "P-001",
+            "label": "Responses"
+          },
+          {
+            "from": "P-002",
+            "to": "EXT-002",
+            "label": "Authentication Requests"
+          },
+          {
+            "from": "EXT-002",
+            "to": "P-002",
+            "label": "Authentication Response"
+          },
+          {
+            "from": "P-002",
+            "to": "EXT-003",
+            "label": "Email Notifications"
+          },
+          {
+            "from": "P-002",
+            "to": "EXT-004",
+            "label": "Data Exchange"
+          },
+          {
+            "from": "EXT-004",
+            "to": "P-002",
+            "label": "Data Exchange"
+          }
+        ],
+        "boundaries": [
+          "TB-001",
+          "TB-002",
+          "TB-003"
+        ]
+      },
+      {
+        "id": "DFD-002",
+        "title": "Co-op Evaluation System Level 1 DFD",
+        "mermaid": "flowchart TD\n    EXT-001[User] -->|Authentication/Requests| P-001[Client Interface]\n    P-001 -->|Requests/Data| P-003[Service Layer]\n    P-003 -->|Process Requests| P-004[Domain Model Layer]\n    P-004 -->|Data Operations| P-005[Data Access Layer]\n    P-005 -->|Queries/Updates| DS-001[Oracle Database]\n    DS-001 -->|Data| P-005\n    P-005 -->|Data| P-004\n    P-004 -->|Processed Data| P-003\n    P-003 -->|Responses| P-001\n    P-003 -->|Authentication Requests| EXT-002[Shibboleth]\n    EXT-002 -->|Authentication Response| P-003\n    P-003 -->|Email Notifications| EXT-003[ITS Mail Server]\n    P-003 <--> |Data Exchange| EXT-004[External APIs]\n    \n    subgraph TB-001[Client Boundary]\n        EXT-001\n        P-001\n    end\n    \n    subgraph TB-002[Server Boundary]\n        P-003\n        P-004\n        P-005\n        DS-001\n    end\n    \n    subgraph TB-003[External Services Boundary]\n        EXT-002\n        EXT-003\n        EXT-004\n    end",
+        "nodes": [
+          {
+            "id": "P-001",
+            "type": "process",
+            "label": "Client Interface"
+          },
+          {
+            "id": "P-003",
+            "type": "process",
+            "label": "Service Layer"
+          },
+          {
+            "id": "P-004",
+            "type": "process",
+            "label": "Domain Model Layer"
+          },
+          {
+            "id": "P-005",
+            "type": "process",
+            "label": "Data Access Layer"
+          },
+          {
+            "id": "DS-001",
+            "type": "data_store",
+            "label": "Oracle Database"
+          },
+          {
+            "id": "EXT-001",
+            "type": "external_entity",
+            "label": "User"
+          },
+          {
+            "id": "EXT-002",
+            "type": "external_entity",
+            "label": "Shibboleth"
+          },
+          {
+            "id": "EXT-003",
+            "type": "external_entity",
+            "label": "ITS Mail Server"
+          },
+          {
+            "id": "EXT-004",
+            "type": "external_entity",
+            "label": "External APIs"
+          }
+        ],
+        "edges": [
+          {
+            "from": "EXT-001",
+            "to": "P-001",
+            "label": "Authentication/Requests"
+          },
+          {
+            "from": "P-001",
+            "to": "P-003",
+            "label": "Requests/Data"
+          },
+          {
+            "from": "P-003",
+            "to": "P-004",
+            "label": "Process Requests"
+          },
+          {
+            "from": "P-004",
+            "to": "P-005",
+            "label": "Data Operations"
+          },
+          {
+            "from": "P-005",
+            "to": "DS-001",
+            "label": "Queries/Updates"
+          },
+          {
+            "from": "DS-001",
+            "to": "P-005",
+            "label": "Data"
+          },
+          {
+            "from": "P-005",
+            "to": "P-004",
+            "label": "Data"
+          },
+          {
+            "from": "P-004",
+            "to": "P-003",
+            "label": "Processed Data"
+          },
+          {
+            "from": "P-003",
+            "to": "P-001",
+            "label": "Responses"
+          },
+          {
+            "from": "P-003",
+            "to": "EXT-002",
+            "label": "Authentication Requests"
+          },
+          {
+            "from": "EXT-002",
+            "to": "P-003",
+            "label": "Authentication Response"
+          },
+          {
+            "from": "P-003",
+            "to": "EXT-003",
+            "label": "Email Notifications"
+          },
+          {
+            "from": "P-003",
+            "to": "EXT-004",
+            "label": "Data Exchange"
+          },
+          {
+            "from": "EXT-004",
+            "to": "P-003",
+            "label": "Data Exchange"
+          }
+        ],
+        "boundaries": [
+          "TB-001",
+          "TB-002",
+          "TB-003"
+        ]
+      }
+    ]
+  },
+  "stride_matrix": {
+    "schema_version": "1.0",
+    "run_id": "coop-eval-system-analysis-001",
+    "rows": [
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Application could be tricked into assuming identity of another user (session fixation, auth bypass, etc).",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=6",
+            "quote": "System must support user authentication via Shibboleth."
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "Fig5-ClientServerView",
+            "quote": "The client is a web browser being used to access the system. The client makes HTTP requests using RESTful web services."
+          }
+        ]
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "Attackers may tamper with input data, requests, or APIs processed by the app server.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=17",
+            "quote": "All communication between client and server... must validate and process input securely."
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "The presentation layer will provide the user with a graphical interface for interacting with the system."
+          }
+        ]
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "App server may lack logging or integrity checks, leading to untrackable changes or actions.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=10",
+            "quote": "A meaningful error message is logged, indicating what caused application to fail."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "client-repudiation",
+            "quote": "Client actions need to be logged to prevent repudiation of important actions"
+          }
+        ]
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Unsafe handling of data may lead to confidential information disclosure to unauthorized users.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=6",
+            "quote": "The system will provide user- and situation-appropriate error messages."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "client-info-disclosure",
+            "quote": "Client-side code might inadvertently expose sensitive information in JavaScript variables or DOM"
+          }
+        ]
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "The process can be exhaustively requested (DoS), impeding system availability.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=8",
+            "quote": "The system is compromised by a Denial of Service (DoS) attack."
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "DoS-Scenario",
+            "quote": "The system is unable to handle a large number (over 6,000) of concurrent user requests."
+          }
+        ]
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "A process bug or misconfiguration may allow attacker escalation from student to admin context.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=6",
+            "quote": "System supports different user classes (Student, Employer, Admin)."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "client-elevation",
+            "quote": "Client-side code could be manipulated to bypass restrictions or validation"
+          }
+        ]
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "An attacker could compromise the application logic to act on behalf of another user",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "The role of the application logic layer is to encapsulate the system controllers, which implement much of the core business logic."
+          }
+        ]
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "An attacker could manipulate the application logic to alter business rules or workflows",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "The application layer modifies the data encapsulated in the domain layer according to the business logic rules before it reports changes back to the presentation layer to be displayed to the user."
+          }
+        ]
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "The application could fail to log critical operations, allowing for repudiation of actions",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "SystemFailure-Scenario",
+            "quote": "A meaningful error message is logged, indicating what it was that caused the application to fail."
+          }
+        ]
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Application logic could leak sensitive information through error messages or logs",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "ErrorMessages-Scenario",
+            "quote": "The system will provide visual feedback stating whether or not a given action was successful. If it was not successful, the system will provide details on what went wrong and how to rectify the situation, when possible."
+          }
+        ]
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "Resource-intensive operations in the application logic could be exploited for DoS",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "AppServerFails-Scenario",
+            "quote": "The application server fails or becomes unresponsive, causing the entire system to fail."
+          }
+        ]
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Flaws in the application logic could allow privilege escalation",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "app-logic-elevation",
+            "quote": "Application logic must enforce authorization for different user roles"
+          }
+        ]
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "An attacker could compromise a service to perform actions as another user",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "The service layer is in charge of modularizing different features (services) of the application."
+          }
+        ]
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "Service layer could be manipulated to alter data as it passes between layers",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "These facades (interfaces) will provide the ability to manipulate or fix the code underneath each service without affecting the way in which that service is called by other layers."
+          }
+        ]
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "Service layer could fail to properly record user actions for auditing",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "service-layer-auditing",
+            "quote": "Service layer should record user actions for non-repudiation"
+          }
+        ]
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Sensitive data could be exposed in service layer responses or logs",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "service-data-exposure",
+            "quote": "Service layer must handle sensitive data appropriately to prevent information disclosure"
+          }
+        ]
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "External service integration points could be exploited for denial of service",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "Certain features, such as reporting, require access to external APIs; the service layer will be in charge of interacting with those external APIs."
+          }
+        ]
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Service layer could fail to enforce proper access controls for different operations",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "service-access-control",
+            "quote": "Service layer must enforce proper authorization for all operations"
+          }
+        ]
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Domain model could be exploited to perform operations as another user",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "The domain model contains all of the system's object representations of data in the system."
+          }
+        ]
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "An attacker could manipulate domain objects to alter data integrity",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "This also includes associated methods for any objects that contain their own functionality."
+          }
+        ]
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "Domain layer could fail to maintain proper state tracking for auditing",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "domain-layer-state",
+            "quote": "Domain layer must maintain accurate state for all objects"
+          }
+        ]
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Domain objects could expose sensitive data through serialization",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "domain-serialization",
+            "quote": "Domain objects must handle serialization properly to prevent sensitive data exposure"
+          }
+        ]
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "Complex domain operations could be exploited for resource exhaustion",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "domain-complexity",
+            "quote": "Complex domain operations must be optimized to prevent resource exhaustion"
+          }
+        ]
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Domain model could fail to enforce object-level access controls",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "domain-access-control",
+            "quote": "Domain model should enforce object-level access controls"
+          }
+        ]
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Data access layer could be exploited to perform database operations under different user context",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "The data access layer contains all of the mappers to the data in the system."
+          }
+        ]
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "SQL injection could allow tampering with database operations",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "All interactions between the DAL and Data Source Layer will indirectly be SQL queries in accordance with the ACID properties (i.e. an ORM framework will generate the SQL statements in most cases)."
+          }
+        ]
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "Data access layer could fail to log database operations for auditing",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "dal-auditing",
+            "quote": "Data access layer should log critical database operations"
+          }
+        ]
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Data access layer could expose sensitive query information in logs or error messages",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "dal-info-disclosure",
+            "quote": "Data access layer must not expose sensitive query details in logs or errors"
+          }
+        ]
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "Inefficient queries could be exploited for database denial of service",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "ConcurrentUsers-Scenario",
+            "quote": "The system is unable to handle a large number (over 6,000) of concurrent user requests."
+          }
+        ]
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Data access layer could fail to enforce proper data access controls",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "dal-access-control",
+            "quote": "Data access layer must enforce proper data access controls"
+          }
+        ]
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "S",
+        "applies": true,
+        "example": "Database credentials could be stolen to access data as privileged user",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig1-ContextDiagram",
+            "quote": "Oracle SQL Database connects to Co-op Evaluation System"
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=19",
+            "quote": "Data store layer is not directly accessed by users; only via application server."
+          }
+        ]
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "T",
+        "applies": true,
+        "example": "Direct database access could allow unauthorized data modification",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "The data source layer. This includes the Oracle database that will contain all of the data for the system."
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=17",
+            "quote": "All interactions... will indirectly be SQL queries... (ORM will generate SQL statements)"
+          }
+        ]
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "R",
+        "applies": true,
+        "example": "Lack of audit logging could allow changed or deleted records without accountability.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=10",
+            "quote": "A meaningful error message is logged, indicating what caused application to fail."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "database-auditing",
+            "quote": "Database should have proper auditing for critical operations"
+          }
+        ]
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "I",
+        "applies": true,
+        "example": "Sensitive records may be exposed if read without proper access control.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=17",
+            "quote": "Domain objects do not have any knowledge that the database exists."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "database-backups",
+            "quote": "Database backups must be secured to prevent data exposure"
+          }
+        ]
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "D",
+        "applies": true,
+        "example": "Locking, resource exhaustion, or flooding may deny DB access.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=8",
+            "quote": "The system is unable to handle a large number (over 6,000) of concurrent user requests."
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "AppServerFails-Scenario",
+            "quote": "The application server fails or becomes unresponsive, causing the entire system to fail."
+          }
+        ]
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "E",
+        "applies": false,
+        "example": "DB does not implement privilege context; controlling access implemented in process/app layer.",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-db-assumption",
+            "quote": "Database access control managed by application server/business logic."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "database-elevation",
+            "quote": "Oracle database doesn't execute application code with varying privilege levels"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "User credentials could be stolen allowing impersonation",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig2-UserInteraction",
+            "quote": "The diagram above show a high-level view of the user interaction with the system as well as the interaction between technologies involved."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-external-entity-assumption",
+            "quote": "External entities do not spoof roles inside the system's trust model."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": false,
+        "example": "Not applicable as external entities are not data that can be tampered with",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "user-tampering",
+            "quote": "Users as external entities cannot be tampered with in the system context"
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-external-entity-assumption",
+            "quote": "Tampering is not modeled inside system for external entities."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "User could deny performing specific actions in the system",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "ErrorMessages-Scenario",
+            "quote": "Furthermore, the system will send the user a follow-up email with the status of any submissions in the case of Work Reports and Co-op Evaluations."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-external-entity-assumption",
+            "quote": "External entities not required to perform non-repudiation in DFD context."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": false,
+        "example": "Not applicable as users are not components that can disclose information",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "user-info-disclosure",
+            "quote": "Users as external entities cannot disclose information within the system context"
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-external-entity-assumption",
+            "quote": "No information disclosure responsibility for external actors."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Users could perform malicious actions to disrupt system availability",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "DoS-Scenario",
+            "quote": "The system is compromised by a Denial of Service (DoS) attack."
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-ext-assumption",
+            "quote": "Denial of service to mail server handled outside CES context."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "Users could attempt to gain unauthorized privileges through system vulnerabilities",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "user-privileges",
+            "quote": "Users might attempt to access functionality beyond their assigned roles"
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-external-entity-assumption",
+            "quote": "EOP not applicable to external entities."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Compromised Shibboleth could allow unauthorized authentication",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig1-ContextDiagram",
+            "quote": "Shiboleth connects to Co-op Evaluation System"
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=12",
+            "quote": "D[Shiboleth] -->|connects to| B[Co-op Evaluation System]"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Authentication responses could be manipulated to gain access",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig3-DataFlow",
+            "quote": "Shibboleth Authentication --> Co-op Evaluation System"
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=12",
+            "quote": "D[Shiboleth] -->|connects to| B[Co-op Evaluation System]"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "Authentication service could fail to properly log authentication attempts",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "shibboleth-auditing",
+            "quote": "Authentication service should log all authentication attempts"
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-ext-assumption",
+            "quote": "External authentication service does not log application-side non-repudiation."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "Authentication service could leak sensitive user information",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "shibboleth-info-disclosure",
+            "quote": "Authentication service must protect sensitive user information"
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=5",
+            "quote": "Shibboleth for RIT user authentication"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Authentication service outage would prevent users from accessing the system",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "shibboleth-availability",
+            "quote": "Authentication service availability is critical for system operation"
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=8",
+            "quote": "The system is compromised by a Denial of Service (DoS) attack."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "Authentication bypass could allow unauthorized privilege escalation",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "shibboleth-privileges",
+            "quote": "Authentication service must properly assign user roles and privileges"
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=5",
+            "quote": "Shibboleth for RIT user authentication"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Mail server could be compromised to send emails as the system",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig1-ContextDiagram",
+            "quote": "ITS Mail Server connects to Co-op Evaluation System"
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=12",
+            "quote": "C[ITS Mail Server] -->|connects to| B"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Email content could be intercepted and modified",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig3-DataFlow",
+            "quote": "Co-op Evaluation System --> ITS Mail Server"
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=12",
+            "quote": "C[ITS Mail Server] -->|connects to| B"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "Mail server could fail to log email delivery, allowing repudiation of notifications",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "ErrorMessages-Scenario",
+            "quote": "Furthermore, the system will send the user a follow-up email with the status of any submissions in the case of Work Reports and Co-op Evaluations."
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=10",
+            "quote": "Meaningful error message is logged, indicating what caused application to fail."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "Email notifications could expose sensitive data",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "email-sensitive-data",
+            "quote": "Email notifications must be designed to not expose sensitive information"
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=5",
+            "quote": "The ITS mail server for sending emails to users"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Mail server outage could prevent notification delivery",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "mail-server-availability",
+            "quote": "Mail server availability impacts notification delivery"
+          },
+          {
+            "source_type": "assumption",
+            "source_id": "STRIDE-ext-assumption",
+            "quote": "Denial of service to mail server handled outside CES context."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": false,
+        "example": "Mail server cannot perform elevation of privilege in CES.",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "mail-server-privileges",
+            "quote": "Mail server doesn't provide functionality for elevation of privileges within the application"
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=5",
+            "quote": "The ITS mail server for sending emails to users"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "External API credentials could be stolen to perform actions as the system",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "Certain features, such as reporting, require access to external APIs; the service layer will be in charge of interacting with those external APIs."
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=21",
+            "quote": "B <--> C[External System]"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Data sent to external APIs could be intercepted and modified",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig6-ServiceInterface",
+            "quote": "If the communications are taking place between the server and an external API, then data will be transferred as a serializable Java object."
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=21",
+            "quote": "B <--> C[External System]"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "External APIs could fail to provide proper audit trails for actions",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "external-api-auditing",
+            "quote": "External APIs should provide proper audit trails for integration"
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=21",
+            "quote": "B <--> C[External System]"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "External APIs could leak sensitive data through responses",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "external-api-data-handling",
+            "quote": "External APIs must handle sensitive data properly"
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=6",
+            "quote": "System must interface with several external APIs."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "External API outage could affect system functionality",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "Fig4-LayeredView",
+            "quote": "Modularizing the services within the system will also make it easier to pinpoint potential defects, allowing for easy maintainability."
+          },
+          {
+            "source_type": "requirement",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=8",
+            "quote": "System is compromised by a Denial of Service (DoS) attack."
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "Vulnerabilities in external APIs could be exploited to gain elevated privileges",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "external-api-security",
+            "quote": "External APIs must be properly secured to prevent security vulnerabilities"
+          },
+          {
+            "source_type": "diagram",
+            "source_id": "PDF:SoftwareArchitectureDocumentation.pdf#page=21",
+            "quote": "B <--> C[External System]"
+          }
+        ]
+      }
+    ],
+    "coverage_pct": 100
+  }
+}

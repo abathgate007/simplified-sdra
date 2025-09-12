@@ -1,0 +1,41 @@
+{
+    "$id": "trust_boundaries.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "TrustBoundaries",
+    "type": "object",
+    "required": ["schema_version", "run_id", "boundaries", "evidence"],
+    "properties": {
+      "schema_version": { "type": "string", "const": "1.0" },
+      "run_id": { "type": "string" },
+      "boundaries": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "name", "description", "elements"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^TB-[0-9]{3}$" },
+            "name": { "type": "string" },
+            "description": { "type": "string", "maxLength": 400 },
+            "elements": {
+              "type": "array",
+              "items": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" }
+            }
+          }
+        }
+      },
+      "evidence": {
+        "type": "array",
+        "description": "Proof-of-work references grounding these boundaries.",
+        "items": {
+          "type": "object",
+          "required": ["source_type", "source_id"],
+          "properties": {
+            "source_type": { "type": "string", "enum": ["requirement", "diagram", "assumption"] },
+            "source_id": { "type": "string" },
+            "quote": { "type": "string", "maxLength": 400 }
+          }
+        }
+      }
+    }
+  }
+  

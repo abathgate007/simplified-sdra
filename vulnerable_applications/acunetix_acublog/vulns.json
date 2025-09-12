@@ -1,0 +1,72 @@
+[
+  {
+    "id": "ACUBLOG-1",
+    "title": "SQL Injection in Search and Category Filters",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use parameterized queries or stored procedures for all database access. [9] Implement input validation on all user-supplied data."
+  },
+  {
+    "id": "ACUBLOG-2",
+    "title": "Reflected Cross-Site Scripting (XSS) in Search Query",
+    "category": "Cross-Site Scripting",
+    "cwe": "CWE-79",
+    "mitigation": "Implement strong, context-aware output encoding on all user-supplied data before rendering it in the browser. [6] Sanitize input to prevent script execution."
+  },
+  {
+    "id": "ACUBLOG-3",
+    "title": "Stored Cross-Site Scripting (XSS) in Blog Comments",
+    "category": "Cross-Site Scripting",
+    "cwe": "CWE-79",
+    "mitigation": "Sanitize all user-provided input before it is stored in the database. [6] Apply strict output encoding when displaying user-generated content like comments."
+  },
+  {
+    "id": "ACUBLOG-4",
+    "title": "Authentication Bypass on Login Page",
+    "category": "Authentication",
+    "cwe": "CWE-592",
+    "mitigation": "Ensure authentication queries are not vulnerable to SQL Injection. Implement account lockout mechanisms and avoid verbose error messages that could reveal valid usernames."
+  },
+  {
+    "id": "ACUBLOG-5",
+    "title": "Cross-Site Request Forgery (CSRF) on 'Add Comment' and 'Profile Update' Actions",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "Implement anti-CSRF tokens (synchronizer token pattern) for all state-changing forms to validate that the request originated from the application."
+  },
+  {
+    "id": "ACUBLOG-6",
+    "title": "Insecure Direct Object References (IDOR)",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "Implement server-side authorization checks for every request to ensure the authenticated user has the right to access the requested resource. Avoid using direct database identifiers in URLs."
+  },
+  {
+    "id": "ACUBLOG-7",
+    "title": "ASP.NET ViewState without MAC Enabled",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-642",
+    "mitigation": "Enable ViewState Message Authentication Code (MAC) globally for the application to prevent tampering with the ViewState content on the client side."
+  },
+  {
+    "id": "ACUBLOG-8",
+    "title": "Verbose Error Messages Disclosing System Information",
+    "category": "Information Disclosure",
+    "cwe": "CWE-209",
+    "mitigation": "Configure the application to use custom error pages and disable detailed error messages (customErrors mode='On') in the web.config file for production environments."
+  },
+  {
+    "id": "ACUBLOG-9",
+    "title": "Weak Credential Storage",
+    "category": "Cryptographic Issues",
+    "cwe": "CWE-312",
+    "mitigation": "Hash user passwords with a strong, salted, and modern hashing algorithm (e.g., Argon2, bcrypt, PBKDF2). Plain text or weakly hashed passwords should never be stored."
+  },
+  {
+    "id": "ACUBLOG-10",
+    "title": "Application Tracing Enabled",
+    "category": "Information Disclosure",
+    "cwe": "CWE-489",
+    "mitigation": "Ensure that application-level tracing is disabled in the production web.config file (`<trace enabled=\"false\"/>`) to prevent the leakage of sensitive application and system data."
+  }
+]

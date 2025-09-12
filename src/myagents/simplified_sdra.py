@@ -11,27 +11,86 @@ from .diagram_to_mermaid_converter import DiagramToMermaidConverter
 
 from pathlib import Path
 from datetime import datetime
+from tkinter import Tk, filedialog
+from typing import Optional, Tuple, Dict
+from typing import List
+import json
+from time import perf_counter
 
-# New: simple, hard-coded review prompt template. This will not be used in final product ---
-REVIEW_SYSTEM_PROMPT = (
-    "You are a senior application security architect. "
-    "Given a software design, produce a short security design review. "
-    "Focus on key risks (STRIDE/OWASP where relevant), trust boundaries, and prioritized mitigations. "
-    "Keep it concise and actionable."
-)
-REVIEW_USER_PREFIX = (
-    "Here is the design to review. "
-    "Summarize the design’s security posture, list the top 5 risks with rationale, and provide prioritized mitigations.\n"
-    "=== DESIGN START ===\n"
-)
+import os, base64 #for dumping to json files
+
 
 @dataclass
 class SimplifiedSecurityDesignReviewAgent:
     config: Config
+    requirements: Optional[str] = None       # parsed design text
+    phase1_output: Optional[str] = None      # Trust Boundaries, DFDs, STRIDE
+    phase2_output: Optional[str] = None      # DREAD, Annotated DFDs, Mitigations
+    final_report: Optional[str] = None       # Final report text
+
+
+    def write_string_array(self, strings: List[str], filename: str) -> None:
+        """
+        Takes an array of Strings and writes them to a file,
+        preserving them exactly as strings.
+        """
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(strings, f, ensure_ascii=False, indent=2)
+
+    def read_string_array(self, filename: str) -> List[str]:
+        """
+        Reads the file back and returns the array of strings,
+        exactly as they were stored.
+        """
+        with open(filename, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    def build_models(self) -> list[LLMModel]:
+        return [
+            #LLMModel(model_name="gpt-5", api_key=self.config.openai_api_key, model_type="openai"),
+            LLMModel(model_name="gpt-4.1", api_key=self.config.openai_api_key, model_type="openai"),
+            LLMModel(model_name="claude-3-7-sonnet-latest", api_key=self.config.anthropic_api_key, model_type="anthropic")
+        ]
+
 
     def __init__(self, config_source: Optional[str] = None):
         self.config = load_config()
+        self.requirements = None
+        self.phase1_output = None
+        self.phase2_output = None
+        self.final_report = None
         print("✅ SimplifiedSecurityDesignReviewAgent initialized: config validated.")
+
+    def load_prompt(self, filename: str, version: Optional[str] = None) -> str:
+        """
+        Load a prompt file from prompts/<version>/<filename> relative to the project root.
+        Always reads fresh from disk. No caching.
+        """
+        v = version or "v1"
+        project_root = Path(__file__).resolve().parents[2]
+        prompt_path = project_root / "prompts" / v / filename
+
+        print(f"📄 Loading prompt: {prompt_path}")
+        if not prompt_path.exists():
+            raise FileNotFoundError(f"Prompt file not found: {prompt_path}")
+
+        return prompt_path.read_text(encoding="utf-8")
+
+    def prompt_for_design_folder(self) -> str:
+        """
+        Open a file dialog to let the user pick the folder that contains
+        the requirements and design documents. Returns the selected path.
+        """
+        # Hide the root Tk window
+        root = Tk()
+        root.withdraw()
+
+        folder = filedialog.askdirectory(title="Select requirements/design folder")
+        root.destroy()
+
+        if not folder:
+            raise ValueError("No folder selected.")
+        return folder
 
     def parse_design_folder(self, folder: str | None = None) -> str:
         conv = DiagramToMermaidConverter(api_key=self.config.openai_api_key, model_name="gpt-4o-mini")
@@ -39,60 +98,343 @@ class SimplifiedSecurityDesignReviewAgent:
         if folder is None:
             raise ValueError("Provide a folder path (keep this simple in the new repo).")
         dp.parse_folder(folder)
+        self.requirements = dp.get_design_as_text()
+        
+        # Save requirements to file
+        with open('parsedrequirements.txt', 'w', encoding='utf-8') as f:
+            f.write(self.requirements)
+        
         return dp.get_design_as_text()
 
-    # --- New: async review given raw design text (single-model, simple call) ---
-    async def review_design_async(self, design_text: str, model_name: str = "gpt-4o-mini") -> str:
-        if not design_text or not design_text.strip():
-            raise ValueError("design_text is empty")
 
-        model = LLMModel(
-            model_name=model_name,
-            api_key=self.config.openai_api_key,
-            model_type="openai",
+    def eval_suggest_improve(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        models: List[LLMModel],   # <-- was List[str]
+    ) -> str:
+        """
+        Prepare role-based messages, call the models up to 3 rounds,
+        merge their outputs, ask for suggested improvements, and stop
+        early if no suggestions are returned. Returns the final merged output.
+        """
+        if not self.requirements:
+            raise ValueError("Requirements not set. Parse the design folder before evaluation.")
+
+        # Prepare role-based messages (user prompt should already include any placeholders filled in)
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        merged_output: str = ""
+        for round_idx in range(1, 4):  # up to 3 iterations
+            print(f"🔁 evalSuggestImprove: round {round_idx}")
+
+            # Call all models asynchronously with the same messages
+            outputs = asyncio.run(self.call_models(messages, models))
+            print(f"outputs: {outputs}")
+            self.write_string_array(outputs, "unmerged_outputs.txt")
+            #outputs = self.read_string_array("unmerged_outputs.txt")
+            # Merge outputs (stub logic for now)
+            merged_output = self.merge_outputs(outputs)
+
+            # Read merged output from file
+            #with open("firstphasemergedoutput.json", "r", encoding="utf-8") as f:
+                #merged_output = f.read()
+            
+            # Evaluate merged output and ask for suggestions (stub logic for now)
+            suggested = self.evaluate_merged_output(merged_output)
+
+            if isinstance(suggested, str) and suggested.strip().lower() == "none":
+                print("✅ No further improvements suggested. Stopping.")
+                break
+
+            # If suggestions exist, append them to the user prompt to guide the next round
+            if suggested:
+                # Simple pattern: feed suggestions back into the next user turn
+                improved_user = (
+                    user_prompt
+                    + "\n\n---\nPlease incorporate the following improvement suggestions:\n"
+                    + str(suggested)
+                )
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": improved_user},
+                ]
+
+        return merged_output
+
+
+    # --- accept List[LLMModel] and use each instance directly ---
+    async def   call_models(self, messages: List[dict], models: List[LLMModel]) -> List[str]:
+        """
+        Asynchronously call each model with the same prompts.
+        Collect all outputs into a list and return.
+        """
+        if not models:
+            raise ValueError("No models provided to call_models().")
+
+        async def _call_one(model: LLMModel) -> str:
+            # SAFE logging: do not print the whole dataclass (it includes the API key)
+            try:
+                print(f"🤖 Calling {model.model_name} key={model.short_id()}")
+            except Exception:
+                print("🤖 Calling model (short_id unavailable)")
+            start_time = perf_counter()
+            try:
+                return await model.callwithmessages(messages)
+            except Exception as e:
+                # Log the model name only (avoid leaking api_key via dataclass repr)
+                return f"[ERROR from {model.model_name}] {e.__class__.__name__}: {e}"
+            finally:
+                end_time = perf_counter()
+                print(f"🤖 {model.model_name} took {end_time - start_time:.2f} seconds")
+
+        tasks = [_call_one(m) for m in models] #Creates a list of coroutines
+        return await asyncio.gather(*tasks) #Waits for all coroutines to complete and returns a list of results
+
+
+    def merge_outputs(self, outputs: List[str]) -> str:
+        """
+        Merge multiple model outputs that share the same JSON schema into a single
+        superset without duplicates.  Returns a JSON string.
+
+        Contract:
+        - Each element in `outputs` should be a JSON string with the SAME top-level schema.
+        - This method returns a SINGLE JSON string with the same schema, combining all
+            entries across inputs and removing duplicates (semantic duplicates OK).
+        """
+        if not outputs:
+            return "{}"
+
+        system_prompt = (
+            "You are a senior data engineer. You will receive multiple JSON documents "
+            "that are intended to share the SAME top-level schema (e.g., { trust_boundaries, dfds, stride, ... } "
+            "or any analogous structure). Merge them into a SINGLE JSON with the SAME schema that is a superset "
+            "of all unique entries across inputs. Remove duplicates (including semantic duplicates). "
+            "Rules:\n"
+            "1) Keep the same keys and nesting as the inputs.\n"
+            "2) For array fields, produce the union with deduplication. Prefer richer/longer entries on conflict.\n"
+            "3) For object fields with identical keys, prefer the most complete (non-null, longer) value.\n"
+            "4) Ensure STRICT JSON output ONLY — no markdown, no commentary.\n"
+            "5) If any input is malformed JSON, do your best to infer and integrate the content correctly.\n"
+            "6) Preserve stable IDs if present; otherwise dedupe by normalized title/name + content similarity.\n"
+            "7) Do not invent fields not present in the inputs.\n"
         )
-        print(f"🔎 Reviewing with model={model.model_name}, key={model.short_id()}")
 
-        # For now, we just concatenate a system-ish instruction + user content.
-        # If your LLMModel supports explicit system/user roles, you can adapt.
-        prompt = f"{REVIEW_SYSTEM_PROMPT}\n\n{REVIEW_USER_PREFIX}{design_text}\n=== DESIGN END ==="
-        response = await model.call(prompt)
-        return response
+        # To keep your current LLMModel.call API (string prompt), we flatten into a single prompt string.
+        # If you already support role-based messages in LLMModel.call, you can switch to that easily.
+        prompt_parts = [
+            "You will merge the following JSON payloads.\n",
+            "=== WELL-FORMED JSON PAYLOADS ==="
+        ]
+        for i, p in enumerate(outputs, start=1):
+            prompt_parts.append(f"\n-- JSON #{i} --\n{json.dumps(p, ensure_ascii=False)}")
 
-    # --- New: sync helper: parse a folder then review it ---
-    def review_folder_once(self, folder: str, model_name: str = "gpt-4o-mini") -> str:
-        design_text = self.parse_design_folder(folder)
-        return asyncio.run(self.review_design_async(design_text, model_name=model_name))
+        prompt_parts.append("\n\nReturn STRICT JSON only.")
+        combined_user_prompt = "\n".join(prompt_parts)
+        
+        # Save combined_user_prompt to file
+        with open('combined_user_prompt.txt', 'w', encoding='utf-8') as f:
+            f.write(combined_user_prompt)
+        
 
-    async def test_llm(self) -> None:
-        model = LLMModel(model_name="gpt-4o-mini",
-                         api_key=self.config.openai_api_key,
-                         model_type="openai")
-        print(f"🤖 Using model={model.model_name}, key={model.short_id()}")
-        resp = await model.call("Tell me a short, funny joke about security reviews.")
-        print("\n🃏 Model response:\n", resp)
+        # 3) Call GPT-5 to produce the merged superset JSON.
+        try:
+            gpt5 = LLMModel(
+                model_name="gpt-5",
+                api_key=self.config.openai_api_key,
+                model_type="openai",
+            )
 
-    def run_once(self) -> None:
-        print("🧪 run_once(): calling model for a joke...")
-        asyncio.run(self.test_llm())
+            messages = [
+               {"role": "system", "content": system_prompt},
+               {"role": "user", "content": combined_user_prompt},
+            ]
+            resp = asyncio.run(gpt5.callwithmessages(messages))
+            
+            return resp
+
+        except Exception as e:
+            print(f"⚠️ GPT-5 merge failed. Reason: {e}")
+        return "{FAILED TO MERGE}"
 
 
+    def evaluate_merged_output(self, merged_output: str):
+        """
+        Evaluate the merged Phase 1 output (Trust Boundaries, DFDs, STRIDE)
+        against self.requirements for completeness, lack of duplication, and
+        meaningful STRIDE entries. Uses GPT-5 and returns either:
+        - a JSON string (list of suggested improvements), or
+        - the string "None" if no improvements are needed.
+        """
+        if not self.requirements:
+            raise ValueError("Requirements not set. Parse the design folder before evaluation.")
+        if not merged_output or not merged_output.strip():
+            raise ValueError("Merged output is empty.")
+
+        # System prompt: strict JSON, schema + rules
+        system_prompt = """
+        You are a senior application security reviewer.
+        TASK: Evaluate MERGED_PHASE1_OUTPUT for COMPLETENESS and QUALITY...
+
+        OUTPUT FORMAT (STRICT JSON ONLY — no markdown, no commentary):
+        EITHER: the string literal "None"
+        OR: a JSON array of suggestion objects with this exact schema:
+        [
+            {
+            "category": "trust_boundary" | "dfd" | "stride",
+            "id_or_location": "string",
+            "issue": "string",
+            "rationale": "string",
+            "suggested_change": "string"
+            }
+        ]
+        """
+        # User prompt includes the inputs verbatim
+        user_prompt = (
+            "REQUIREMENTS_AND_DESIGN_TEXT:\n"
+            "------------------------------\n"
+            f"{self.requirements}\n\n"
+            "MERGED_PHASE1_OUTPUT (JSON):\n"
+            "----------------------------\n"
+            f"{merged_output}\n\n"
+            "Return STRICT JSON only (either \"None\" or a JSON array following the schema)."
+        )
+
+        # Call GPT-5 (flattened to a single prompt string for current LLMModel API)
+        try:
+            reviewer = LLMModel(
+                model_name="gpt-5",
+                api_key=self.config.openai_api_key,
+                model_type="openai",
+            )
+            prompt = f"[SYSTEM]\n{system_prompt}\n\n[USER]\n{user_prompt}"
+            resp = asyncio.run(reviewer.call(prompt)).strip()
+        except Exception as e:
+            print(f"evaluate_merged_output: model call failed: {e}")
+            return "None"
+
+        # Normalize/validate the response:
+        # Accept exact "None" (case-sensitive as specified), or a JSON array per schema.
+        if resp == "None":
+            return "None"
+
+        # If the model returned JSON, ensure it's valid; attempt gentle extraction if needed
+        try:
+            parsed = json.loads(resp)
+            # If it's a dict that wraps suggestions, try to unwrap a common field name
+            if isinstance(parsed, dict):
+                for key in ("suggestions", "improvements", "items"):
+                    if key in parsed and isinstance(parsed[key], list):
+                        return json.dumps(parsed[key], ensure_ascii=False)
+                # Unexpected object shape -> treat as no-op
+                return "None"
+            # If it's a list, return as-is
+            if isinstance(parsed, list):
+                return json.dumps(parsed, ensure_ascii=False)
+            # Any other JSON type -> treat as no suggestions
+            return "None"
+        except Exception:
+            # As a last resort, try to extract a JSON array from the text
+            import re
+            m = re.search(r'(\[\s*\{.*\}\s*\])', resp, flags=re.DOTALL)
+            if m:
+                candidate = m.group(1)
+                try:
+                    json.loads(candidate)
+                    return candidate
+                except Exception:
+                    pass
+            # If we can't validate, err on the side of not looping forever
+            return "None"
+            
+    def run_phase1_trust_dfd_stride(self, system_prompt: str, user_prompt: str) -> str:
+        """
+        Phase 1: Produce Trust Boundaries, DFDs, and STRIDE outputs.
+        Inserts requirements into the user_prompt placeholder and calls the LLM.
+        """
+        if not self.requirements:
+            raise ValueError("Requirements not set. Did you parse the design folder first?")
+
+        print("▶️ Phase 1: Trust Boundaries, DFDs, STRIDE")
+
+        # Replace placeholder with the requirements text
+        filled_user_prompt = user_prompt.replace("<<REQUIREMENTS_AND_DESIGN_TEXT>>", self.requirements)
+
+        models = self.build_models()
+        response = self.eval_suggest_improve(system_prompt, filled_user_prompt, models)
+        
+        self.phase1_output = response
+        self.save_outputs_exact(self.phase1_output, "firstphase_outputs")
+
+        return self.phase1_output
+
+    def run_phase2_dread_annotations_mitigations(self, system_prompt: str, user_prompt: str) -> str:
+        print("▶️ Phase 2: DREAD, Annotated DFDs, Mitigations (stub)")
+        self.phase2_output = "PHASE2: DREAD + Annotated DFDs + Mitigations (TBD)"
+        return self.phase2_output
+
+    def run_phase3_final_report(self, system_prompt: str, user_prompt: str) -> str:
+        print("▶️ Phase 3: Final Report (stub)")
+        self.final_report = (
+            f"FINAL REPORT (TBD)\n\n"
+            f"--- Phase 1 ---\n{self.phase1_output}\n\n"
+            f"--- Phase 2 ---\n{self.phase2_output}"
+        )
+        return self.final_report
+        
+    def run_multistep_review(self) -> str:
+        """
+        Top-level multi-step review orchestrator.
+        Prompts the user for the design folder (via file dialog).
+        For now, it just returns 'Done' after capturing the folder path.
+        """
+        #folder = self.prompt_for_design_folder()
+        #print(f"Selected design folder: {folder}")
+        #self.parse_design_folder(folder) #populates self.requirements
+        
+        #Read requirements from file - THIS IS JUST FOR TESTING
+        with open('parsedrequirements.txt', 'r', encoding='utf-8') as f:
+            self.requirements = f.read()
+        print(f"Parsed requirements: {self.requirements[:1200]}")
+
+        #First phase
+        first_system_prompt = self.load_prompt("Trust_DFD_STRIDE_System_Prompt.txt", "v1")
+        first_user_prompt = self.load_prompt("Trust_DFD_STRIDE_User_Prompt.txt", "v1")
+        print(f"First system prompt: {first_system_prompt}")
+        print(f"First user prompt: {first_user_prompt}")
+        phase1 = self.run_phase1_trust_dfd_stride(first_system_prompt, first_user_prompt)
+        print(f"✅ Phase 1 output preview: {str(phase1)[:1400]}")
+        return "Done"
+        #Second phase
+        second_phase_system_prompt = self.load_prompt("DREAD_AnnotatedDFD_Mitigations_System_Prompt.txt", "v1")
+        second_phase_user_prompt = self.load_prompt("DREAD_AnnotatedDFD_Mitigations_User_Prompt.txt", "v1")
+        print(f"second_phase_system_prompt: {second_phase_system_prompt}")
+        print(f"second_phase_user_prompt: {second_phase_user_prompt}")
+        phase2 = self.run_phase2_dread_annotations_mitigations(second_phase_system_prompt, second_phase_user_prompt)
+        print(f"✅ Phase 2 output preview: {str(phase2)[:400]}")
+
+        #Third phase
+        finalDeliverySystemPrompt = self.load_prompt("finalDeliverySystemPrompt.txt", "v1")
+        finalDeliveryUserPrompt = self.load_prompt("finalDeliveryUserPrompt.txt", "v1")
+        print(f"third_phase_system_prompt: {finalDeliverySystemPrompt}")
+        print(f"third_phase_user_prompt: {finalDeliveryUserPrompt}")
+        final_report = self.run_phase3_final_report(finalDeliverySystemPrompt, finalDeliveryUserPrompt)
+        print(f"✅ Final report preview: {final_report[:400]}")
+        return "Done"
 
 if __name__ == "__main__":
-    import argparse
-
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--parse", type=str, help="Folder of design docs to parse")
-    ap.add_argument("--review", type=str, help="Folder of design docs to parse and review")
-    ap.add_argument("--model", type=str, default="gpt-4o-mini", help="LLM model name (default: gpt-4o-mini)")
-    args = ap.parse_args()
-
+    # Simplified entrypoint: always run the multi-step orchestrator.
     agent = SimplifiedSecurityDesignReviewAgent()
-    if args.review:
-        out = agent.review_folder_once(args.review, model_name=args.model)
-        print(out)
-    elif args.parse:
-        text = agent.parse_design_folder(args.parse)
-        print(text[:1200])  # preview
-    else:
-        agent.run_once()
+    result = agent.run_multistep_review()
+    
+    # Read firstphaseunmergedoutputs.json file and reconstruct outputs variable
+    #with open('firstphaseunmergedoutputs.json', 'r', encoding='utf-8') as f:
+    #    parsed_outputs = json.load(f)
+    
+    # Reconstruct the original outputs variable (list of JSON strings)
+    #outputs = [json.dumps(output, ensure_ascii=False) for output in parsed_outputs]
+    
+    print(result)

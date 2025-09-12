@@ -1,0 +1,56 @@
+graph TD
+    subgraph "Client Layer"
+        User[<fa:fa-user> User / Browser]
+    end
+
+    subgraph "Web Tier"
+        LB(Load Balancer)
+        IIS1[<fa:fa-server> IIS Web Server 1]
+        IIS2[<fa:fa-server> IIS Web Server 2]
+    end
+
+    subgraph "Application Tier"
+        subgraph "AcuBlog Application (ASP.NET)"
+            WebApp[ASP.NET Web Forms]
+            Login[Login.aspx]
+            Search[Search.aspx]
+            Comments[Comments Handler]
+            Admin[Admin Section]
+        end
+    end
+
+    subgraph "Database Tier"
+        SQLServer[<fa:fa-database> Microsoft SQL Server]
+        subgraph "AcuBlog Database"
+            DB[(acublog_db)]
+        end
+    end
+
+    %% Connections
+    User -- HTTPS Request --> LB
+    LB -- Forwards Request --> IIS1
+    LB -- Forwards Request --> IIS2
+
+    IIS1 -- ASP.NET Request --> WebApp
+    IIS2 -- ASP.NET Request --> WebApp
+
+    WebApp -- Forms Authentication & User Input --> Login
+    WebApp -- Search Queries --> Search
+    WebApp -- User Content --> Comments
+    WebApp -- Management --> Admin
+
+    WebApp -- ADO.NET Connection --> SQLServer
+    SQLServer -- Stores/Retrieves Data --> DB
+
+
+    %% Styling
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef client fill:#c9daf8,stroke:#666,stroke-width:2px;
+    classDef web fill:#f4cccc,stroke:#666,stroke-width:2px;
+    classDef app fill:#d9ead3,stroke:#666,stroke-width:2px;
+    classDef db fill:#fff2cc,stroke:#666,stroke-width:2px;
+
+    class User client;
+    class LB,IIS1,IIS2 web;
+    class WebApp,Login,Search,Comments,Admin app;
+    class SQLServer,DB db;

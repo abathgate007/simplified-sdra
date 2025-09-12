@@ -1,0 +1,27 @@
+{
+    "$id": "annotated_dfd.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "AnnotatedDFDs",
+    "type": "object",
+    "required": ["schema_version","run_id","dfd_id","annotations"],
+    "properties": {
+      "schema_version": { "type": "string", "const": "1.0" },
+      "run_id": { "type": "string" },
+      "dfd_id": { "type": "string", "pattern": "^DFD-[0-9]{3}$" },
+      "annotations": {
+        "type": "array",
+        "description": "Overlay layer; do not mutate the base Mermaid layout.",
+        "items": {
+          "type": "object",
+          "required": ["annotation_id","target_id","threat_ids","note"],
+          "properties": {
+            "annotation_id": { "type": "string", "pattern": "^ANN-[0-9]{4}$" },
+            "target_id": { "type": "string", "pattern": "^(P|DS|EXT)-[0-9]{3}$" },
+            "threat_ids": { "type": "array", "items": { "type": "string", "pattern": "^TH-[0-9]{4}$" } },
+            "note": { "type": "string", "maxLength": 200 }
+          }
+        }
+      }
+    }
+  }
+  

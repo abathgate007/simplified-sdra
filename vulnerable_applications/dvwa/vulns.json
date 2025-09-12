@@ -1,0 +1,177 @@
+[
+  {
+    "id": "DVWA-1",
+    "title": "SQL Injection in user lookup",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use of parameterized queries and prepared statements"
+  },
+  {
+    "id": "DVWA-2",
+    "title": "Blind SQL Injection in user ID parameter",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Input validation and parameterized queries"
+  },
+  {
+    "id": "DVWA-3",
+    "title": "Reflected Cross-Site Scripting (XSS) in name parameter",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Output encoding and input sanitization"
+  },
+  {
+    "id": "DVWA-4",
+    "title": "Stored Cross-Site Scripting (XSS) in guestbook",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Input sanitization and output encoding"
+  },
+  {
+    "id": "DVWA-5",
+    "title": "DOM-based Cross-Site Scripting via URL fragment",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Secure DOM manipulation and input validation"
+  },
+  {
+    "id": "DVWA-6",
+    "title": "Cross-Site Request Forgery (CSRF) in password change",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "CSRF tokens and request validation"
+  },
+  {
+    "id": "DVWA-7",
+    "title": "File inclusion vulnerability (LFI)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Input validation and path sanitization"
+  },
+  {
+    "id": "DVWA-8",
+    "title": "Remote File Inclusion (RFI)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-98",
+    "mitigation": "Disable remote file inclusion and validate file paths"
+  },
+  {
+    "id": "DVWA-9",
+    "title": "Unrestricted file upload",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-434",
+    "mitigation": "File type validation and upload restrictions"
+  },
+  {
+    "id": "DVWA-10",
+    "title": "Command injection via ping functionality",
+    "category": "Injection",
+    "cwe": "CWE-78",
+    "mitigation": "Input validation and avoid system calls with user input"
+  },
+  {
+    "id": "DVWA-11",
+    "title": "Brute force attack on login form",
+    "category": "Broken Authentication",
+    "cwe": "CWE-307",
+    "mitigation": "Account lockout and rate limiting"
+  },
+  {
+    "id": "DVWA-12",
+    "title": "Weak session management",
+    "category": "Broken Authentication",
+    "cwe": "CWE-613",
+    "mitigation": "Secure session configuration and regeneration"
+  },
+  {
+    "id": "DVWA-13",
+    "title": "Insecure CAPTCHA implementation",
+    "category": "Broken Authentication",
+    "cwe": "CWE-287",
+    "mitigation": "Secure CAPTCHA validation and server-side verification"
+  },
+  {
+    "id": "DVWA-14",
+    "title": "Weak password policy",
+    "category": "Broken Authentication",
+    "cwe": "CWE-521",
+    "mitigation": "Strong password requirements and enforcement"
+  },
+  {
+    "id": "DVWA-15",
+    "title": "Information disclosure through error messages",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-209",
+    "mitigation": "Generic error messages and proper error handling"
+  },
+  {
+    "id": "DVWA-16",
+    "title": "Directory traversal vulnerability",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Path validation and access controls"
+  },
+  {
+    "id": "DVWA-17",
+    "title": "Insecure direct object reference in file access",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "Access control validation and indirect references"
+  },
+  {
+    "id": "DVWA-18",
+    "title": "Missing authorization checks",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "Proper authorization validation on all requests"
+  },
+  {
+    "id": "DVWA-19",
+    "title": "Client-side security bypass",
+    "category": "Broken Access Control",
+    "cwe": "CWE-602",
+    "mitigation": "Server-side validation and security enforcement"
+  },
+  {
+    "id": "DVWA-20",
+    "title": "Insufficient input validation",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-20",
+    "mitigation": "Comprehensive input validation and sanitization"
+  },
+  {
+    "id": "DVWA-21",
+    "title": "Hardcoded credentials",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-798",
+    "mitigation": "Secure credential management and configuration"
+  },
+  {
+    "id": "DVWA-22",
+    "title": "Weak cryptographic implementation",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Strong encryption algorithms and proper key management"
+  },
+  {
+    "id": "DVWA-23",
+    "title": "HTTP parameter pollution",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-235",
+    "mitigation": "Proper parameter parsing and validation"
+  },
+  {
+    "id": "DVWA-24",
+    "title": "Open redirect vulnerability",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-601",
+    "mitigation": "Whitelist allowed redirect destinations"
+  },
+  {
+    "id": "DVWA-25",
+    "title": "Missing security headers",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-693",
+    "mitigation": "Implement security headers like CSP, HSTS, and X-Frame-Options"
+  }
+]

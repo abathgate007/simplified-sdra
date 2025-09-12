@@ -1,0 +1,13 @@
+"Assume the role of a senior penetration tester creating a complete audit checklist for the deliberately vulnerable application, [Application Name].
+Your task is to generate a comprehensive and exhaustive list of every known vulnerability for this application. Your analysis must be meticulous.
+Include not only the most common vulnerabilities (like SQLi and XSS) but also more nuanced and secondary issues, such as:
+Security Misconfigurations
+Information Disclosure / Verbose Errors
+Broken Access Control (IDOR)
+Insecure File Handling (Uploads, Traversal)
+Cross-Site Request Forgery (CSRF)
+Weak Session Management
+Unvalidated Redirects and Forwards
+Any other known weaknesses.
+The goal is to create a complete list suitable for a formal security test plan. Do not summarize or omit less critical findings.
+Please format the final output as a JSON array using the following structure: [ { "id": "...", "title": "...", "category": "...", "cwe": "...", "mitigation": "..." } ]"

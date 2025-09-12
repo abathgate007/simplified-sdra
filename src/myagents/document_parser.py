@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, Union, List
 import fitz  # PyMuPDF
 from .diagram_to_mermaid_converter import DiagramToMermaidConverter
+import shutil
 
 PathLike = Union[str, Path]
 
@@ -31,23 +32,34 @@ class DocumentParser:
         if suffix == ".pdf":
             self._parse_pdf(file)
         else:
-            # placeholder for other types (txt/docx/images) — add later
-            self.design_as_text += f"\n[FILE] {file.name}"
+            # Check if it's an image file and convert to Mermaid
+            if suffix in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp']:
+                mermaid = self._image_to_mermaid(file)
+                print(mermaid)
+                if mermaid:
+                    self.design_as_text += f"\n[MERMAID DIAGRAM]\n{mermaid}\n"
+            else:
+                # placeholder for other types (txt/docx) — add later
+                self.design_as_text += f"\n[FILE] {file.name}"
 
     # --- internals ---
     def _parse_pdf(self, file: Path) -> None:
         assets_dir = file.parent / f"{file.stem}_assets"
-        assets_dir.mkdir(exist_ok=True)
 
-        text_parts: List[str] = []
-        image_blocks: List[str] = []
+        # If it exists already, remove it and everything inside
+        if assets_dir.exists():
+            shutil.rmtree(assets_dir)
+
+        # Now create a fresh empty one
+        assets_dir.mkdir()
+
 
         try:
             with fitz.open(file) as doc:
                 for page_idx, page in enumerate(doc, start=1):
                     txt = (page.get_text("text") or "").strip()
                     if txt:
-                        text_parts.append(f"\n\n# [PDF:{file.name}] Page {page_idx}\n{txt}")
+                        self.design_as_text += (f"\n\n# [PDF:{file.name}] Page {page_idx}\n{txt}")
 
                     for img_idx, img in enumerate(page.get_images(full=True), start=1):
                         xref = img[0]
@@ -61,18 +73,12 @@ class DocumentParser:
                             pix = None
 
                         mermaid = self._image_to_mermaid(out_png)
-                        image_blocks.append(
-                            f"\n\n# [IMAGE:{file.name}] Page {page_idx} Image {img_idx}\n"
-                            f"```mermaid\n{mermaid}\n```"
-                        )
+                        print(mermaid)
+                        self.design_as_text += f"\n[MERMAID DIAGRAM]\n{mermaid}\n"
         except Exception as e:
             self.design_as_text += f"\n[PDF ERROR] {file.name}: {e.__class__.__name__}: {e}"
             return
 
-        if text_parts:
-            self.design_as_text += "".join(text_parts)
-        if image_blocks:
-            self.design_as_text += "".join(image_blocks)
 
     def _image_to_mermaid(self, image_path: Path) -> str:
         if not self.converter:

@@ -1,0 +1,42 @@
+graph TD
+    subgraph "User Layer"
+        User("User")
+    end
+
+    subgraph "Web Server Layer"
+        WebServer("Apache Web Server")
+    end
+
+    subgraph "Application Layer"
+        WebApp("PHP Application / AcuArt")
+        subgraph "Application Components"
+            Login("Login Page")
+            Products("Product Catalog")
+            Guestbook("Guestbook")
+            Admin("Admin Panel")
+        end
+    end
+
+    subgraph "Database Layer"
+        Database("MySQL Database / acuart")
+    end
+
+    User -- HTTP/HTTPS Request --> WebServer
+    WebServer -- PHP Request --> WebApp
+    WebApp -- SQL Query --> Database
+
+    Login --- WebApp
+    Products --- WebApp
+    Guestbook --- WebApp
+    Admin --- WebApp
+
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef user fill:#c9daf8,stroke:#666,stroke-width:2px;
+    classDef web fill:#f4cccc,stroke:#666,stroke-width:2px;
+    classDef app fill:#d9ead3,stroke:#666,stroke-width:2px;
+    classDef db fill:#fff2cc,stroke:#666,stroke-width:2px;
+
+    class User user;
+    class WebServer web;
+    class WebApp,Login,Products,Guestbook,Admin app;
+    class Database db;

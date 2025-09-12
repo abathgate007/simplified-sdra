@@ -1,0 +1,352 @@
+[
+  {
+    "id": "SS-1",
+    "title": "SQL Injection (Basic)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use parameterized queries and prepared statements"
+  },
+  {
+    "id": "SS-2",
+    "title": "SQL Injection (Intermediate)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Input validation, parameterized queries, and least privilege database access"
+  },
+  {
+    "id": "SS-3",
+    "title": "SQL Injection (Advanced)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Comprehensive input validation, WAF implementation, and database activity monitoring"
+  },
+  {
+    "id": "SS-4",
+    "title": "Blind SQL Injection (Boolean)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Consistent response handling and parameterized queries"
+  },
+  {
+    "id": "SS-5",
+    "title": "Blind SQL Injection (Time Based)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Query timeout controls and input validation"
+  },
+  {
+    "id": "SS-6",
+    "title": "Cross-Site Scripting (XSS) - Reflected",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Output encoding and Content Security Policy implementation"
+  },
+  {
+    "id": "SS-7",
+    "title": "Cross-Site Scripting (XSS) - Stored",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Input sanitization and output encoding"
+  },
+  {
+    "id": "SS-8",
+    "title": "Cross-Site Scripting (XSS) - DOM Based",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Secure DOM manipulation and client-side input validation"
+  },
+  {
+    "id": "SS-9",
+    "title": "Cross-Site Request Forgery (CSRF)",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "CSRF tokens and SameSite cookie attributes"
+  },
+  {
+    "id": "SS-10",
+    "title": "Session Management Flaws",
+    "category": "Broken Authentication",
+    "cwe": "CWE-613",
+    "mitigation": "Configure session cookies with secure: true, httpOnly: true, sameSite: 'strict', and proper session timeout"
+  },
+  {
+    "id": "SS-11",
+    "title": "Session Fixation",
+    "category": "Broken Authentication",
+    "cwe": "CWE-384",
+    "mitigation": "Regenerate session ID after successful authentication"
+  },
+  {
+    "id": "SS-12",
+    "title": "Insecure Direct Object Reference",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "Access control validation and indirect object references"
+  },
+  {
+    "id": "SS-13",
+    "title": "Missing Function Level Access Control",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "Role-based access control on all application functions"
+  },
+  {
+    "id": "SS-14",
+    "title": "Privilege Escalation",
+    "category": "Broken Access Control",
+    "cwe": "CWE-269",
+    "mitigation": "Server-side privilege validation and principle of least privilege"
+  },
+  {
+    "id": "SS-15",
+    "title": "Weak Authentication",
+    "category": "Broken Authentication",
+    "cwe": "CWE-287",
+    "mitigation": "Multi-factor authentication and strong password policies"
+  },
+  {
+    "id": "SS-16",
+    "title": "Poor Data Validation",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-20",
+    "mitigation": "Comprehensive input validation and sanitization"
+  },
+  {
+    "id": "SS-17",
+    "title": "Insecure Cryptographic Storage",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Strong encryption algorithms and proper key management"
+  },
+  {
+    "id": "SS-18",
+    "title": "Insecure Communication",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-319",
+    "mitigation": "Enforce HTTPS with HSTS and proper TLS configuration"
+  },
+  {
+    "id": "SS-19",
+    "title": "Failure to Restrict URL Access",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "URL-based access control and authentication checks"
+  },
+  {
+    "id": "SS-20",
+    "title": "Unvalidated Redirects and Forwards",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-601",
+    "mitigation": "Whitelist allowed redirect destinations"
+  },
+  {
+    "id": "SS-21",
+    "title": "Cross-Site Script Inclusion (XSSI)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "JSONP validation and Content-Type headers"
+  },
+  {
+    "id": "SS-22",
+    "title": "Client Side Injection",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Client-side input validation and secure coding practices"
+  },
+  {
+    "id": "SS-23",
+    "title": "Poor Session Management",
+    "category": "Broken Authentication",
+    "cwe": "CWE-613",
+    "mitigation": "Secure session configuration and proper session lifecycle management"
+  },
+  {
+    "id": "SS-24",
+    "title": "NoSQL Injection",
+    "category": "Injection",
+    "cwe": "CWE-943",
+    "mitigation": "Input validation and parameterized NoSQL queries"
+  },
+  {
+    "id": "SS-25",
+    "title": "LDAP Injection",
+    "category": "Injection",
+    "cwe": "CWE-90",
+    "mitigation": "LDAP query parameterization and input validation"
+  },
+  {
+    "id": "SS-26",
+    "title": "XML External Entity (XXE)",
+    "category": "Injection",
+    "cwe": "CWE-611",
+    "mitigation": "Disable external entity processing in XML parsers"
+  },
+  {
+    "id": "SS-27",
+    "title": "XML Injection",
+    "category": "Injection",
+    "cwe": "CWE-91",
+    "mitigation": "XML input validation and safe parsing"
+  },
+  {
+    "id": "SS-28",
+    "title": "Broken Cryptography Challenge",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Use industry-standard cryptographic libraries and algorithms"
+  },
+  {
+    "id": "SS-29",
+    "title": "Weak Encryption",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-326",
+    "mitigation": "Strong encryption algorithms with appropriate key lengths"
+  },
+  {
+    "id": "SS-30",
+    "title": "Hash Length Extension Attack",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Use HMAC instead of plain hash functions for integrity"
+  },
+  {
+    "id": "SS-31",
+    "title": "Insecure Randomness",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-330",
+    "mitigation": "Use cryptographically secure random number generators"
+  },
+  {
+    "id": "SS-32",
+    "title": "Security through Obscurity",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-656",
+    "mitigation": "Implement proper security controls instead of relying on obscurity"
+  },
+  {
+    "id": "SS-33",
+    "title": "Reverse Engineering Challenge",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Code obfuscation and runtime application self-protection"
+  },
+  {
+    "id": "SS-34",
+    "title": "Binary Exploitation",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-120",
+    "mitigation": "Memory safety techniques and bounds checking"
+  },
+  {
+    "id": "SS-35",
+    "title": "Web Service SQL Injection",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "API input validation and parameterized queries"
+  },
+  {
+    "id": "SS-36",
+    "title": "REST Web Service Insecure Direct Object Reference",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "API authorization checks and resource access validation"
+  },
+  {
+    "id": "SS-37",
+    "title": "SOAP Web Service SQL Injection",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "SOAP message validation and parameterized queries"
+  },
+  {
+    "id": "SS-38",
+    "title": "Mobile Reverse Engineering",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Mobile app obfuscation and anti-tampering measures"
+  },
+  {
+    "id": "SS-39",
+    "title": "Mobile Data Storage",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-312",
+    "mitigation": "Encrypted local storage and secure key management"
+  },
+  {
+    "id": "SS-40",
+    "title": "Mobile Network Communication",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-319",
+    "mitigation": "Certificate pinning and encrypted communications"
+  },
+  {
+    "id": "SS-41",
+    "title": "Mobile Device Access",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "Device permissions and secure authentication"
+  },
+  {
+    "id": "SS-42",
+    "title": "Cross-Origin Resource Sharing (CORS) Misconfiguration",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-942",
+    "mitigation": "Restrict CORS to trusted origins only"
+  },
+  {
+    "id": "SS-43",
+    "title": "Server-Side Request Forgery (SSRF)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-918",
+    "mitigation": "URL validation and network access restrictions"
+  },
+  {
+    "id": "SS-44",
+    "title": "Clickjacking",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-1021",
+    "mitigation": "X-Frame-Options header and frame-ancestors CSP directive"
+  },
+  {
+    "id": "SS-45",
+    "title": "Content Security Policy Bypass",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-693",
+    "mitigation": "Strict CSP policy without unsafe-inline or unsafe-eval"
+  },
+  {
+    "id": "SS-46",
+    "title": "Subdomain Takeover",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-350",
+    "mitigation": "DNS record management and subdomain monitoring"
+  },
+  {
+    "id": "SS-47",
+    "title": "HTTP Parameter Pollution",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-235",
+    "mitigation": "Proper parameter parsing and validation"
+  },
+  {
+    "id": "SS-48",
+    "title": "Race Condition",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-362",
+    "mitigation": "Atomic operations and proper synchronization"
+  },
+  {
+    "id": "SS-49",
+    "title": "Business Logic Data Validation",
+    "category": "Business Logic Errors",
+    "cwe": "CWE-840",
+    "mitigation": "Server-side business rule validation"
+  },
+  {
+    "id": "SS-50",
+    "title": "Weak Password Recovery",
+    "category": "Broken Authentication",
+    "cwe": "CWE-640",
+    "mitigation": "Secure password reset process with proper validation"
+  }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "JS-1",
+    "title": "SQL Injection in login and product search",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use of parameterized queries / prepared statements"
+  },
+  {
+    "id": "JS-2",
+    "title": "Cross-Site Scripting (stored & reflected)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Output encoding and input sanitization"
+  },
+  {
+    "id": "JS-3",
+    "title": "Broken Authentication (weak recovery & password reuse)",
+    "category": "Broken Authentication",
+    "cwe": "CWE-287",
+    "mitigation": "Strengthen password policies, secure recovery, MFA"
+  },
+  {
+    "id": "JS-4",
+    "title": "Brute-force / rate limit bypass",
+    "category": "Brute Force",
+    "cwe": "CWE-307",
+    "mitigation": "Account lockout or request throttling"
+  },
+  {
+    "id": "JS-5",
+    "title": "CSRF (multiple endpoints)",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "Anti-CSRF tokens in state-modifying requests"
+  },
+  {
+    "id": "JS-6",
+    "title": "Clickjacking protection missing",
+    "category": "Clickjacking",
+    "cwe": "CWE-1021",
+    "mitigation": "Set X-Frame-Options / Content-Security Policy frame-ancestors"
+  },
+  {
+    "id": "JS-7",
+    "title": "Long password DoS",
+    "category": "Denial of Service",
+    "cwe": "CWE-400",
+    "mitigation": "Limit input length at server-side"
+  },
+  {
+    "id": "JS-8",
+    "title": "Client-side validation bypass",
+    "category": "Input Validation",
+    "cwe": "CWE-20",
+    "mitigation": "Enforce server-side validation"
+  },
+  {
+    "id": "JS-9",
+    "title": "Directory listing exposure (/ftp, /encryptionkeys)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-538",
+    "mitigation": "Disable directory listings and secure directories"
+  },
+  {
+    "id": "JS-10",
+    "title": "Sensitive info leakage from main.js",
+    "category": "Sensitive Data Exposure",
+    "cwe": "CWE-922",
+    "mitigation": "Remove secrets from client-side code"
+  },
+  {
+    "id": "JS-11",
+    "title": "Insecure JWT design",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-310",
+    "mitigation": "Use secure, short-lived signed tokens"
+  }
+]

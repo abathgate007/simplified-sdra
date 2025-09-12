@@ -1,0 +1,94 @@
+graph TB
+    subgraph "Client Layer"
+        Browser[Web Browser]
+        Mobile[Mobile App]
+    end
+    
+    subgraph "Frontend Layer"
+        Angular[Angular SPA Frontend]
+        Static[Static Assets<br/>CSS, JS, Images]
+    end
+    
+    subgraph "Application Layer"
+        Express[Express.js Server]
+        Routes[REST API Routes]
+        Auth[Authentication Module]
+        Middleware[Security Middleware]
+        Challenges[Challenge Engine]
+    end
+    
+    subgraph "Business Logic"
+        UserMgmt[User Management]
+        ProductCatalog[Product Catalog]
+        OrderSystem[Order System]
+        Feedback[Feedback System]
+        FileUpload[File Upload Handler]
+        Payment[Payment Processing]
+    end
+    
+    subgraph "Data Layer"
+        SQLite[(SQLite Database)]
+        FileSystem[File System<br/>Uploaded Files]
+        Memory[In-Memory Storage<br/>Sessions, Cache]
+    end
+    
+  
+    subgraph "External Dependencies"
+        NPM[NPM Packages]
+        JWT[JWT Libraries]
+        Crypto[Crypto Libraries]
+        Sequelize[Sequelize ORM]
+    end
+    
+    %% Client connections
+    Browser --> Angular
+    Mobile --> Routes
+    
+    %% Frontend connections
+    Angular --> Static
+    Angular --> Routes
+    
+    %% Application layer connections
+    Express --> Routes
+    Routes --> Auth
+    Routes --> Middleware
+    Routes --> Challenges
+    
+    %% Business logic connections
+    Routes --> UserMgmt
+    Routes --> ProductCatalog
+    Routes --> OrderSystem
+    Routes --> Feedback
+    Routes --> FileUpload
+    Routes --> Payment
+    
+    %% Data layer connections
+    UserMgmt --> SQLite
+    ProductCatalog --> SQLite
+    OrderSystem --> SQLite
+    Feedback --> SQLite
+    FileUpload --> FileSystem
+    Auth --> Memory
+    
+   
+    %% External dependencies
+    Express --> NPM
+    Auth --> JWT
+    UserMgmt --> Crypto
+    SQLite --> Sequelize
+    
+    %% Styling
+    classDef clientLayer fill:#e1f5fe
+    classDef frontendLayer fill:#f3e5f5
+    classDef appLayer fill:#e8f5e8
+    classDef businessLayer fill:#fff3e0
+    classDef dataLayer fill:#fce4ec
+    classDef securityLayer fill:#ffebee
+    classDef externalLayer fill:#f1f8e9
+    
+    class Browser,Mobile clientLayer
+    class Angular,Static frontendLayer
+    class Express,Routes,Auth,Middleware,Challenges appLayer
+    class UserMgmt,ProductCatalog,OrderSystem,Feedback,FileUpload,Payment businessLayer
+    class SQLite,FileSystem,Memory dataLayer
+    class NPM,JWT,Crypto,Sequelize externalLayer

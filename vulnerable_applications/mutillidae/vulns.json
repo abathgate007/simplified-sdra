@@ -1,0 +1,457 @@
+[
+  {
+    "id": "MUT-1",
+    "title": "SQL Injection (Extract Data)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use of parameterized queries and prepared statements"
+  },
+  {
+    "id": "MUT-2",
+    "title": "SQL Injection (Insert Injection)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Input validation and parameterized INSERT statements"
+  },
+  {
+    "id": "MUT-3",
+    "title": "SQL Injection (Login Bypass)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Secure authentication logic with prepared statements"
+  },
+  {
+    "id": "MUT-4",
+    "title": "SQL Injection (Union)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Query structure validation and parameterization"
+  },
+  {
+    "id": "MUT-5",
+    "title": "Blind SQL Injection (Boolean Based)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Consistent response handling and input validation"
+  },
+  {
+    "id": "MUT-6",
+    "title": "Blind SQL Injection (Time Based)",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Query timeout controls and parameterized queries"
+  },
+  {
+    "id": "MUT-7",
+    "title": "Cross-Site Scripting (Reflected)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Output encoding and Content Security Policy"
+  },
+  {
+    "id": "MUT-8",
+    "title": "Cross-Site Scripting (Persistent)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Input sanitization and output encoding"
+  },
+  {
+    "id": "MUT-9",
+    "title": "Cross-Site Scripting (DOM Based)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Secure DOM manipulation practices"
+  },
+  {
+    "id": "MUT-10",
+    "title": "Cross-Site Scripting (Via Cookie Injection)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Cookie validation and HTTPOnly flags"
+  },
+  {
+    "id": "MUT-11",
+    "title": "Cross-Site Scripting (Against JSON)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "JSON encoding and proper content-type headers"
+  },
+  {
+    "id": "MUT-12",
+    "title": "Cross-Site Scripting (Via HTTP Headers)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Header validation and sanitization"
+  },
+  {
+    "id": "MUT-13",
+    "title": "HTML Injection (HTMLi)",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "HTML encoding and input validation"
+  },
+  {
+    "id": "MUT-14",
+    "title": "Cross-Site Request Forgery (CSRF)",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "CSRF tokens and SameSite cookie attributes"
+  },
+  {
+    "id": "MUT-15",
+    "title": "JavaScript Injection",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Content Security Policy and input validation"
+  },
+  {
+    "id": "MUT-16",
+    "title": "LDAP Injection",
+    "category": "Injection",
+    "cwe": "CWE-90",
+    "mitigation": "LDAP query parameterization and input validation"
+  },
+  {
+    "id": "MUT-17",
+    "title": "Command Injection",
+    "category": "Injection",
+    "cwe": "CWE-78",
+    "mitigation": "Avoid system calls with user input"
+  },
+  {
+    "id": "MUT-18",
+    "title": "Code Injection",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Avoid eval() and dynamic code execution"
+  },
+  {
+    "id": "MUT-19",
+    "title": "File Inclusion",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-98",
+    "mitigation": "Input validation and disable remote includes"
+  },
+  {
+    "id": "MUT-20",
+    "title": "Directory Traversal",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Path validation and access controls"
+  },
+  {
+    "id": "MUT-21",
+    "title": "File Upload",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-434",
+    "mitigation": "File type validation and upload restrictions"
+  },
+  {
+    "id": "MUT-22",
+    "title": "Buffer Overflow (Local)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-120",
+    "mitigation": "Input length validation and safe functions"
+  },
+  {
+    "id": "MUT-23",
+    "title": "Buffer Overflow (Remote)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-120",
+    "mitigation": "Network input validation and buffer bounds checking"
+  },
+  {
+    "id": "MUT-24",
+    "title": "Format String Injection",
+    "category": "Injection",
+    "cwe": "CWE-134",
+    "mitigation": "Avoid user input in format strings"
+  },
+  {
+    "id": "MUT-25",
+    "title": "XML External Entity (XXE) Injection",
+    "category": "Injection",
+    "cwe": "CWE-611",
+    "mitigation": "Disable external entity processing in XML parsers"
+  },
+  {
+    "id": "MUT-26",
+    "title": "XPath Injection",
+    "category": "Injection",
+    "cwe": "CWE-643",
+    "mitigation": "XPath parameterization and input validation"
+  },
+  {
+    "id": "MUT-27",
+    "title": "JSON Injection",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "JSON schema validation and safe parsing"
+  },
+  {
+    "id": "MUT-28",
+    "title": "SOAP Injection",
+    "category": "Injection",
+    "cwe": "CWE-91",
+    "mitigation": "SOAP message validation and safe parsing"
+  },
+  {
+    "id": "MUT-29",
+    "title": "Authentication Bypass",
+    "category": "Broken Authentication",
+    "cwe": "CWE-287",
+    "mitigation": "Secure authentication logic and server-side validation"
+  },
+  {
+    "id": "MUT-30",
+    "title": "Authorization Bypass",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "Proper authorization checks on all resources"
+  },
+  {
+    "id": "MUT-31",
+    "title": "Session Management Issues",
+    "category": "Broken Authentication",
+    "cwe": "CWE-613",
+    "mitigation": "Secure session configuration and regeneration"
+  },
+  {
+    "id": "MUT-32",
+    "title": "Insecure Direct Object Reference",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "Access control validation and indirect references"
+  },
+  {
+    "id": "MUT-33",
+    "title": "Privilege Escalation",
+    "category": "Broken Access Control",
+    "cwe": "CWE-269",
+    "mitigation": "Role-based access control and privilege validation"
+  },
+  {
+    "id": "MUT-34",
+    "title": "Insufficient Transport Layer Security",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-319",
+    "mitigation": "Enforce HTTPS and proper TLS configuration"
+  },
+  {
+    "id": "MUT-35",
+    "title": "Insecure Cryptographic Storage",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Strong encryption algorithms and key management"
+  },
+  {
+    "id": "MUT-36",
+    "title": "Information Disclosure",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Remove sensitive information and configure error handling"
+  },
+  {
+    "id": "MUT-37",
+    "title": "Improper Error Handling",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-209",
+    "mitigation": "Generic error messages and proper logging"
+  },
+  {
+    "id": "MUT-38",
+    "title": "Clickjacking",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-1021",
+    "mitigation": "X-Frame-Options and frame-ancestors CSP"
+  },
+  {
+    "id": "MUT-39",
+    "title": "HTTP Parameter Pollution",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-235",
+    "mitigation": "Proper parameter parsing and validation"
+  },
+  {
+    "id": "MUT-40",
+    "title": "HTTP Response Splitting",
+    "category": "Injection",
+    "cwe": "CWE-113",
+    "mitigation": "Header validation and encoding"
+  },
+  {
+    "id": "MUT-41",
+    "title": "HTTP Request Smuggling",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-444",
+    "mitigation": "Proper HTTP parsing and validation"
+  },
+  {
+    "id": "MUT-42",
+    "title": "Open Redirect",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-601",
+    "mitigation": "Whitelist allowed redirect destinations"
+  },
+  {
+    "id": "MUT-43",
+    "title": "Server-Side Request Forgery (SSRF)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-918",
+    "mitigation": "URL validation and network segmentation"
+  },
+  {
+    "id": "MUT-44",
+    "title": "Host Header Injection",
+    "category": "Injection",
+    "cwe": "CWE-20",
+    "mitigation": "Host header validation and whitelist"
+  },
+  {
+    "id": "MUT-45",
+    "title": "Method Tampering",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-650",
+    "mitigation": "HTTP method validation and restrictions"
+  },
+  {
+    "id": "MUT-46",
+    "title": "Parameter Tampering",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-472",
+    "mitigation": "Server-side parameter validation"
+  },
+  {
+    "id": "MUT-47",
+    "title": "Cookie Tampering",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-565",
+    "mitigation": "Cookie integrity protection and validation"
+  },
+  {
+    "id": "MUT-48",
+    "title": "SSL/TLS Issues",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-326",
+    "mitigation": "Secure SSL/TLS configuration and certificate validation"
+  },
+  {
+    "id": "MUT-49",
+    "title": "Weak Password Recovery",
+    "category": "Broken Authentication",
+    "cwe": "CWE-640",
+    "mitigation": "Secure password reset process with proper validation"
+  },
+  {
+    "id": "MUT-50",
+    "title": "Username Enumeration",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Consistent response times and messages"
+  },
+  {
+    "id": "MUT-51",
+    "title": "Password Brute Force",
+    "category": "Broken Authentication",
+    "cwe": "CWE-307",
+    "mitigation": "Account lockout and rate limiting"
+  },
+  {
+    "id": "MUT-52",
+    "title": "Session Fixation",
+    "category": "Broken Authentication",
+    "cwe": "CWE-384",
+    "mitigation": "Session regeneration after authentication"
+  },
+  {
+    "id": "MUT-53",
+    "title": "Session Hijacking",
+    "category": "Broken Authentication",
+    "cwe": "CWE-384",
+    "mitigation": "Secure session tokens and HTTPS enforcement"
+  },
+  {
+    "id": "MUT-54",
+    "title": "Weak Session Tokens",
+    "category": "Broken Authentication",
+    "cwe": "CWE-330",
+    "mitigation": "Cryptographically secure random session generation"
+  },
+  {
+    "id": "MUT-55",
+    "title": "Missing Security Headers",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-693",
+    "mitigation": "Implement security headers like CSP, HSTS, X-Frame-Options"
+  },
+  {
+    "id": "MUT-56",
+    "title": "Insecure Randomness",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-330",
+    "mitigation": "Use cryptographically secure random number generators"
+  },
+  {
+    "id": "MUT-57",
+    "title": "Race Conditions",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-362",
+    "mitigation": "Proper synchronization and atomic operations"
+  },
+  {
+    "id": "MUT-58",
+    "title": "Time-of-Check Time-of-Use (TOCTOU)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-367",
+    "mitigation": "Atomic operations and proper file handling"
+  },
+  {
+    "id": "MUT-59",
+    "title": "Log Injection",
+    "category": "Injection",
+    "cwe": "CWE-117",
+    "mitigation": "Log entry sanitization and structured logging"
+  },
+  {
+    "id": "MUT-60",
+    "title": "Application Logic Errors",
+    "category": "Business Logic Errors",
+    "cwe": "CWE-840",
+    "mitigation": "Comprehensive business logic validation"
+  },
+  {
+    "id": "MUT-61",
+    "title": "Denial of Service (DoS)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-400",
+    "mitigation": "Rate limiting and resource management"
+  },
+  {
+    "id": "MUT-62",
+    "title": "Regular Expression DoS (ReDoS)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-1333",
+    "mitigation": "Safe regex patterns and input validation"
+  },
+  {
+    "id": "MUT-63",
+    "title": "XML Bomb (Billion Laughs)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-776",
+    "mitigation": "XML parser limits and entity restrictions"
+  },
+  {
+    "id": "MUT-64",
+    "title": "Deserialization Attacks",
+    "category": "Injection",
+    "cwe": "CWE-502",
+    "mitigation": "Avoid deserializing untrusted data"
+  },
+  {
+    "id": "MUT-65",
+    "title": "Template Injection",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Template sandboxing and input validation"
+  }
+]

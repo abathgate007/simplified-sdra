@@ -1,0 +1,93 @@
+[
+  {
+    "id": "ACUART-1",
+    "title": "SQL Injection in Product Category Parameter",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Implement input validation and use parameterized queries or prepared statements for all database interactions. [4, 9]"
+  },
+  {
+    "id": "ACUART-2",
+    "title": "Blind SQL Injection",
+    "category": "Injection",
+    "cwe": "CWE-89",
+    "mitigation": "Use parameterized queries for all database interactions and avoid exposing detailed database error messages to users. Custom error pages should be used instead."
+  },
+  {
+    "id": "ACUART-3",
+    "title": "Reflected Cross-Site Scripting (XSS) in Search Functionality",
+    "category": "Cross-Site Scripting",
+    "cwe": "CWE-79",
+    "mitigation": "Implement context-aware output encoding for all user-supplied data that is displayed on the page. Sanitize user input to prevent the execution of malicious scripts. [6]"
+  },
+  {
+    "id": "ACUART-4",
+    "title": "Stored Cross-Site Scripting (XSS) in Guestbook",
+    "category": "Cross-Site Scripting",
+    "cwe": "CWE-79",
+    "mitigation": "Sanitize all user input before storing it in the database and implement robust output encoding when displaying user-generated content. [6, 8]"
+  },
+  {
+    "id": "ACUART-5",
+    "title": "Authentication Bypass via SQL Injection on Login Page",
+    "category": "Authentication",
+    "cwe": "CWE-592",
+    "mitigation": "Use parameterized queries for authentication checks and implement strong password policies. Avoid detailed error messages on failed login attempts. [6, 7]"
+  },
+  {
+    "id": "ACUART-6",
+    "title": "Directory Traversal / File Inclusion",
+    "category": "Path Traversal",
+    "cwe": "CWE-22",
+    "mitigation": "Implement strict input validation and sanitization for all file path parameters. The application should operate with the least privileges necessary and use a whitelist of allowed files and directories. [7, 8]"
+  },
+  {
+    "id": "ACUART-7",
+    "title": "Cross-Site Request Forgery (CSRF) in User Actions",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "Implement anti-CSRF tokens (synchronizer tokens) for all state-changing requests to ensure that they originate from the application's own forms."
+  },
+  {
+    "id": "ACUART-8",
+    "title": "Insecure Credential Storage",
+    "category": "Cryptographic Issues",
+    "cwe": "CWE-312",
+    "mitigation": "Passwords should be hashed using a strong, salted, and modern hashing algorithm (e.g., Argon2, bcrypt)."
+  },
+  {
+    "id": "ACUART-9",
+    "title": "Weak Password Policy",
+    "category": "Authentication",
+    "cwe": "CWE-521",
+    "mitigation": "Enforce strong password complexity requirements, including length, character types, and prohibit common passwords."
+  },
+  {
+    "id": "ACUART-10",
+    "title": "HTML Injection in Guestbook",
+    "category": "Injection",
+    "cwe": "CWE-80",
+    "mitigation": "Implement proper output encoding and sanitization for all user-supplied input to prevent the rendering of unauthorized HTML elements. [11]"
+  },
+  {
+    "id": "ACUART-11",
+    "title": "Error Handling Issues / Information Disclosure",
+    "category": "Information Disclosure",
+    "cwe": "CWE-209",
+    "mitigation": "Configure the web server and application to suppress detailed error messages in a production environment. Generic, non-descriptive error pages should be shown to the user."
+  },
+  {
+    "id": "ACUART-12",
+    "title": "Clickjacking in Guestbook Page",
+    "category": "UI Redressing",
+    "cwe": "CWE-1021",
+    "mitigation": "Implement the X-Frame-Options HTTP header or a Content Security Policy (CSP) with the frame-ancestors directive to prevent the page from being embedded in an iframe on a malicious site. [11]"
+  },
+   {
+    "id": "ACUART-13",
+    "title": "Web Server Misconfiguration / Version Disclosure",
+    "category": "Configuration",
+    "cwe": "CWE-2",
+    "mitigation": "Configure the web server to avoid disclosing its version number and other sensitive information in HTTP headers and error pages. [8]"
+  }
+]

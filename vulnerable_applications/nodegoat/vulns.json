@@ -1,0 +1,317 @@
+[
+  {
+    "id": "NG-1",
+    "title": "NoSQL Injection (MongoDB)",
+    "category": "Injection",
+    "cwe": "CWE-943",
+    "mitigation": "Input validation and parameterized NoSQL queries"
+  },
+  {
+    "id": "NG-2",
+    "title": "Server-Side JavaScript Injection",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Avoid eval() and dynamic code execution with user input"
+  },
+  {
+    "id": "NG-3",
+    "title": "Cross-Site Scripting (XSS) - Reflected",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Output encoding and Content Security Policy"
+  },
+  {
+    "id": "NG-4",
+    "title": "Cross-Site Scripting (XSS) - Stored",
+    "category": "XSS",
+    "cwe": "CWE-79",
+    "mitigation": "Input sanitization and output encoding"
+  },
+  {
+    "id": "NG-5",
+    "title": "Cross-Site Request Forgery (CSRF)",
+    "category": "CSRF",
+    "cwe": "CWE-352",
+    "mitigation": "CSRF tokens and SameSite cookie attributes"
+  },
+  {
+    "id": "NG-6",
+    "title": "Insecure Session Management",
+    "category": "Broken Authentication",
+    "cwe": "CWE-613",
+    "mitigation": "Use secure: true, httpOnly: true, sameSite: 'strict', proper session timeout, and regenerate session ID on authentication"
+  },
+  {
+    "id": "NG-7",
+    "title": "Session Fixation",
+    "category": "Broken Authentication",
+    "cwe": "CWE-384",
+    "mitigation": "Session regeneration after authentication"
+  },
+  {
+    "id": "NG-8",
+    "title": "Insecure Direct Object Reference",
+    "category": "Broken Access Control",
+    "cwe": "CWE-639",
+    "mitigation": "Access control validation and indirect references"
+  },
+  {
+    "id": "NG-9",
+    "title": "Missing Function Level Access Control",
+    "category": "Broken Access Control",
+    "cwe": "CWE-862",
+    "mitigation": "Role-based access control on all endpoints"
+  },
+  {
+    "id": "NG-10",
+    "title": "Privilege Escalation via Parameter Manipulation",
+    "category": "Broken Access Control",
+    "cwe": "CWE-269",
+    "mitigation": "Server-side privilege validation"
+  },
+  {
+    "id": "NG-11",
+    "title": "Weak Password Storage (Plaintext)",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-256",
+    "mitigation": "Strong password hashing with bcrypt or similar"
+  },
+  {
+    "id": "NG-12",
+    "title": "Weak Cryptographic Hash (MD5)",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-327",
+    "mitigation": "Use strong hashing algorithms like bcrypt or Argon2"
+  },
+  {
+    "id": "NG-13",
+    "title": "Insecure Randomness",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-330",
+    "mitigation": "Use cryptographically secure random number generators"
+  },
+  {
+    "id": "NG-14",
+    "title": "Information Disclosure via Error Messages",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-209",
+    "mitigation": "Generic error messages and proper error handling"
+  },
+  {
+    "id": "NG-15",
+    "title": "Debug Information Disclosure",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Disable debug mode in production"
+  },
+  {
+    "id": "NG-16",
+    "title": "Hardcoded Secrets in Source Code",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-798",
+    "mitigation": "Use environment variables and secure secret management"
+  },
+  {
+    "id": "NG-17",
+    "title": "Insufficient Input Validation",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-20",
+    "mitigation": "Comprehensive input validation and sanitization"
+  },
+  {
+    "id": "NG-18",
+    "title": "Prototype Pollution",
+    "category": "Injection",
+    "cwe": "CWE-1321",
+    "mitigation": "Object.create(null) and input validation for object keys"
+  },
+  {
+    "id": "NG-19",
+    "title": "Deserialization of Untrusted Data",
+    "category": "Injection",
+    "cwe": "CWE-502",
+    "mitigation": "Avoid deserializing untrusted data or use safe parsers"
+  },
+  {
+    "id": "NG-20",
+    "title": "Command Injection via Child Process",
+    "category": "Injection",
+    "cwe": "CWE-78",
+    "mitigation": "Avoid shell execution with user input"
+  },
+  {
+    "id": "NG-21",
+    "title": "Path Traversal in File Operations",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-22",
+    "mitigation": "Path validation and sanitization"
+  },
+  {
+    "id": "NG-22",
+    "title": "Unsafe File Upload",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-434",
+    "mitigation": "File type validation and upload restrictions"
+  },
+  {
+    "id": "NG-23",
+    "title": "Denial of Service via Regular Expression",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-1333",
+    "mitigation": "Safe regex patterns and input validation"
+  },
+  {
+    "id": "NG-24",
+    "title": "HTTP Parameter Pollution",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-235",
+    "mitigation": "Proper parameter parsing and validation"
+  },
+  {
+    "id": "NG-25",
+    "title": "Server-Side Request Forgery (SSRF)",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-918",
+    "mitigation": "URL validation and network restrictions"
+  },
+  {
+    "id": "NG-26",
+    "title": "Open Redirect",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-601",
+    "mitigation": "Whitelist allowed redirect destinations"
+  },
+  {
+    "id": "NG-27",
+    "title": "Missing Security Headers",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-693",
+    "mitigation": "Implement security headers like CSP, HSTS, X-Frame-Options"
+  },
+  {
+    "id": "NG-28",
+    "title": "Clickjacking via Missing X-Frame-Options",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-1021",
+    "mitigation": "Set X-Frame-Options and frame-ancestors CSP"
+  },
+  {
+    "id": "NG-29",
+    "title": "Insufficient Transport Layer Security",
+    "category": "Cryptographic Failures",
+    "cwe": "CWE-319",
+    "mitigation": "Enforce HTTPS and secure TLS configuration"
+  },
+  {
+    "id": "NG-30",
+    "title": "Weak JWT Implementation",
+    "category": "Broken Authentication",
+    "cwe": "CWE-347",
+    "mitigation": "Proper JWT signature validation and secure algorithms"
+  },
+  {
+    "id": "NG-31",
+    "title": "Race Condition in File Operations",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-362",
+    "mitigation": "Atomic file operations and proper locking"
+  },
+  {
+    "id": "NG-32",
+    "title": "Business Logic Bypass",
+    "category": "Business Logic Errors",
+    "cwe": "CWE-840",
+    "mitigation": "Server-side business logic validation"
+  },
+  {
+    "id": "NG-33",
+    "title": "Mass Assignment Vulnerability",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-915",
+    "mitigation": "Whitelist allowed object properties"
+  },
+  {
+    "id": "NG-34",
+    "title": "Timing Attack on Authentication",
+    "category": "Broken Authentication",
+    "cwe": "CWE-208",
+    "mitigation": "Constant-time comparison functions"
+  },
+  {
+    "id": "NG-35",
+    "title": "Cookie Security Issues",
+    "category": "Broken Authentication",
+    "cwe": "CWE-614",
+    "mitigation": "Set Secure, HTTPOnly, and SameSite cookie flags"
+  },
+  {
+    "id": "NG-36",
+    "title": "Verbose Error Pages",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-209",
+    "mitigation": "Custom error pages without sensitive information"
+  },
+  {
+    "id": "NG-37",
+    "title": "Weak Password Policy",
+    "category": "Broken Authentication",
+    "cwe": "CWE-521",
+    "mitigation": "Strong password requirements and enforcement"
+  },
+  {
+    "id": "NG-38",
+    "title": "Account Enumeration",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-200",
+    "mitigation": "Consistent response messages and timing"
+  },
+  {
+    "id": "NG-39",
+    "title": "Brute Force Attack on Login",
+    "category": "Broken Authentication",
+    "cwe": "CWE-307",
+    "mitigation": "Rate limiting and account lockout"
+  },
+  {
+    "id": "NG-40",
+    "title": "Dependency Vulnerabilities",
+    "category": "Vulnerable and Outdated Components",
+    "cwe": "CWE-1104",
+    "mitigation": "Regular dependency updates and security scanning"
+  },
+  {
+    "id": "NG-41",
+    "title": "Template Injection (Handlebars/EJS)",
+    "category": "Injection",
+    "cwe": "CWE-94",
+    "mitigation": "Template sandboxing and input validation"
+  },
+  {
+    "id": "NG-42",
+    "title": "Log Injection",
+    "category": "Injection",
+    "cwe": "CWE-117",
+    "mitigation": "Log sanitization and structured logging"
+  },
+  {
+    "id": "NG-43",
+    "title": "Memory Disclosure via Buffer Overread",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-126",
+    "mitigation": "Proper buffer handling and bounds checking"
+  },
+  {
+    "id": "NG-44",
+    "title": "Unsafe Reflection",
+    "category": "Injection",
+    "cwe": "CWE-470",
+    "mitigation": "Avoid dynamic property access with user input"
+  },
+  {
+    "id": "NG-45",
+    "title": "Express.js Security Misconfiguration",
+    "category": "Security Misconfiguration",
+    "cwe": "CWE-16",
+    "mitigation": "Secure Express.js configuration and middleware"
+  }
+]

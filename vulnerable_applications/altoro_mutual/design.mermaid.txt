@@ -1,0 +1,67 @@
+graph TD
+    subgraph "Client Layer"
+        User("User / Browser")
+        ApiClient("API Client")
+    end
+
+    subgraph "Web & Presentation Tier"
+        IIS("IIS Web Server")
+    end
+
+    subgraph "Application Logic Tier"
+        subgraph "Altoro Mutual Web App (ASP.NET)"
+            WebApp("ASP.NET Application Core")
+            Login("Login.aspx")
+            Transfer("Transfer.aspx")
+            Search("Search.aspx")
+            Admin("Admin.aspx")
+            Feedback("Feedback.aspx")
+        end
+    end
+
+    subgraph "Service Tier"
+        SOAP_API("SOAP API (actions.asmx)")
+    end
+
+    subgraph "Data Tier"
+        SQLServer("Microsoft SQL Server")
+        subgraph "Database"
+            DB[(altoro_db)]
+        end
+    end
+
+    %% Connections
+    User -- HTTP/S Request --> IIS
+    IIS -- Hosts & Forwards to --> WebApp
+    
+    WebApp --- Login
+    WebApp --- Transfer
+    WebApp --- Search
+    WebApp --- Admin
+    WebApp --- Feedback
+    
+    Login -- ADO.NET Query --> SQLServer
+    Transfer -- ADO.NET Query --> SQLServer
+    Search -- ADO.NET Query --> SQLServer
+    Admin -- ADO.NET Query --> SQLServer
+    Feedback -- ADO.NET Query --> SQLServer
+
+    ApiClient -- SOAP Request --> IIS
+    IIS -- Forwards to --> SOAP_API
+    SOAP_API -- ADO.NET Query --> SQLServer
+
+    SQLServer -- Stores/Retrieves Data --> DB
+
+    %% Styling
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef client fill:#c9daf8,stroke:#666,stroke-width:2px;
+    classDef web fill:#f4cccc,stroke:#666,stroke-width:2px;
+    classDef app fill:#d9ead3,stroke:#666,stroke-width:2px;
+    classDef service fill:#e0e0e0,stroke:#666,stroke-width:2px;
+    classDef db fill:#fff2cc,stroke:#666,stroke-width:2px;
+
+    class User,ApiClient client;
+    class IIS web;
+    class WebApp,Login,Transfer,Search,Admin,Feedback app;
+    class SOAP_API service;
+    class SQLServer,DB db;

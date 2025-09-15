@@ -1,0 +1,405 @@
+# Security Design Review Report
+Co-op Evaluation System (CES)
+
+Run ID: run-2025-09-13T00:00:00Z  
+Prepared: 2025-09-14
+
+---
+
+## 1) Executive summary
+
+The CES architecture integrates campus SSO (Shibboleth), a custom employer authentication path, an Oracle database, an ITS mail relay, and an external reporting system behind an ITS reverse proxy. The threat model applies STRIDE to all DFD elements, and risk is prioritized with DREAD.
+
+Overall risk posture: Elevated. Multiple Critical risks are concentrated in session management, SSO parsing, server-side request handling, and database transport. Most risks are addressable with well-understood controls already enumerated in the mitigations set.
+
+Top critical risks to address immediately:
+- CSRF on state-changing endpoints (TH-0201)
+- Insecure Java deserialization (TH-0202)
+- Session ID predictability/leakage/binding errors (TH-0161, TH-0164, TH-0166)
+- SAML parser XXE and signature wrapping/validation weaknesses (TH-0203, TH-0204/TH-0102)
+- Password hashing/work factor weaknesses in the employer credential store (TH-0176)
+- Reverse proxy cache poisoning and cross-user data leakage (TH-0209)
+- CORS misconfiguration enabling cross-origin abuse (TH-0207)
+
+Coverage: STRIDE analysis coverage is 88% across components and data stores. The mitigation plan maps discrete controls to each threat, with priorities and NIST CSF references.
+
+Immediate next steps (0–30 days):
+- Enforce session hardening and CSRF protections (MIT-0001, MIT-0004, MIT-0015)
+- Lock down SAML processing (MIT-0003)
+- Disable native Java deserialization paths (MIT-0012)
+- Harden reverse proxy and caching rules (MIT-0010, MIT-0017)
+- Apply credential store hardening with strong hashing (MIT-0016)
+- Lock down CORS (MIT-0011)
+
+---
+
+## 2) System overview
+
+CES is a web application (Servlet/JSP on Tomcat) accessed by students, employers, and administrators via the ITS reverse proxy. It uses:
+- Shibboleth IdP for RIT user SSO (SAML)
+- Custom employer authentication (separate credential store)
+- Oracle SQL database for data persistence
+- ITS mail server for outbound notifications
+- External reporting service for exports/imports
+
+Key trust boundaries:
+- Public Internet to CES (TB-001)
+- SSO/Shibboleth SAML exchange (TB-002)
+- Database network zone (TB-003)
+- External reporting API boundary (TB-004)
+- Mail server boundary (TB-005)
+- Reverse proxy to application server (TB-006)
+- Session management across client/server (TB-008)
+- Employer authentication boundary (TB-009)
+
+---
+
+## 3) Dataflow diagram (context and flows)
+
+```mermaid
+flowchart TD
+  EXT-001[EXT-001 Student User]
+  EXT-002[EXT-002 Employer User]
+  EXT-003[EXT-003 Administrator]
+  EXT-004[EXT-004 Shibboleth IdP]
+  EXT-005[EXT-005 Reporting System]
+  EXT-006[EXT-006 ITS Mail Server]
+  EXT-007[EXT-007 ITS DNS/Web Server]
+  P-000[P-000 Client Browser/UI (JS/Angular)]
+  P-001[P-001 CES Web Application (Servlet/JSP)]
+  P-002[P-002 SSO/SAML Controller]
+  P-003[P-003 Employer Local Auth Controller]
+  P-004[P-004 Email Notification Service]
+  P-005[P-005 Reporting Service]
+  P-006[P-006 Data Persistence Framework/ORM]
+  DS-001[DS-001 Oracle SQL Database]
+  DS-002[DS-002 Session Store]
+  DS-003[DS-003 Employer Credentials Store]
+  DS-004[DS-004 Audit/Logs]
+
+  EXT-001 -->|User actions| P-000
+  EXT-002 -->|User actions| P-000
+  EXT-003 -->|User actions| P-000
+  EXT-007 <--> |HTTPS reverse proxy| P-001
+  P-000 <--> |HTTPS requests/responses, cookies| P-001
+  P-001 -->|Initiate SSO| P-002
+  P-002 <--> |SAML AuthnRequest/Response| EXT-004
+  P-002 -->|SSO callback & attributes| P-001
+  P-000 -->|Employer credentials| P-003
+  P-003 <--> |Verify creds| DS-003
+  P-003 -->|Establish session| P-001
+  P-001 <--> |Create/Read/Update| DS-002
+  P-001 -->|Events| P-004
+  P-004 <--> |SMTP (TLS)| EXT-006
+  P-005 <--> |Export/Fetch reports| EXT-005
+  P-001 -->|CRUD requests| P-006
+  P-006 <--> |SQL/stored procedures| DS-001
+  P-005 -->|Report queries| DS-001
+  P-001 -->|App logs| DS-004
+  P-002 -->|Auth logs| DS-004
+  P-003 -->|Auth logs| DS-004
+  P-004 -->|Delivery logs| DS-004
+  P-005 -->|Report logs| DS-004
+  P-006 -->|DB ops logs| DS-004
+```
+
+---
+
+## 4) Trust boundaries
+
+- TB-001 Public Internet Boundary
+  - Between end-user networks and CES over HTTPS via reverse proxy.
+  - Elements: EXT-001, EXT-002, EXT-003, EXT-007, P-000, P-001
+
+- TB-002 SSO/Shibboleth Boundary
+  - SAML exchange between CES and RIT Shibboleth IdP.
+  - Elements: P-001, P-002, EXT-004, P-003
+
+- TB-003 Database Network Boundary
+  - Oracle DB accessible only from app tier/persistence framework.
+  - Elements: P-001, P-006, DS-001, P-005
+
+- TB-004 Reporting API Boundary
+  - CES reporting service and external reporting system.
+  - Elements: P-005, EXT-005, P-002, EXT-006
+
+- TB-005 Mail Server Boundary
+  - CES notification to ITS Mail Server over SMTP.
+  - Elements: P-004, EXT-006
+
+- TB-006 Reverse Proxy to Application Server Boundary
+  - ITS DNS/Web front end to CES app server.
+  - Elements: EXT-007, P-001, P-002, P-005
+
+- TB-008 Session Management Boundary
+  - Client/server session identifiers, cookies, server-side state.
+  - Elements: P-000, P-001, DS-002
+
+- TB-009 Employer Authentication Boundary
+  - Custom employer login, credentials and flows.
+  - Elements: EXT-002, P-003, DS-003
+
+Boundary hot spots: TB-008 (session), TB-002 (SSO), TB-006 (reverse proxy), TB-003 (database).
+
+---
+
+## 5) Threat modeling approach and coverage
+
+- Method: STRIDE per process, data store, and external entity; DREAD risk scoring per threat.
+- Evidence sources: Architecture docs, context/process/dataflow diagrams, and explicit assumptions about session management and Tomcat/JSP behaviors.
+- Coverage: 88% of elements have enumerated STRIDE threats with examples and evidence references.
+
+---
+
+## 6) Prioritized risk register (top items)
+
+| Rank | Threat ID | Element | Risk summary | STRIDE | DREAD | Severity | Key mitigations |
+|------|-----------|---------|--------------|--------|-------|----------|-----------------|
+| 1 | TH-0202 | P-001 App | Insecure Java deserialization → RCE | E | 41 | Critical | MIT-0012 |
+| 2 | TH-0161 | DS-002 Session | Predictable/weak session IDs | S | 41 | Critical | MIT-0001, MIT-0015 |
+| 3 | TH-0164 | DS-002 Session | Session IDs leaked via logs/referrers | I | 41 | Critical | MIT-0001, MIT-0015, MIT-0006 |
+| 4 | TH-0201 | P-001 App | CSRF on state-changing endpoints | E | 40 | Critical | MIT-0004, MIT-0001 |
+| 5 | TH-0203 | P-002 SSO | SAML XML parser XXE | I | 40 | Critical | MIT-0003 |
+| 6 | TH-0166 | DS-002 Session | Session bound to wrong principal | E | 40 | Critical | MIT-0001, MIT-0015 |
+| 7 | TH-0176 | DS-003 Creds | Weak hashing/work factors → offline cracking | E | 40 | Critical | MIT-0016 |
+| 8 | TH-0209 | EXT-007 Proxy | Cache poisoning/stale cache data leaks | I | 40 | Critical | MIT-0010 |
+| 9 | TH-0207 | P-001 App | CORS misconfig with credentials | I | 40 | Critical | MIT-0011 |
+| 10 | TH-0111 | P-003 Employer Auth | Credential stuffing/brute force | S | 40 | Critical | MIT-0007 |
+| 11 | TH-0092 | P-001 App | Input tampering/SQL Injection | T | 39 | High | MIT-0002 |
+| 12 | TH-0212 | DS-001 DB | Unencrypted DB transport | I | 39 | High | MIT-0014 |
+| 13 | TH-0154 | DS-001 DB | PII disclosure (queries/backups) | I | 38 | High | MIT-0014 |
+| 14 | TH-0204 | P-002 SSO | XML Signature Wrapping | E | 38 | High | MIT-0003 |
+| 15 | TH-0208 | P-005 Reports | CSV/Excel formula injection | E | 38 | High | MIT-0009 |
+
+Note: Additional High risks (scores 35–39) are documented in the DREAD appendix and mapped to mitigations.
+
+---
+
+## 7) Component findings and control highlights
+
+- P-000 Client Browser/UI (TB-001/TB-008)
+  - Key threats: XSS/DOM tampering, clickjacking, data leakage via URLs/storage.
+  - Controls: MIT-0019 (XSS mitigations), MIT-0017 (clickjacking defense), MIT-0010 (edge header hardening), MIT-0001 (cookie flags).
+
+- P-001 CES Web Application (TB-001/TB-006/TB-003/TB-002/TB-004/TB-005/TB-008)
+  - Key threats: CSRF, SQLi, mass assignment, deserialization RCE, CORS misconfig, access control gaps.
+  - Controls: MIT-0004, MIT-0002, MIT-0013, MIT-0012, MIT-0011, MIT-0005, MIT-0001.
+
+- P-002 SSO/SAML Controller (TB-002)
+  - Key threats: Rogue IdP, signature/conditions tampering, assertion replay, XXE, open redirects/RelayState abuse, XML signature wrapping.
+  - Controls: MIT-0003, MIT-0018, MIT-0010 (edge header normalization as applicable).
+
+- P-003 Employer Local Auth (TB-009/TB-008)
+  - Key threats: Brute force/stuffing, reset token tampering, enumeration, DoS.
+  - Controls: MIT-0007, MIT-0016 (hashing), MIT-0006 (audit), MIT-0001 (session).
+
+- P-004 Email Notification Service (TB-005)
+  - Key threats: Header injection, spoofing, PII leakage over SMTP, email storms.
+  - Controls: MIT-0008 (TLS + DKIM/SPF/DMARC + header sanitization), MIT-0006 (delivery audit), MIT-0020 (rate/budgets).
+
+- P-005 Reporting Service (TB-004)
+  - Key threats: Overbroad scopes, PII-heavy exports, expensive queries, CSV injection.
+  - Controls: MIT-0009, MIT-0005, MIT-0020.
+
+- P-006 Persistence/ORM (TB-003)
+  - Key threats: SQL injection via ORM misuse, overprivileged DB cred, long transactions.
+  - Controls: MIT-0002, MIT-0014.
+
+- DS-001 Oracle Database (TB-003)
+  - Key threats: Tampering, PII disclosure, DB transport encryption gaps.
+  - Controls: MIT-0014 (least privilege, TCPS/mTLS, auditing, backup protection).
+
+- DS-002 Session Store (TB-008)
+  - Key threats: ID predictability/fixation/leakage, store exhaustion, wrong-principal binding.
+  - Controls: MIT-0001, MIT-0015, MIT-0006.
+
+- DS-003 Employer Credentials Store (TB-009)
+  - Key threats: Weak hashing/work factors, salts tampering, enumeration.
+  - Controls: MIT-0016, MIT-0007, MIT-0006.
+
+- DS-004 Audit/Logs
+  - Key threats: Log tampering/deletion, sensitive data in logs, log flooding.
+  - Controls: MIT-0006 (immutable logging, integrity hashing, redaction), MIT-0020 (quotas/backpressure).
+
+- EXT-007 Reverse Proxy (TB-001/TB-006)
+  - Key threats: Header/body tampering, cache poisoning, bypass via rewrites, clickjacking at edge.
+  - Controls: MIT-0010 (normalize headers, cache controls), MIT-0017 (frame protections), MIT-0020 (rate limits).
+
+- EXT-004 Shibboleth IdP (TB-002)
+  - Key threats: Rogue IdP, attribute over-release, availability dependencies.
+  - Controls: MIT-0003 (pinned metadata, strict validation), monitoring/timeouts (MIT-0020).
+
+- EXT-006 ITS Mail (TB-005)
+  - Key threats: STARTTLS downgrade, spoofing, overprivileged MTA creds.
+  - Controls: MIT-0008.
+
+- EXT-005 Reporting System (TB-004)
+  - Key threats: Untrusted client impersonation, bulk pulls DoS, PII leakage.
+  - Controls: MIT-0009, MIT-0020, MIT-0005.
+
+---
+
+## 8) Mitigation plan and roadmap
+
+- Priority 1–5 (Immediate)
+  - MIT-0001 Session Security Hardening
+  - MIT-0004 CSRF Protections
+  - MIT-0003 SAML Security Controls
+  - MIT-0012 Deserialization Protections
+  - MIT-0010 Reverse Proxy Hardening and Caching Controls
+  - MIT-0011 CORS Lockdown
+  - MIT-0016 Credential Store Hardening
+  - MIT-0002 Robust Input Validation and ORM Binding
+  - MIT-0005 Access Control and Authorization
+
+- Priority 6–12 (Near term)
+  - MIT-0006 Immutable Logging and Audit Trails
+  - MIT-0007 Rate Limiting and Anti-Automation
+  - MIT-0015 Session Store Hardening
+  - MIT-0013 Mass Assignment Defense
+  - MIT-0008 Email Channel Security
+  - MIT-0009 Reporting Export Hardening
+
+- Priority 13–20 (Follow-on)
+  - MIT-0014 Database Security and Transport Encryption
+  - MIT-0017 Clickjacking Defense
+  - MIT-0018 Redirect/Forward Allowlisting
+  - MIT-0019 XSS Mitigations
+  - MIT-0020 DoS Resilience and Capacity
+
+Effort sizing: S = small, M = medium, L = larger program (see items). NIST CSF mappings are included per item for governance alignment.
+
+---
+
+## 9) Validation and test strategy
+
+- Session controls (MIT-0001, MIT-0015)
+  - Verify Set-Cookie: Secure, HttpOnly, SameSite on all auth cookies.
+  - Ensure session rotation on login and privilege changes.
+  - Attempt fixation, replay, and principal confusion tests.
+  - Fuzz referrers/logs to confirm no token leakage; check log redaction.
+
+- CSRF (MIT-0004)
+  - Confirm per-request tokens; verify origin/referrer checks.
+  - Use an external origin to attempt state changes; validate denials.
+
+- SAML (MIT-0003, MIT-0018)
+  - Unit tests: signature validation, audience/recipient, NotOnOrAfter, InResponseTo.
+  - Disable DTD/XXE; negative tests for XXE payloads.
+  - Replay a valid assertion; confirm one-time use detection.
+  - Test RelayState/return URL allowlist with external domains.
+
+- Deserialization (MIT-0012)
+  - Code scan: remove ObjectInputStream use; enable ObjectInputFilter if unavoidable.
+  - Dynamic tests with known gadget payloads to confirm rejection.
+
+- Input/ORM (MIT-0002, MIT-0013)
+  - Automated injection tests; verify parameterized queries.
+  - Over-posting tests for protected fields.
+
+- Access control (MIT-0005)
+  - ABAC/RBAC unit tests on every route.
+  - IDOR probing; privilege escalation attempts across roles.
+
+- Reverse proxy (MIT-0010, MIT-0017)
+  - Header allowlist tests (X-Forwarded-* normalization).
+  - Cache-aware tests for authenticated content; attempt cache poisoning.
+  - Verify CSP frame-ancestors and X-Frame-Options.
+
+- CORS (MIT-0011)
+  - Validate exact-origin allowlist; ensure credentials=false unless required.
+  - Preflight behavior checks.
+
+- Credential store (MIT-0016)
+  - Verify argon2/bcrypt parameters and unique salts.
+  - Enumeration tests; timing side-channel checks.
+
+- Email (MIT-0008)
+  - STARTTLS required; certificate validation enforced.
+  - Header injection tests; content inspection for PII in headers/subjects.
+
+- Reporting (MIT-0009)
+  - CSV formula encoding tests; privilege scope tests; export audit confirmation.
+
+- Database (MIT-0014)
+  - TCPS/mTLS validation; least privilege user verification; audit/triggers for sensitive table changes.
+  - Backup encryption and access path validation.
+
+- DoS (MIT-0007, MIT-0020)
+  - Throttling tests by IP/user; endpoint budget enforcement.
+  - Load testing for long-running queries and queue backpressure.
+
+---
+
+## 10) Open questions and assumptions
+
+Assumptions (from evidence/artifacts):
+- Tomcat/JSP session management with a server-side session store (DS-002) is in use.
+- Reverse proxy terminates HTTPS and forwards to the app server.
+- SAML POST binding is used with attribute release from Shibboleth.
+- Oracle DB is reachable only from the application/persistence tier.
+
+Open questions to resolve:
+- Are session cookies currently flagged Secure/HttpOnly/SameSite and rotated on auth?
+- Is TCPS with cert validation or mTLS enabled for Oracle transport today?
+- Are SAML DTD processing and external entity resolution fully disabled?
+- Are any Java serialization/deserialization libraries used in the application or libraries?
+- What are the current bcrypt/argon2 parameters for employer passwords? Are unique per-user salts stored?
+- Is the reverse proxy performing auth-aware caching and header normalization?
+- Is CORS currently disabled by default or allowlisted to specific origins without credentials?
+- Are logs centralized with append-only/WORM and field-level redaction for secrets/tokens?
+- Does the reporting export flow log each export with subject, scope, and requester identity?
+- Are SMTP connections enforcing TLS with cert validation and avoiding PII in headers/subjects?
+
+---
+
+## 11) Appendices
+
+### A) Annotated DFD hot spots (selected)
+- P-000 (Client): TH-0081/82/83/84/85/86/0205 → CSP/XFO, input/output encoding, anti-automation, secure cookies.
+- P-001 (App): TH-0091/92/93/94/95/96/0201/0202/0207/0210/0211 → authZ, CSRF, validation, CORS, rate limits.
+- P-002 (SSO): TH-0101/02/03/04/05/06/0203/0204/0213 → signature/conditions validation, XXE off, anti-replay, redirect allowlist.
+- DS-002 (Session): TH-0161/62/63/64/65/66 → entropy, rotation, quotas, auditing.
+- EXT-007 (Reverse proxy): TH-0071/72/73/74/75/76/0209/0206 → header allowlist, cache controls, frame protections.
+
+### B) Trust boundary to element mapping (condensed)
+- TB-001: EXT-001/2/3/7, P-000, P-001
+- TB-002: P-001/2/3, EXT-004
+- TB-003: P-001/5/6, DS-001
+- TB-004: P-005, EXT-005, P-002, EXT-006
+- TB-005: P-004, EXT-006
+- TB-006: EXT-007, P-001/2/5
+- TB-008: P-000/1, DS-002
+- TB-009: EXT-002, P-003, DS-003
+
+### C) DREAD scoring summary (highlights)
+- Critical (≥40): TH-0202, TH-0161, TH-0164, TH-0201, TH-0203, TH-0166, TH-0176, TH-0209, TH-0207, TH-0111
+- High (35–39): All remaining cataloged threats in the artifacts; see mitigation mappings for each.
+
+### D) Mitigations catalog (reference)
+- MIT-0001 Session Security Hardening (PR.AC-1, PR.AC-6, PR.PT-1)
+- MIT-0002 Robust Input Validation and ORM Binding (PR.IP-1, PR.DS-5, PR.PT-3)
+- MIT-0003 SAML Security Controls (PR.AC-1, PR.DS-2, PR.PT-4, DE.CM-7)
+- MIT-0004 CSRF Protections (PR.AC-3, PR.PT-3)
+- MIT-0005 Access Control and Authorization (PR.AC-4, PR.AC-6)
+- MIT-0006 Immutable Logging and Audit Trails (PR.PT-1, DE.CM-1, DE.CM-7)
+- MIT-0007 Rate Limiting and Anti-Automation (PR.PT-4, DE.CM-7)
+- MIT-0008 Email Channel Security (PR.DS-2, PR.PT-4)
+- MIT-0009 Reporting Export Hardening (PR.AC-4, PR.DS-5, DE.CM-7)
+- MIT-0010 Reverse Proxy Hardening and Caching Controls (PR.PT-4, PR.PT-3, DE.CM-7)
+- MIT-0011 CORS Lockdown (PR.PT-4, PR.AC-3)
+- MIT-0012 Deserialization Protections (PR.PT-3, PR.IP-1)
+- MIT-0013 Mass Assignment Defense (PR.IP-1, PR.AC-4)
+- MIT-0014 Database Security and Transport Encryption (PR.DS-1, PR.DS-2, PR.AC-4, DE.CM-7)
+- MIT-0015 Session Store Hardening (PR.AC-1, PR.PT-1, PR.DS-1)
+- MIT-0016 Credential Store Hardening (PR.AC-1, PR.DS-1, DE.CM-7)
+- MIT-0017 Clickjacking Defense (PR.PT-3)
+- MIT-0018 Redirect/Forward Allowlisting (PR.PT-3, PR.AC-3)
+- MIT-0019 XSS Mitigations (PR.PT-3, PR.IP-1)
+- MIT-0020 DoS Resilience and Capacity (PR.PT-4, RS.AN-1, RC.IM-1)
+
+---
+
+## 12) Conclusion
+
+CES has a strong foundation but requires targeted hardening at session, SSO, proxy/caching, and data-layer boundaries. The included mitigations are sufficient to reduce all identified Critical items to High or Medium when implemented and verified. Prioritizing the 0–30 day actions will materially reduce risk exposure for end users and sensitive institutional data.

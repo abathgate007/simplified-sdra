@@ -1,0 +1,147 @@
+I can generate a complete, polished Security Design Review Report once I have your artifacts (annotated DFDs, trust boundaries, STRIDE matrix, DREAD analysis, and mitigations). If you can paste or attach them, I’ll populate the report with concrete content.
+
+In the meantime, here is a precise, ready-to-fill report template aligned to your artifacts. You can drop your content into the marked sections, and I can finalize it on your next message.
+
+1) Administrative Information
+- System name and version:
+- Business owner:
+- Technical owner / architects:
+- Reviewers:
+- Date of review:
+- Trigger (new system, major change, periodic review):
+- Classification (internal/confidential/etc.):
+
+2) Executive Summary
+- Overall security posture: [Strong / Moderate / Needs Improvement]
+- Key risks (top 3–5) with severity:
+  - [ID] [Title] — Severity: [High/Med/Low] — Status: [Open/Planned/Mitigated]
+- Notable design strengths:
+- Major design changes accepted in this review:
+- Residual risk summary and acceptances:
+- Next steps and timelines:
+
+3) System Overview
+- Purpose and critical business functions:
+- High-level architecture description:
+- Environment(s) and deployment model (cloud/on-prem/hybrid; regions; tenancy):
+- Trust boundaries overview (named and enumerated):
+- DFD inventory (reference IDs for all processes, data stores, data flows, external entities):
+- Sensitive data processed (types, locations, flows):
+
+4) Scope, Assumptions, and Constraints
+- In scope components and integrations:
+- Out of scope components and rationale:
+- Assumptions (e.g., managed services security, customer-managed controls):
+- Constraints (e.g., legacy protocols, regulator-imposed limits):
+
+5) Assets and Data Classification
+- Primary assets (service availability, IP, credentials, PII/PHI, payment data, keys, logs):
+- Data classification per flow/data store (e.g., Public/Internal/Confidential/Restricted):
+- Crown jewels and single points of failure:
+
+6) Trust Boundaries and Attack Surface
+- Trust boundaries (TB-1..n) with brief definitions:
+- Attack surface elements by boundary (external interfaces, admin planes, supply chain, CI/CD, secrets, 3rd-party APIs):
+- Entry points and authentication posture at each boundary:
+- Implicit trust/privilege assumptions:
+
+7) Threat Modeling Summary (based on your STRIDE matrix)
+- Coverage summary: elements analyzed, threats identified, mitigated vs. open:
+- STRIDE by element (roll-up):
+  - Spoofing: [count], key open items:
+  - Tampering: [count], key open items:
+  - Repudiation: [count], key open items:
+  - Information disclosure: [count], key open items:
+  - Denial of service: [count], key open items:
+  - Elevation of privilege: [count], key open items:
+- Abuse cases and plausible attacker profiles:
+- Cross-boundary threat hotspots:
+
+8) Risk Assessment (based on your DREAD analysis)
+- Scoring approach and scale used (note any deviations from standard):
+- Portfolio risk summary:
+  - High risks: [count]
+  - Medium risks: [count]
+  - Low risks: [count]
+- Top risks by DREAD score:
+  - [ID/Title] — D:R:E:A:D = [x/x/x/x/x] — Score: [n] — Severity: [H/M/L]
+- Sensitivity analysis (key drivers of risk: exploitability, affected users, detection, etc.):
+
+9) Key Findings
+For each finding, include the following:
+- ID and Title:
+- Affected elements (DFD refs, trust boundaries, assets):
+- Threat category (STRIDE) and attack path:
+- Description and evidence (diagram refs, config notes):
+- Impact (business and technical), data at risk, blast radius:
+- Likelihood and DREAD breakdown (D, R, E, A, D) with total and severity:
+- Preconditions and dependencies:
+- Proposed mitigation(s) and design alternatives:
+- Residual risk after mitigation:
+- Owner, target date, status:
+- Validation plan (how we will verify mitigation):
+
+10) Mitigations and Design Changes
+- Implemented mitigations (mapped to findings):
+- Planned mitigations with timelines:
+- Defense-in-depth coverage (prevent/detect/respond):
+- Changes to authentication, authorization, crypto, input validation, logging, availability controls:
+- Hardening baselines and configuration standards adopted:
+- Gaps requiring product/infra changes or vendor engagement:
+
+11) Residual Risk and Risk Acceptance
+- Residual risks by severity after mitigations:
+- Justification for acceptances (business rationale, compensating controls, time-bounded):
+- Risk owners and review/renewal dates:
+- Sunset criteria or triggers for re-review:
+
+12) Security Requirements and Control Mapping
+- Mapped requirements (e.g., ISO 27001, NIST 800-53, SOC 2, PCI DSS) with coverage notes:
+- Control gaps and planned remediation:
+- Privacy requirements (data minimization, retention, DSAR, regional residency):
+
+13) Validation and Test Plan
+- Security testing to execute:
+  - Threat-driven test cases aligned to top findings
+  - Penetration testing scope and schedule
+  - Secure code review/static/dynamic analysis
+  - Fuzzing and negative testing of parsers/protocols
+  - Secrets scanning/SBOM and dependency risk checks
+  - Chaos/DoS resilience tests and capacity limits
+- Monitoring and alerting validation (detections for abuse cases):
+- Success criteria and exit gates:
+
+14) Operational Security Considerations
+- Identity and access management (least privilege, break-glass, admin plane isolation):
+- Secrets management (storage, rotation, just-in-time access):
+- Cryptography (algorithms, key sizes, KMS/HSM usage, lifecycle):
+- Logging and telemetry (content, retention, protection, privacy):
+- Patch and vulnerability management (SLA, third-party libraries, OS images):
+- Backup and recovery (RPO/RTO, immutable backups, test cadence):
+- Change management and deployment safeguards (approvals, rollbacks, canaries):
+- Incident response playbooks (runbooks, contacts, drills):
+- Multi-tenant isolation and noisy neighbor protections (if applicable):
+
+15) Open Issues and Action Items
+- [ID] [Action] — Owner — Due — Status — Dependency
+- …
+
+16) Decision Log
+- [Date] [Decision] [Context/Alternatives] [Rationale] [Impacts]
+
+17) Appendices
+- A: Annotated DFDs with element IDs and trust boundaries
+- B: STRIDE matrix (full detail)
+- C: DREAD worksheets and scoring rubric
+- D: Mitigations evidence (configs, policies, diagrams)
+- E: Glossary and abbreviations
+
+How to proceed
+- Option A: Paste or attach your artifacts, and I’ll produce a filled report with prioritized findings, risk summaries, and concrete mitigations.
+- Option B: If sharing is not possible, provide brief summaries:
+  - DFD elements and trust boundaries
+  - STRIDE matrix highlights (top threats per element)
+  - DREAD scores for top 10–15 threats
+  - Current and proposed mitigations
+  - Any constraints/assumptions
+I will then generate the complete report.

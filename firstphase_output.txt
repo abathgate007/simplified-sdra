@@ -1,0 +1,1246 @@
+{
+  "trust_boundaries": {
+    "schema_version": "1.0",
+    "run_id": "run-2025-09-13T00:00:00Z",
+    "boundaries": [
+      {
+        "id": "TB-001",
+        "name": "Public Internet Boundary",
+        "description": "Boundary between end-user networks and CES; all browser traffic traverses the public Internet to the CES web application.",
+        "elements": [
+          "EXT-001",
+          "EXT-002",
+          "EXT-003",
+          "EXT-007",
+          "P-000",
+          "P-001"
+        ]
+      },
+      {
+        "id": "TB-002",
+        "name": "SSO/Shibboleth Boundary",
+        "description": "Trust boundary between CES and RIT Shibboleth IdP where SAML messages are exchanged.",
+        "elements": [
+          "P-001",
+          "P-002",
+          "EXT-004",
+          "P-003"
+        ]
+      },
+      {
+        "id": "TB-003",
+        "name": "Database Network Boundary",
+        "description": "Boundary protecting the Oracle SQL database reachable only from the application tier/persistence framework.",
+        "elements": [
+          "P-001",
+          "P-006",
+          "DS-001",
+          "P-005"
+        ]
+      },
+      {
+        "id": "TB-004",
+        "name": "Reporting API Boundary",
+        "description": "Boundary between CES reporting service and external reporting system (Jim's Reporting).",
+        "elements": [
+          "P-005",
+          "EXT-005",
+          "P-002",
+          "EXT-006"
+        ]
+      },
+      {
+        "id": "TB-005",
+        "name": "Mail Server Boundary",
+        "description": "Boundary between CES notification service and ITS Mail Server over SMTP.",
+        "elements": [
+          "P-004",
+          "EXT-006"
+        ]
+      },
+      {
+        "id": "TB-006",
+        "name": "Web Reverse Proxy to Application Server Boundary",
+        "description": "Boundary between ITS DNS/Web front end (reverse proxy) and the CES application server (Tomcat).",
+        "elements": [
+          "EXT-007",
+          "P-001",
+          "P-002",
+          "P-005"
+        ]
+      },
+      {
+        "id": "TB-008",
+        "name": "Session Management Boundary",
+        "description": "Boundary spanning client and server handling session identifiers, cookies, and server-side session state.",
+        "elements": [
+          "P-000",
+          "P-001",
+          "DS-002"
+        ]
+      },
+      {
+        "id": "TB-009",
+        "name": "Employer Authentication Boundary",
+        "description": "Boundary for custom employer login handling credentials and auth flows distinct from SSO.",
+        "elements": [
+          "EXT-002",
+          "P-003",
+          "DS-003"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "source_type": "requirement",
+        "source_id": "SoftwareArchitectureDocumentation.pdf p.6-7, p.12-14",
+        "quote": "components include Shibboleth for RIT user authentication, the ITS mail server for sending emails, and an Oracle SQL database for storing system information."
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "p.13 Figure 3 (Data Flow)",
+        "quote": "G[Shibboleth Authentication] --> H[Co-op Evaluation System] ... H --> L[ITS Mail Server] ... H --> J[Co-op Evaluation Database] ... I[Custom Employer Login] --> H"
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "p.23 Figure 5 (Process View)",
+        "quote": "B -->|Requests| C[Servlet] ... E -->|Queries| F[Oracle SQL Database]"
+      },
+      {
+        "source_type": "assumption",
+        "source_id": "Session management",
+        "quote": "Server-side session store (in-memory or distributed) is typical for Tomcat/JSP and required to address session timeout scenarios."
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "Figure 1",
+        "quote": "Context diagram of the Co-op Evaluation System showing ITS DNS/Web Server, ITS Mail Server, Shibboleth, and Oracle SQL Database"
+      },
+      {
+        "source_type": "requirement",
+        "source_id": "Section 2",
+        "quote": "The system must interface with Shibboleth for RIT user authentication, the ITS mail server for sending emails, and an Oracle SQL database"
+      },
+      {
+        "source_type": "diagram",
+        "source_id": "Figure 3",
+        "quote": "Custom Employer Login shown as separate authentication path from Shibboleth Authentication"
+      },
+      {
+        "source_type": "assumption",
+        "source_id": "web-session-management",
+        "quote": "Web applications require session state management for user authentication and authorization"
+      }
+    ]
+  },
+  "dfds": {
+    "schema_version": "1.0",
+    "run_id": "run-2025-09-13T00:00:00Z",
+    "dfds": [
+      {
+        "id": "DFD-001",
+        "title": "Co-op Evaluation System Context and Data Flows",
+        "mermaid": "flowchart TD\n  EXT-001[EXT-001 Student User]\n  EXT-002[EXT-002 Employer User]\n  EXT-003[EXT-003 Administrator]\n  EXT-004[EXT-004 Shibboleth IdP]\n  EXT-005[EXT-005 Reporting System]\n  EXT-006[EXT-006 ITS Mail Server]\n  EXT-007[EXT-007 ITS DNS/Web Server]\n  P-000[P-000 Client Browser/UI (JS/Angular)]\n  P-001[P-001 CES Web Application (Servlet/JSP)]\n  P-002[P-002 SSO/SAML Controller]\n  P-003[P-003 Employer Local Auth Controller]\n  P-004[P-004 Email Notification Service]\n  P-005[P-005 Reporting Service]\n  P-006[P-006 Data Persistence Framework/ORM]\n  DS-001[DS-001 Oracle SQL Database]\n  DS-002[DS-002 Session Store]\n  DS-003[DS-003 Employer Credentials Store]\n  DS-004[DS-004 Audit/Logs]\n\n  EXT-001 -->|User actions| P-000\n  EXT-002 -->|User actions| P-000\n  EXT-003 -->|User actions| P-000\n  EXT-007 <--> |HTTPS reverse proxy| P-001\n  P-000 <--> |HTTPS requests/responses, cookies| P-001\n  P-001 -->|Initiate SSO| P-002\n  P-002 <--> |SAML AuthnRequest/Response| EXT-004\n  P-002 -->|SSO callback & attributes| P-001\n  P-000 -->|Employer credentials| P-003\n  P-003 <--> |Verify creds| DS-003\n  P-003 -->|Establish session| P-001\n  P-001 <--> |Create/Read/Update| DS-002\n  P-001 -->|Events| P-004\n  P-004 <--> |SMTP (TLS)| EXT-006\n  P-005 <--> |Export/Fetch reports| EXT-005\n  P-001 -->|CRUD requests| P-006\n  P-006 <--> |SQL/stored procedures| DS-001\n  P-005 -->|Report queries| DS-001\n  P-001 -->|App logs| DS-004\n  P-002 -->|Auth logs| DS-004\n  P-003 -->|Auth logs| DS-004\n  P-004 -->|Delivery logs| DS-004\n  P-005 -->|Report logs| DS-004\n  P-006 -->|DB ops logs| DS-004",
+        "nodes": [
+          {
+            "id": "EXT-001",
+            "type": "external_entity",
+            "label": "Student User"
+          },
+          {
+            "id": "EXT-002",
+            "type": "external_entity",
+            "label": "Employer User"
+          },
+          {
+            "id": "EXT-003",
+            "type": "external_entity",
+            "label": "Administrator"
+          },
+          {
+            "id": "EXT-004",
+            "type": "external_entity",
+            "label": "Shibboleth IdP"
+          },
+          {
+            "id": "EXT-005",
+            "type": "external_entity",
+            "label": "Reporting System (Jim's Reporting)"
+          },
+          {
+            "id": "EXT-006",
+            "type": "external_entity",
+            "label": "ITS Mail Server"
+          },
+          {
+            "id": "EXT-007",
+            "type": "external_entity",
+            "label": "ITS DNS/Web Server (Reverse Proxy)"
+          },
+          {
+            "id": "P-000",
+            "type": "process",
+            "label": "Client Browser/UI (JS/Angular)"
+          },
+          {
+            "id": "P-001",
+            "type": "process",
+            "label": "CES Web Application (Servlet/JSP)"
+          },
+          {
+            "id": "P-002",
+            "type": "process",
+            "label": "SSO/SAML Controller"
+          },
+          {
+            "id": "P-003",
+            "type": "process",
+            "label": "Employer Local Auth Controller"
+          },
+          {
+            "id": "P-004",
+            "type": "process",
+            "label": "Email Notification Service"
+          },
+          {
+            "id": "P-005",
+            "type": "process",
+            "label": "Reporting Service"
+          },
+          {
+            "id": "P-006",
+            "type": "process",
+            "label": "Data Persistence Framework/ORM"
+          },
+          {
+            "id": "DS-001",
+            "type": "data_store",
+            "label": "Oracle SQL Database"
+          },
+          {
+            "id": "DS-002",
+            "type": "data_store",
+            "label": "Session Store"
+          },
+          {
+            "id": "DS-003",
+            "type": "data_store",
+            "label": "Employer Credentials Store"
+          },
+          {
+            "id": "DS-004",
+            "type": "data_store",
+            "label": "Audit/Logs"
+          }
+        ],
+        "edges": [
+          {
+            "from": "EXT-001",
+            "to": "P-000",
+            "label": "User actions (form input, navigation)"
+          },
+          {
+            "from": "EXT-002",
+            "to": "P-000",
+            "label": "User actions (employer)"
+          },
+          {
+            "from": "EXT-003",
+            "to": "P-000",
+            "label": "User actions (admin)"
+          },
+          {
+            "from": "EXT-007",
+            "to": "P-001",
+            "label": "HTTPS reverse proxy"
+          },
+          {
+            "from": "P-000",
+            "to": "P-001",
+            "label": "HTTPS requests/responses, cookies"
+          },
+          {
+            "from": "P-001",
+            "to": "P-002",
+            "label": "Initiate SSO"
+          },
+          {
+            "from": "P-002",
+            "to": "EXT-004",
+            "label": "SAML AuthnRequest/Response"
+          },
+          {
+            "from": "P-002",
+            "to": "P-001",
+            "label": "SSO callback & attributes"
+          },
+          {
+            "from": "P-000",
+            "to": "P-003",
+            "label": "Employer credentials (username/password)"
+          },
+          {
+            "from": "P-003",
+            "to": "DS-003",
+            "label": "Verify credentials (hash compare)"
+          },
+          {
+            "from": "P-003",
+            "to": "P-001",
+            "label": "Establish session (principal)"
+          },
+          {
+            "from": "P-001",
+            "to": "DS-002",
+            "label": "Session create/read/update/destroy"
+          },
+          {
+            "from": "P-001",
+            "to": "P-004",
+            "label": "Notification events (submission status)"
+          },
+          {
+            "from": "P-004",
+            "to": "EXT-006",
+            "label": "SMTP (TLS)"
+          },
+          {
+            "from": "P-005",
+            "to": "EXT-005",
+            "label": "Report export/import"
+          },
+          {
+            "from": "P-001",
+            "to": "P-006",
+            "label": "CRUD requests"
+          },
+          {
+            "from": "P-006",
+            "to": "DS-001",
+            "label": "SQL/stored procedures"
+          },
+          {
+            "from": "P-005",
+            "to": "DS-001",
+            "label": "Report queries"
+          },
+          {
+            "from": "P-001",
+            "to": "DS-004",
+            "label": "App logs"
+          },
+          {
+            "from": "P-002",
+            "to": "DS-004",
+            "label": "Auth logs"
+          },
+          {
+            "from": "P-003",
+            "to": "DS-004",
+            "label": "Auth logs"
+          },
+          {
+            "from": "P-004",
+            "to": "DS-004",
+            "label": "Delivery logs"
+          },
+          {
+            "from": "P-005",
+            "to": "DS-004",
+            "label": "Report logs"
+          },
+          {
+            "from": "P-006",
+            "to": "DS-004",
+            "label": "DB ops logs"
+          }
+        ],
+        "boundaries": [
+          "TB-001",
+          "TB-002",
+          "TB-003",
+          "TB-004",
+          "TB-005",
+          "TB-006",
+          "TB-008",
+          "TB-009"
+        ]
+      }
+    ]
+  },
+  "stride_matrix": {
+    "schema_version": "1.0",
+    "run_id": "run-2025-09-13T00:00:00Z",
+    "rows": [
+      {
+        "element_id": "P-000",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Spoofed/automated client (malicious user agent) impersonates a legitimate browser to bypass UI controls.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.18 Layered View",
+            "quote": "Client ... AngularJS"
+          }
+        ]
+      },
+      {
+        "element_id": "P-000",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "DOM tampering/XSS via malicious input alters client-side state or requests."
+      },
+      {
+        "element_id": "P-000",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "User denies initiating actions; lack of client request correlation may hinder attribution."
+      },
+      {
+        "element_id": "P-000",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Sensitive data exposed in browser storage/URL/referrer or through mixed content."
+      },
+      {
+        "element_id": "P-000",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "Resource exhaustion via heavy scripts or repeated polling degrades client/server."
+      },
+      {
+        "element_id": "P-000",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "XSS leads to session theft or CSRF token exfiltration, escalating privileges."
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Session hijacking or forged cookies allow spoofing of authenticated users.",
+        "evidence": [
+          {
+            "source_type": "assumption",
+            "source_id": "Session cookies",
+            "quote": "Web app uses session cookies for auth per JSP/Tomcat norms."
+          }
+        ]
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "Input tampering (e.g., parameter manipulation/SQLi) alters server state; enforce validation and ORM binding."
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "Missing or insufficient audit logs prevent tying actions to identities.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "p.9 Availability",
+            "quote": "A meaningful error message is logged"
+          }
+        ]
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Verbose errors or misconfigured caching disclose PII or stack traces."
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "DoS via expensive endpoints or lack of rate limiting; server becomes unresponsive.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "p.8 Availability",
+            "quote": "DoS attack ... does not continue for longer than 1 minute."
+          }
+        ]
+      },
+      {
+        "element_id": "P-001",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Broken access control lets users escalate roles (e.g., employer to admin)."
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Attacker spins up rogue IdP to spoof identities; require issuer whitelist and signature verification.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.13 Figure 3",
+            "quote": "Shibboleth Authentication"
+          }
+        ]
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "SAML message tampering (audience/recipient/NotOnOrAfter) if signatures not enforced."
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "Lack of SSO audit makes login assertions non-repudiable by neither party."
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "SAML attributes (email, roles) leaked via logs or referers on POST binding."
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "Flooding ACS endpoint with SAML responses to exhaust CPU/XML parsing."
+      },
+      {
+        "element_id": "P-002",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Replay of valid assertions grants elevated roles; enforce one-time use and audience."
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Credential stuffing/brute-force against employer login; apply rate limits/MFA.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.13 Figure 3",
+            "quote": "Custom Employer Login"
+          }
+        ]
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "Tampering with password reset tokens or parameters to take over accounts."
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "No auth attempt logging; attackers can deny abusive activity."
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Credential disclosure via verbose errors or timing/account enumeration."
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "DoS via login endpoint flood leading to lockout or CPU exhaustion (hashing)."
+      },
+      {
+        "element_id": "P-003",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Bypassing role checks on callback can escalate employer to admin."
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Email sender/domain spoofing if not authenticated; use SMTP AUTH, DKIM, SPF, DMARC."
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "Header injection via unvalidated input into email headers."
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "Lack of delivery logs hinders proof of notification."
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "PII leakage over SMTP if TLS not enforced; avoid sensitive content in subject/headers.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "p.6 Functional Requirements",
+            "quote": "interact with ITS’s email server"
+          }
+        ]
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "Email storm from retry loops or template errors overwhelms MTA."
+      },
+      {
+        "element_id": "P-004",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Template injection leading to code execution in mail service if unsafe rendering."
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "S",
+        "applies": true,
+        "example": "Unauthorized actor invokes reporting endpoints without proper authz."
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "Tampering with report parameters to alter results or access other tenants."
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "No audit of report generation/export leads to repudiation."
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Reports leak PII beyond need-to-know; ensure aggregation/minimization.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.13 Figure 3",
+            "quote": "H --> K[Jim's Reporting]"
+          }
+        ]
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "Expensive report queries cause DB contention/DoS."
+      },
+      {
+        "element_id": "P-005",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Privilege escalation by exploiting overbroad report scopes."
+      },
+      {
+        "element_id": "P-006",
+        "element_type": "process",
+        "stride": "S",
+        "applies": false,
+        "example": "N/A: ORM does not authenticate users; use least-privileged DB account."
+      },
+      {
+        "element_id": "P-006",
+        "element_type": "process",
+        "stride": "T",
+        "applies": true,
+        "example": "SQL injection if bindings improperly used; ORM misuse can still permit tampering.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.23 Figure 5",
+            "quote": "E[Data Persistence Framework]"
+          }
+        ]
+      },
+      {
+        "element_id": "P-006",
+        "element_type": "process",
+        "stride": "R",
+        "applies": true,
+        "example": "Lack of DB operation audit trails prevents accountability."
+      },
+      {
+        "element_id": "P-006",
+        "element_type": "process",
+        "stride": "I",
+        "applies": true,
+        "example": "Overprivileged DB credentials disclose data beyond need."
+      },
+      {
+        "element_id": "P-006",
+        "element_type": "process",
+        "stride": "D",
+        "applies": true,
+        "example": "Long-running transactions lock tables causing availability issues."
+      },
+      {
+        "element_id": "P-006",
+        "element_type": "process",
+        "stride": "E",
+        "applies": true,
+        "example": "Bypassing row-level checks at ORM layer can elevate data access."
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "S",
+        "applies": true,
+        "example": "Impersonation using shared/system DB accounts; enforce strong auth and network ACLs."
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "T",
+        "applies": true,
+        "example": "Unauthorized modification of evaluations/work reports via SQLi or direct DB access.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "p.6 Functional Requirements",
+            "quote": "support concurrent reads and writes to the database"
+          }
+        ]
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "R",
+        "applies": true,
+        "example": "Insufficient auditing prevents proving who changed records."
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "I",
+        "applies": true,
+        "example": "PII disclosure from insecure queries/backups; ensure encryption at rest and access control."
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "D",
+        "applies": true,
+        "example": "Lock contention or saturation under load leads to timeouts.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "p.8 Availability",
+            "quote": "over 6,000 concurrent user requests"
+          }
+        ]
+      },
+      {
+        "element_id": "DS-001",
+        "element_type": "data_store",
+        "stride": "E",
+        "applies": true,
+        "example": "Abusing stored procedures or DB scheduler to escalate privileges."
+      },
+      {
+        "element_id": "DS-002",
+        "element_type": "data_store",
+        "stride": "S",
+        "applies": true,
+        "example": "Predictable session IDs or weak randomness enable session spoofing."
+      },
+      {
+        "element_id": "DS-002",
+        "element_type": "data_store",
+        "stride": "T",
+        "applies": true,
+        "example": "Session fixation or unauthorized mutation of session state."
+      },
+      {
+        "element_id": "DS-002",
+        "element_type": "data_store",
+        "stride": "R",
+        "applies": true,
+        "example": "Lack of session event logs allows repudiation of actions tied to session."
+      },
+      {
+        "element_id": "DS-002",
+        "element_type": "data_store",
+        "stride": "I",
+        "applies": true,
+        "example": "Session IDs leaked via logs/referrers enable hijacking."
+      },
+      {
+        "element_id": "DS-002",
+        "element_type": "data_store",
+        "stride": "D",
+        "applies": true,
+        "example": "Session store exhaustion causes widespread logouts/denials."
+      },
+      {
+        "element_id": "DS-002",
+        "element_type": "data_store",
+        "stride": "E",
+        "applies": true,
+        "example": "Privilege escalation by binding session to wrong principal on auth."
+      },
+      {
+        "element_id": "DS-003",
+        "element_type": "data_store",
+        "stride": "S",
+        "applies": true,
+        "example": "Account enumeration via timing/error differences when verifying credentials."
+      },
+      {
+        "element_id": "DS-003",
+        "element_type": "data_store",
+        "stride": "T",
+        "applies": true,
+        "example": "Tampering with password hashes/salts enables offline cracking."
+      },
+      {
+        "element_id": "DS-003",
+        "element_type": "data_store",
+        "stride": "R",
+        "applies": true,
+        "example": "Insufficient audit of credential changes (resets) allows repudiation."
+      },
+      {
+        "element_id": "DS-003",
+        "element_type": "data_store",
+        "stride": "I",
+        "applies": true,
+        "example": "Disclosure of hashed passwords; enforce strong hashing (argon2/bcrypt) and secret handling."
+      },
+      {
+        "element_id": "DS-003",
+        "element_type": "data_store",
+        "stride": "D",
+        "applies": true,
+        "example": "Frequent hashing operations under attack exhaust CPU, delaying legit auth."
+      },
+      {
+        "element_id": "DS-003",
+        "element_type": "data_store",
+        "stride": "E",
+        "applies": true,
+        "example": "Weak hashing/work factors permit offline cracking and role escalation."
+      },
+      {
+        "element_id": "DS-004",
+        "element_type": "data_store",
+        "stride": "S",
+        "applies": true,
+        "example": "Forged log entries (spoofed source) mislead investigations."
+      },
+      {
+        "element_id": "DS-004",
+        "element_type": "data_store",
+        "stride": "T",
+        "applies": true,
+        "example": "Log tampering/deletion; protect with append-only/WORM and integrity checks.",
+        "evidence": [
+          {
+            "source_type": "requirement",
+            "source_id": "p.9 Availability",
+            "quote": "A meaningful error message is logged"
+          }
+        ]
+      },
+      {
+        "element_id": "DS-004",
+        "element_type": "data_store",
+        "stride": "R",
+        "applies": true,
+        "example": "If logs are mutable or missing, users can repudiate actions."
+      },
+      {
+        "element_id": "DS-004",
+        "element_type": "data_store",
+        "stride": "I",
+        "applies": true,
+        "example": "Sensitive data (tokens/PII) written to logs leaks information."
+      },
+      {
+        "element_id": "DS-004",
+        "element_type": "data_store",
+        "stride": "D",
+        "applies": true,
+        "example": "Log flooding fills disk, impacting availability."
+      },
+      {
+        "element_id": "DS-004",
+        "element_type": "data_store",
+        "stride": "E",
+        "applies": true,
+        "example": "Overbroad log viewer permissions expose admin-only data."
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Attacker pretends to be a student user to gain access.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.13 Figure 3",
+            "quote": "Student"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Malicious student input attempts to tamper with server-side data."
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "Student denies submitting/altering an evaluation; ensure audit."
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "Student could exfiltrate their own or others' data if improperly authorized."
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Student client floods endpoints causing DoS."
+      },
+      {
+        "element_id": "EXT-001",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "Tries to escalate to admin features via IDOR or role misconfig."
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Fake employer attempts to access evaluations via custom login."
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Tampering attempts against employer evaluation inputs."
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "Employer denies submitting an evaluation; correlate with IP/time and auth."
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "Employer may try to view other employers' data; enforce access control."
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Credential stuffing floods login path causing lockouts."
+      },
+      {
+        "element_id": "EXT-002",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "Attempts to escalate to admin by manipulating roles."
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Attacker impersonates administrator to access management functions."
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Admin-side parameter tampering risks system-wide changes."
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "Admin denies approving/denying co-ops; ensure immutable audit."
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "Admin device compromise leaks sensitive data."
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Bulk admin operations can overload system."
+      },
+      {
+        "element_id": "EXT-003",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "Privilege escalation beyond intended admin scope."
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Rogue IdP spoofing Shibboleth; enforce metadata trust and TLS pinning.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.13 Figure 3",
+            "quote": "Shibboleth Authentication"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Tampered SAML responses if signatures/conditions not validated."
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "IdP/CES dispute over assertion use; maintain correlation IDs."
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "Attribute over-release exposes more data than necessary."
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "IdP outage degrades availability; implement graceful handling."
+      },
+      {
+        "element_id": "EXT-004",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "If IdP sends elevated roles erroneously, users may gain extra privileges."
+      },
+      {
+        "element_id": "EXT-005",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Untrusted reporting client impersonates trusted system; use API auth."
+      },
+      {
+        "element_id": "EXT-005",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "External system tampers with report payloads; validate schemas."
+      },
+      {
+        "element_id": "EXT-005",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "Lack of export logs prevents repudiation handling."
+      },
+      {
+        "element_id": "EXT-005",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "PII leakage via exported reports; enforce minimization and protection."
+      },
+      {
+        "element_id": "EXT-005",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Bulk report pulls overload CES/DB."
+      },
+      {
+        "element_id": "EXT-005",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "External system misuses elevated API scopes to access data."
+      },
+      {
+        "element_id": "EXT-006",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Impersonated mail server via MX/DNS poisoning; enforce MTAs and cert checks.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.13 Figure 3",
+            "quote": "ITS Mail Server"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-006",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Tampering with messages if STARTTLS downgraded; require TLS."
+      },
+      {
+        "element_id": "EXT-006",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "No delivery receipts/audit trail causes repudiation."
+      },
+      {
+        "element_id": "EXT-006",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "Email content disclosure over insecure links; minimize sensitive data in email."
+      },
+      {
+        "element_id": "EXT-006",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Mail server throttle/outage delays notifications."
+      },
+      {
+        "element_id": "EXT-006",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "If CES creds on MTA overprivileged, attacker can abuse to send as trusted domains."
+      },
+      {
+        "element_id": "EXT-007",
+        "element_type": "external_entity",
+        "stride": "S",
+        "applies": true,
+        "example": "Spoofed reverse proxy or misrouted DNS sends traffic to attacker.",
+        "evidence": [
+          {
+            "source_type": "diagram",
+            "source_id": "p.12 Figure 1",
+            "quote": "ITS DNS/Web Server"
+          }
+        ]
+      },
+      {
+        "element_id": "EXT-007",
+        "element_type": "external_entity",
+        "stride": "T",
+        "applies": true,
+        "example": "Header/body tampering at proxy; enforce header allowlists and TLS."
+      },
+      {
+        "element_id": "EXT-007",
+        "element_type": "external_entity",
+        "stride": "R",
+        "applies": true,
+        "example": "Lack of proxy access logs hinders traceability."
+      },
+      {
+        "element_id": "EXT-007",
+        "element_type": "external_entity",
+        "stride": "I",
+        "applies": true,
+        "example": "Proxy logs may disclose cookies/URLs; scrub sensitive fields."
+      },
+      {
+        "element_id": "EXT-007",
+        "element_type": "external_entity",
+        "stride": "D",
+        "applies": true,
+        "example": "Proxy overload blocks access to CES."
+      },
+      {
+        "element_id": "EXT-007",
+        "element_type": "external_entity",
+        "stride": "E",
+        "applies": true,
+        "example": "Overbroad proxy rules could bypass app auth (path rewrites)."
+      }
+    ],
+    "coverage_pct": 88.0
+  }
+}

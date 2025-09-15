@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SDRA Report — <span id="runId"></span></title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0}
+  header, .toolbar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+  header{padding:12px 16px;border-bottom:1px solid #eee}
+  .toolbar{padding:10px 16px;background:#fafafa;border-bottom:1px solid #eee}
+  .chip{display:inline-block;padding:.15rem .5rem;border-radius:999px;border:1px solid #ddd;margin-right:.25rem}
+  .sev-Critical{background:#ffe6e6;border-color:#ffb3b3}
+  .sev-High{background:#fff1e6;border-color:#ffd1a6}
+  .sev-Medium{background:#fffbe6;border-color:#ffe999}
+  .sev-Low{background:#eef7ff;border-color:#bfe1ff}
+  .sev-Info{background:#f2f2f2;border-color:#ddd}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px 10px;border-bottom:1px solid #eee;vertical-align:top}
+  tr:hover{background:#fcfcfc}
+  details>summary{cursor:pointer}
+  .section{padding:16px}
+  .dfd{margin:16px 0;padding:12px;border:1px solid #eee;border-radius:10px;background:#fff}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 style="margin:0">Security Design Review</h1>
+  <div id="meta"></div>
+  <div style="margin-left:auto">
+    <button id="modeAction">Action mode</button>
+    <button id="modeAudit">Audit mode</button>
+    <a id="downloadAll" href="#" class="chip">Download artifacts</a>
+  </div>
+</header>
+
+<div class="toolbar">
+  <strong>Filters:</strong>
+  <label><input type="checkbox" class="sev" value="Critical" checked> Critical</label>
+  <label><input type="checkbox" class="sev" value="High" checked> High</label>
+  <label><input type="checkbox" class="sev" value="Medium" checked> Medium</label>
+  <label><input type="checkbox" class="sev" value="Low"> Low</label>
+  <label><input type="checkbox" class="sev" value="Info"> Info</label>
+  <span>|</span>
+  <label>STRIDE:
+    <select id="stride">
+      <option value="">All</option>
+      <option>S</option><option>T</option><option>R</option><option>I</option><option>D</option><option>E</option>
+    </select>
+  </label>
+  <label>Search: <input id="q" type="search" placeholder="threat, element, mitigation…"/></label>
+</div>
+
+<section class="section" id="threats">
+  <h2>Prioritized Threats &amp; Mitigations</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Severity</th><th>Score</th><th>Element</th><th>STRIDE</th><th>Threat</th><th>Mitigations</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</section>
+
+<section class="section" id="dfds">
+  <h2>DFDs with Annotations</h2>
+  <label><input type="checkbox" id="onlyFiltered"> Show only threats matching current filters</label>
+  <div id="dfdContainer"></div>
+</section>
+
+<section class="section hidden" id="evidence">
+  <h2>Evidence &amp; Validation</h2>
+  <div id="evidenceList"></div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: false, securityLevel: "loose", theme: "default" });
+
+  // --------- Injected data (replace with real artifacts) ---------
+  const DREAD = /* DREAD JSON */ {};
+  const ANNOTATED_DFDS = /* annotated_dfds array */ [];
+  const MITIGATIONS = /* mitigations JSON */ {};
+  const ELEMENT_LABELS = /* optional: map element_id -> label from DFDs */ {};
+
+  // --------- Helpers ----------
+  const sevOrder = {Critical:0, High:1, Medium:2, Low:3, Info:4};
+  function getMitigationsForThreat(id){
+    return (MITIGATIONS.items||[]).filter(m => (m.threat_ids||[]).includes(id));
+  }
+  function elLabel(id){ return ELEMENT_LABELS[id] || id; }
+
+  function currentFilter(){
+    const severities = [...document.querySelectorAll('.sev:checked')].map(i=>i.value);
+    const stride = document.getElementById('stride').value;
+    const q = document.getElementById('q').value.toLowerCase();
+    return { severities, stride, q };
+  }
+
+  function matchesFilter(row, f){
+    if (f.severities.length && !f.severities.includes(row.severity)) return false;
+    if (f.stride && f.stride !== row.stride) return false;
+    const txt = (row.threat_id + ' ' + row.rationale + ' ' + elLabel(row.element_id)).toLowerCase();
+    return !f.q || txt.includes(f.q);
+  }
+
+  function renderTable(){
+    const f = currentFilter();
+    const rows = (DREAD.ratings || [])
+      .filter(r => matchesFilter(r, f))
+      .sort((a,b) => (sevOrder[a.severity]-sevOrder[b.severity]) || (b.score - a.score));
+
+    const tbody = document.getElementById('rows');
+    tbody.innerHTML = '';
+    rows.forEach((r, idx) => {
+      const mits = getMitigationsForThreat(r.threat_id);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${idx+1}</td>
+        <td><span class="chip sev-${r.severity}">${r.severity}</span></td>
+        <td>${r.score}</td>
+        <td><a href="#${r.element_id}" title="Jump on DFD">${elLabel(r.element_id)}</a></td>
+        <td>${r.stride}</td>
+        <td>
+          <details>
+            <summary>${r.threat_id}</summary>
+            <div><em>Rationale:</em> ${r.rationale || ''}</div>
+            <div><a href="#th-${r.threat_id}">Highlight on DFD</a></div>
+            <div class="evidence hidden" data-for="${r.threat_id}"></div>
+          </details>
+        </td>
+        <td>${
+          mits.map(m => `<span class="chip" title="${m.description}">${m.id} • ${m.effort} • ${(m.nist_csf||[]).join(',')}</span>`).join(' ')
+        }</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderDFDs(){
+    const c = document.getElementById('dfdContainer');
+    c.innerHTML = '';
+    ANNOTATED_DFDS.forEach((ad, i) => {
+      const box = document.createElement('div'); box.className = 'dfd';
+      box.innerHTML = `<h3 id="${ad.dfd_id}">${ad.dfd_id}</h3><div class="mermaid" id="mm-${i}"></div>`;
+      c.appendChild(box);
+      // You’ll render the base Mermaid for this DFD elsewhere; here you can overlay or list annotations
+      // For MVP: list annotations under the diagram
+      const list = document.createElement('ul');
+      (ad.annotations||[]).forEach(a => {
+        const li = document.createElement('li'); li.id = `th-${(a.threat_ids||[])[0]||''}`;
+        li.innerHTML = `<strong>${a.annotation_id}</strong> → ${a.target_id}: ${a.note} [${(a.threat_ids||[]).join(', ')}]`;
+        box.appendChild(li);
+      });
+    });
+    mermaid.run();
+  }
+
+  function setMode(mode){
+    const ev = document.getElementById('evidence');
+    if (mode === 'action'){
+      // Defaults for implementers/pentesters
+      document.querySelectorAll('.sev').forEach(chk => chk.checked = ['Critical','High','Medium'].includes(chk.value));
+      document.getElementById('stride').value = '';
+      ev.classList.add('hidden');
+    } else {
+      // Audit view
+      document.querySelectorAll('.sev').forEach(chk => chk.checked = true);
+      ev.classList.remove('hidden');
+    }
+    renderTable();
+  }
+
+  // Wire up
+  document.getElementById('modeAction').onclick = () => setMode('action');
+  document.getElementById('modeAudit').onclick = () => setMode('audit');
+  document.querySelectorAll('.sev').forEach(el => el.onchange = renderTable);
+  document.getElementById('stride').onchange = renderTable;
+  document.getElementById('q').oninput = renderTable;
+
+  // Initial render
+  setMode('action');
+  renderDFDs();
+</script>
+</body>
+</html>

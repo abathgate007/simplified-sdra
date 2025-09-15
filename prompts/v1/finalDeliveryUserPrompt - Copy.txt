@@ -1,0 +1,52 @@
+You are given:
+1) An HTML template file (reportTemplate.html) as raw text.
+2) Five JSON artifacts from the SDRA pipeline:
+   - trust_boundaries.json
+   - stride_matrix.json
+   - dread.json
+   - annotated_dfds.json
+   - mitigations.json
+
+Goal:
+Return a single, finalized HTML file that is identical to reportTemplate.html except that the template’s JavaScript data placeholders are replaced with the actual JSON data. Do not alter any other parts of the template.
+
+Template (raw text):
+<<REPORT_TEMPLATE_HTML>>
+
+Artifacts (raw JSON):
+<<PHASE1>>
+<<PHASE2>>
+
+Exact replacement rules (follow strictly):
+
+A) If the template contains these placeholders in a `<script>` block:
+   - `const DREAD = /* DREAD JSON */ {};`
+   - `const ANNOTATED_DFDS = /* annotated_dfds array */ [];`
+   - `const MITIGATIONS = /* mitigations JSON */ {};`
+   then replace each with the EXACT corresponding JSON (no extra keys, no comments), e.g.:
+   - `const DREAD = <DREAD_JSON>;`
+   - `const ANNOTATED_DFDS = <ANNOTATED_DFDS_JSON>;`
+   - `const MITIGATIONS = <MITIGATIONS_JSON>;`
+
+B) If the template does not already define these additional constants, APPEND a new `<script>` block just before the closing `</body>` that defines them:
+   - `const TRUST_BOUNDARIES = <TRUST_BOUNDARIES_JSON>;`
+   - `const STRIDE_MATRIX = <STRIDE_MATRIX_JSON>;`
+   These are for Audit mode/evidence/coverage; do not remove or modify any existing scripts.
+
+C) If the template already has `ELEMENT_LABELS` as a placeholder or empty object, and if DFDS node labels are available to build a mapping (element_id → label), then:
+   - Create `ELEMENT_LABELS` by reducing the nodes from the (already-merged) DFDs available to the page. If not available inside the template, derive labels from `ANNOTATED_DFDS` context if provided, else set `ELEMENT_LABELS = {}` and make no further changes.
+
+D) Do not minify or reformat unrelated parts of the template. Keep whitespace and structure unchanged, except for the specific replacements and optional appended `<script>` block described above.
+
+E) Do not change any function names, CSS classes, DOM structure, or event handlers already present in the template. Your only edits are:
+   1) Replacing the three data placeholders (DREAD, ANNOTATED_DFDS, MITIGATIONS) if present.
+   2) Appending the two additional constants (TRUST_BOUNDARIES, STRIDE_MATRIX) if they are not already present.
+   3) Optionally setting or updating ELEMENT_LABELS as described in (C).
+
+F) Validation:
+   - Ensure the final HTML parses correctly.
+   - Ensure each `const XYZ = ...;` is valid JavaScript with EXACT JSON (no trailing commas, no comments).
+   - Do not alter or remove the Mermaid script include if present.
+
+Output:
+Return ONE complete HTML file as plain text (no Markdown fences, no extra commentary). The returned HTML must be ready to save as `report.html` and open in a browser.

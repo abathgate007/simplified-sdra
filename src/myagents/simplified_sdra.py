@@ -19,6 +19,10 @@ from time import perf_counter
 
 import os, base64 #for dumping to json files
 
+import asyncio
+import openai
+from openai import AsyncOpenAI
+
 
 @dataclass
 class SimplifiedSecurityDesignReviewAgent:
@@ -29,27 +33,11 @@ class SimplifiedSecurityDesignReviewAgent:
     final_report: Optional[str] = None       # Final report text
 
 
-    def write_string_array(self, strings: List[str], filename: str) -> None:
-        """
-        Takes an array of Strings and writes them to a file,
-        preserving them exactly as strings.
-        """
-        with open(filename, "w", encoding="utf-8") as f:
-            json.dump(strings, f, ensure_ascii=False, indent=2)
-
-    def read_string_array(self, filename: str) -> List[str]:
-        """
-        Reads the file back and returns the array of strings,
-        exactly as they were stored.
-        """
-        with open(filename, "r", encoding="utf-8") as f:
-            return json.load(f)
 
     def build_models(self) -> list[LLMModel]:
         return [
-            #LLMModel(model_name="gpt-5", api_key=self.config.openai_api_key, model_type="openai"),
-            LLMModel(model_name="gpt-4.1", api_key=self.config.openai_api_key, model_type="openai"),
-            LLMModel(model_name="claude-3-7-sonnet-latest", api_key=self.config.anthropic_api_key, model_type="anthropic")
+            LLMModel(model_name="gpt-5", api_key=self.config.openai_api_key, model_type="openai"),
+            LLMModel(model_name="claude-sonnet-4-20250514", api_key=self.config.anthropic_api_key, model_type="anthropic")
         ]
 
 
@@ -93,7 +81,7 @@ class SimplifiedSecurityDesignReviewAgent:
         return folder
 
     def parse_design_folder(self, folder: str | None = None) -> str:
-        conv = DiagramToMermaidConverter(api_key=self.config.openai_api_key, model_name="gpt-4o-mini")
+        conv = DiagramToMermaidConverter(api_key=self.config.openai_api_key, model_name="gpt-5")
         dp = DocumentParser(converter=conv)
         if folder is None:
             raise ValueError("Provide a folder path (keep this simple in the new repo).")
@@ -107,7 +95,7 @@ class SimplifiedSecurityDesignReviewAgent:
         return dp.get_design_as_text()
 
 
-    def eval_suggest_improve(
+    async def eval_suggest_improve(
         self,
         system_prompt: str,
         user_prompt: str,
@@ -128,23 +116,17 @@ class SimplifiedSecurityDesignReviewAgent:
         ]
 
         merged_output: str = ""
-        for round_idx in range(1, 4):  # up to 3 iterations
+        for round_idx in range(1, 3):  # up to 2 iterations
             print(f"🔁 evalSuggestImprove: round {round_idx}")
 
             # Call all models asynchronously with the same messages
-            outputs = asyncio.run(self.call_models(messages, models))
-            print(f"outputs: {outputs}")
-            self.write_string_array(outputs, "unmerged_outputs.txt")
-            #outputs = self.read_string_array("unmerged_outputs.txt")
-            # Merge outputs (stub logic for now)
-            merged_output = self.merge_outputs(outputs)
+            outputs = await self.call_models(messages, models)
 
-            # Read merged output from file
-            #with open("firstphasemergedoutput.json", "r", encoding="utf-8") as f:
-                #merged_output = f.read()
+            merged_output = await self.merge_outputs(outputs)
+
             
             # Evaluate merged output and ask for suggestions (stub logic for now)
-            suggested = self.evaluate_merged_output(merged_output)
+            suggested = await self.evaluate_merged_output(merged_output)
 
             if isinstance(suggested, str) and suggested.strip().lower() == "none":
                 print("✅ No further improvements suggested. Stopping.")
@@ -167,7 +149,7 @@ class SimplifiedSecurityDesignReviewAgent:
 
 
     # --- accept List[LLMModel] and use each instance directly ---
-    async def   call_models(self, messages: List[dict], models: List[LLMModel]) -> List[str]:
+    async def call_models(self, messages: List[dict], models: List[LLMModel]) -> List[str]:
         """
         Asynchronously call each model with the same prompts.
         Collect all outputs into a list and return.
@@ -195,7 +177,7 @@ class SimplifiedSecurityDesignReviewAgent:
         return await asyncio.gather(*tasks) #Waits for all coroutines to complete and returns a list of results
 
 
-    def merge_outputs(self, outputs: List[str]) -> str:
+    async def merge_outputs(self, outputs: List[str]) -> str:
         """
         Merge multiple model outputs that share the same JSON schema into a single
         superset without duplicates.  Returns a JSON string.
@@ -252,8 +234,7 @@ class SimplifiedSecurityDesignReviewAgent:
                {"role": "system", "content": system_prompt},
                {"role": "user", "content": combined_user_prompt},
             ]
-            resp = asyncio.run(gpt5.callwithmessages(messages))
-            
+            resp = await gpt5.callwithmessages(messages)
             return resp
 
         except Exception as e:
@@ -261,7 +242,7 @@ class SimplifiedSecurityDesignReviewAgent:
         return "{FAILED TO MERGE}"
 
 
-    def evaluate_merged_output(self, merged_output: str):
+    async def evaluate_merged_output(self, merged_output: str):
         """
         Evaluate the merged Phase 1 output (Trust Boundaries, DFDs, STRIDE)
         against self.requirements for completeness, lack of duplication, and
@@ -311,7 +292,7 @@ class SimplifiedSecurityDesignReviewAgent:
                 model_type="openai",
             )
             prompt = f"[SYSTEM]\n{system_prompt}\n\n[USER]\n{user_prompt}"
-            resp = asyncio.run(reviewer.call(prompt)).strip()
+            resp = (await reviewer.call(prompt)).strip()
         except Exception as e:
             print(f"evaluate_merged_output: model call failed: {e}")
             return "None"
@@ -350,7 +331,7 @@ class SimplifiedSecurityDesignReviewAgent:
             # If we can't validate, err on the side of not looping forever
             return "None"
             
-    def run_phase1_trust_dfd_stride(self, system_prompt: str, user_prompt: str) -> str:
+    async def run_phase1_trust_dfd_stride(self, system_prompt: str, user_prompt: str) -> str:
         """
         Phase 1: Produce Trust Boundaries, DFDs, and STRIDE outputs.
         Inserts requirements into the user_prompt placeholder and calls the LLM.
@@ -364,10 +345,12 @@ class SimplifiedSecurityDesignReviewAgent:
         filled_user_prompt = user_prompt.replace("<<REQUIREMENTS_AND_DESIGN_TEXT>>", self.requirements)
 
         models = self.build_models()
-        response = self.eval_suggest_improve(system_prompt, filled_user_prompt, models)
+        response = await self.eval_suggest_improve(system_prompt, filled_user_prompt, models)
         
         self.phase1_output = response
-        self.save_outputs_exact(self.phase1_output, "firstphase_outputs")
+        # Save phase1_output as a single string to file
+        with open("firstphase_output.txt", "w", encoding="utf-8") as f:
+            f.write(self.phase1_output)
 
         return self.phase1_output
 
@@ -376,16 +359,36 @@ class SimplifiedSecurityDesignReviewAgent:
         self.phase2_output = "PHASE2: DREAD + Annotated DFDs + Mitigations (TBD)"
         return self.phase2_output
 
-    def run_phase3_final_report(self, system_prompt: str, user_prompt: str) -> str:
-        print("▶️ Phase 3: Final Report (stub)")
-        self.final_report = (
-            f"FINAL REPORT (TBD)\n\n"
-            f"--- Phase 1 ---\n{self.phase1_output}\n\n"
-            f"--- Phase 2 ---\n{self.phase2_output}"
+    async def run_phase3_final_report(self, system_prompt: str, user_prompt: str) -> str:
+        """
+        Phase 3: Generate the final report via GPT-5 using role-based messages.
+        Assumes the provided prompts already contain Phase 1 and Phase 2 data.
+        """
+        print("▶️ Phase 3: Final Report")
+
+        # Build role-based messages directly from the provided prompts
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        # Initialize GPT-5 model client
+        gpt5 = LLMModel(
+            model_name="gpt-5",
+            api_key=self.config.openai_api_key,
+            model_type="openai",
         )
+
+        try:
+            # Use the role-aware API
+            self.final_report = await gpt5.callwithmessages(messages)
+        except Exception as e:
+            print(f"⚠️ Phase 3 final report generation failed: {e}")
+            self.final_report = f"ERROR: {e}"
+
         return self.final_report
         
-    def run_multistep_review(self) -> str:
+    async def run_multistep_review(self) -> str:
         """
         Top-level multi-step review orchestrator.
         Prompts the user for the design folder (via file dialog).
@@ -398,37 +401,69 @@ class SimplifiedSecurityDesignReviewAgent:
         #Read requirements from file - THIS IS JUST FOR TESTING
         with open('parsedrequirements.txt', 'r', encoding='utf-8') as f:
             self.requirements = f.read()
-        print(f"Parsed requirements: {self.requirements[:1200]}")
+        #print(f"Parsed requirements: {self.requirements[:1200]}")
 
         #First phase
         first_system_prompt = self.load_prompt("Trust_DFD_STRIDE_System_Prompt.txt", "v1")
         first_user_prompt = self.load_prompt("Trust_DFD_STRIDE_User_Prompt.txt", "v1")
-        print(f"First system prompt: {first_system_prompt}")
-        print(f"First user prompt: {first_user_prompt}")
-        phase1 = self.run_phase1_trust_dfd_stride(first_system_prompt, first_user_prompt)
+        #print(f"First system prompt: {first_system_prompt}")
+        #print(f"First user prompt: {first_user_prompt}")
+        #phase1 = await self.run_phase1_trust_dfd_stride(first_system_prompt, first_user_prompt)
+        #print(f"✅ Phase 1 output preview: {str(phase1)[:1400]}")
+        #with open("firstphase_output.txt", "w", encoding="utf-8") as f:
+        #    f.write(phase1)
+
+        #Read firstphase_output.txt file and assign it to phase1
+        with open("firstphase_output.txt", "r", encoding="utf-8") as f:
+            phase1 = f.read()
         print(f"✅ Phase 1 output preview: {str(phase1)[:1400]}")
-        return "Done"
+        
+        
         #Second phase
         second_phase_system_prompt = self.load_prompt("DREAD_AnnotatedDFD_Mitigations_System_Prompt.txt", "v1")
-        second_phase_user_prompt = self.load_prompt("DREAD_AnnotatedDFD_Mitigations_User_Prompt.txt", "v1")
+        second_phase_user_prompt = "Context (inputs produced by earlier steps):" + phase1 + "\n\n" + self.load_prompt("DREAD_AnnotatedDFD_Mitigations_User_Prompt.txt", "v1")
         print(f"second_phase_system_prompt: {second_phase_system_prompt}")
         print(f"second_phase_user_prompt: {second_phase_user_prompt}")
-        phase2 = self.run_phase2_dread_annotations_mitigations(second_phase_system_prompt, second_phase_user_prompt)
-        print(f"✅ Phase 2 output preview: {str(phase2)[:400]}")
+        #phase2 = self.run_phase2_dread_annotations_mitigations(second_phase_system_prompt, second_phase_user_prompt)
+        #models = self.build_models()
+        #phase2 = await self.eval_suggest_improve(second_phase_system_prompt, second_phase_user_prompt, models)
+        #with open("secondphase_output.txt", "w", encoding="utf-8") as f:
+            #f.write(phase2)
+        with open("secondphase_output.txt", "r", encoding="utf-8") as f:
+            phase2 = f.read()
+        print(f"✅ Phase 2 output preview: {str(phase2)[:1400]}")
 
         #Third phase
         finalDeliverySystemPrompt = self.load_prompt("finalDeliverySystemPrompt.txt", "v1")
         finalDeliveryUserPrompt = self.load_prompt("finalDeliveryUserPrompt.txt", "v1")
-        print(f"third_phase_system_prompt: {finalDeliverySystemPrompt}")
-        print(f"third_phase_user_prompt: {finalDeliveryUserPrompt}")
-        final_report = self.run_phase3_final_report(finalDeliverySystemPrompt, finalDeliveryUserPrompt)
-        print(f"✅ Final report preview: {final_report[:400]}")
+        #finalReportTemplate = "Empty report template"
+        #with open("reportTeamplate.html", "r", encoding="utf-8") as f:
+            #finalReportTemplate = f.read()
+        # Add phase 1 to the final delivery user prompt
+        finalDeliveryUserPrompt = finalDeliveryUserPrompt + "\n\n" + phase1 + "\n\n" + phase2
+        #finalDeliveryUserPrompt = finalDeliveryUserPrompt.replace("<<PHASE2>>", phase2)
+        with open("finalDeliveryUserPrompt.txt", 'w', encoding='utf-8') as f:
+            f.write(finalDeliveryUserPrompt)
+        #finalDeliveryUserPrompt = finalDeliveryUserPrompt.replace("<<REPORT_TEMPLATE_HTML>>", finalReportTemplate)
+          
+        final_report = await self.run_phase3_final_report(finalDeliverySystemPrompt, finalDeliveryUserPrompt)
+        
+        # Save final report with datetime
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"final_report_{timestamp}.html"
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(final_report)
+        print(f"Final report saved to: {filename}")
+        
         return "Done"
 
+
 if __name__ == "__main__":
-    # Simplified entrypoint: always run the multi-step orchestrator.
+    
+
     agent = SimplifiedSecurityDesignReviewAgent()
-    result = agent.run_multistep_review()
+    result = asyncio.run(agent.run_multistep_review())
     
     # Read firstphaseunmergedoutputs.json file and reconstruct outputs variable
     #with open('firstphaseunmergedoutputs.json', 'r', encoding='utf-8') as f:

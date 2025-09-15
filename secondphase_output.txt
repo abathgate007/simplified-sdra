@@ -1,0 +1,1231 @@
+{
+  "dread": {
+    "schema_version": "1.0",
+    "run_id": "run-2025-09-13T00:00:00Z",
+    "ratings": [
+      {
+        "threat_id": "TH-0081",
+        "element_id": "P-000",
+        "stride": "S",
+        "dread": { "damage": 5, "reproducibility": 7, "exploitability": 7, "affected_users": 6, "discoverability": 8 },
+        "score": 33,
+        "severity": "High",
+        "rationale": "Spoofed/automated client bypasses UI controls; server-side authz must not trust client type."
+      },
+      {
+        "threat_id": "TH-0082",
+        "element_id": "P-000",
+        "stride": "T",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 8, "affected_users": 7, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "DOM tampering/XSS can alter requests and inject malicious payloads."
+      },
+      {
+        "threat_id": "TH-0083",
+        "element_id": "P-000",
+        "stride": "R",
+        "dread": { "damage": 5, "reproducibility": 8, "exploitability": 7, "affected_users": 6, "discoverability": 7 },
+        "score": 33,
+        "severity": "High",
+        "rationale": "Insufficient client request correlation enables denial of actions by users."
+      },
+      {
+        "threat_id": "TH-0084",
+        "element_id": "P-000",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Sensitive data in URL, storage, or mixed content can leak via browser/referrers."
+      },
+      {
+        "threat_id": "TH-0085",
+        "element_id": "P-000",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Heavy scripts/polling or automation can exhaust client/server resources."
+      },
+      {
+        "threat_id": "TH-0086",
+        "element_id": "P-000",
+        "stride": "E",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 8, "affected_users": 7, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "XSS can steal sessions/CSRF tokens and escalate privileges."
+      },
+      {
+        "threat_id": "TH-0205",
+        "element_id": "P-000",
+        "stride": "E",
+        "dread": { "damage": 7, "reproducibility": 9, "exploitability": 8, "affected_users": 7, "discoverability": 8 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Clickjacking via framing can trigger unintended state changes."
+      },
+      {
+        "threat_id": "TH-0091",
+        "element_id": "P-001",
+        "stride": "S",
+        "dread": { "damage": 8, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 8 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "Session hijacking/forged cookies allow spoofing of authenticated users."
+      },
+      {
+        "threat_id": "TH-0092",
+        "element_id": "P-001",
+        "stride": "T",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Input tampering/SQLi alters server state; insufficient validation/binding."
+      },
+      {
+        "threat_id": "TH-0093",
+        "element_id": "P-001",
+        "stride": "R",
+        "dread": { "damage": 6, "reproducibility": 9, "exploitability": 7, "affected_users": 6, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Missing or weak audit logs hinder attribution of actions."
+      },
+      {
+        "threat_id": "TH-0094",
+        "element_id": "P-001",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Verbose errors/caching may disclose PII or stack traces."
+      },
+      {
+        "threat_id": "TH-0095",
+        "element_id": "P-001",
+        "stride": "D",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "Expensive endpoints and lack of rate limits can cause DoS."
+      },
+      {
+        "threat_id": "TH-0096",
+        "element_id": "P-001",
+        "stride": "E",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Broken access control may allow role escalation (e.g., employer to admin)."
+      },
+      {
+        "threat_id": "TH-0201",
+        "element_id": "P-001",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 8 },
+        "score": 40,
+        "severity": "Critical",
+        "rationale": "CSRF on state-changing endpoints can force victim actions with their privileges."
+      },
+      {
+        "threat_id": "TH-0202",
+        "element_id": "P-001",
+        "stride": "E",
+        "dread": { "damage": 10, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 41,
+        "severity": "Critical",
+        "rationale": "Insecure Java deserialization can enable remote code execution."
+      },
+      {
+        "threat_id": "TH-0210",
+        "element_id": "P-001",
+        "stride": "T",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Mass assignment/over-posting may modify protected fields (e.g., role/status)."
+      },
+      {
+        "threat_id": "TH-0207",
+        "element_id": "P-001",
+        "stride": "I",
+        "dread": { "damage": 8, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 8 },
+        "score": 40,
+        "severity": "Critical",
+        "rationale": "CORS misconfig (e.g., '*' with credentials) enables cross-origin data exfil/abuse."
+      },
+      {
+        "threat_id": "TH-0211",
+        "element_id": "P-001",
+        "stride": "S",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 8, "affected_users": 7, "discoverability": 8 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "Open redirect after login enables phishing and session confusion."
+      },
+      {
+        "threat_id": "TH-0101",
+        "element_id": "P-002",
+        "stride": "S",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Rogue IdP could spoof identities without strict issuer/metadata trust."
+      },
+      {
+        "threat_id": "TH-0102",
+        "element_id": "P-002",
+        "stride": "T",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "SAML message tampering (conditions/audience) if signatures not enforced."
+      },
+      {
+        "threat_id": "TH-0103",
+        "element_id": "P-002",
+        "stride": "R",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 6, "discoverability": 7 },
+        "score": 34,
+        "severity": "High",
+        "rationale": "Insufficient SSO audit trails hinder repudiation handling."
+      },
+      {
+        "threat_id": "TH-0104",
+        "element_id": "P-002",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "SAML attributes may leak via logs or referrers."
+      },
+      {
+        "threat_id": "TH-0105",
+        "element_id": "P-002",
+        "stride": "D",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Flooding ACS with SAML responses exhausts XML parsing/CPU."
+      },
+      {
+        "threat_id": "TH-0106",
+        "element_id": "P-002",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Replay of valid assertions grants access without reuse protection."
+      },
+      {
+        "threat_id": "TH-0203",
+        "element_id": "P-002",
+        "stride": "I",
+        "dread": { "damage": 9, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 40,
+        "severity": "Critical",
+        "rationale": "SAML XML parser XXE may leak files or cause DoS unless DTD/XXE disabled."
+      },
+      {
+        "threat_id": "TH-0204",
+        "element_id": "P-002",
+        "stride": "E",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "XML Signature Wrapping can bypass signature checks and elevate access."
+      },
+      {
+        "threat_id": "TH-0213",
+        "element_id": "P-002",
+        "stride": "T",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 8, "affected_users": 7, "discoverability": 8 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "Unvalidated SSO redirect/RelayState manipulation can route users to attacker sites."
+      },
+      {
+        "threat_id": "TH-0111",
+        "element_id": "P-003",
+        "stride": "S",
+        "dread": { "damage": 8, "reproducibility": 9, "exploitability": 8, "affected_users": 7, "discoverability": 8 },
+        "score": 40,
+        "severity": "Critical",
+        "rationale": "Credential stuffing/brute-force against employer login without rate limits/MFA."
+      },
+      {
+        "threat_id": "TH-0112",
+        "element_id": "P-003",
+        "stride": "T",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Tampering with reset tokens/params could take over accounts."
+      },
+      {
+        "threat_id": "TH-0113",
+        "element_id": "P-003",
+        "stride": "R",
+        "dread": { "damage": 5, "reproducibility": 9, "exploitability": 8, "affected_users": 6, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "No auth attempt logging allows denial of abusive activity."
+      },
+      {
+        "threat_id": "TH-0114",
+        "element_id": "P-003",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Verbose errors/timing leaks reveal credentials/account existence."
+      },
+      {
+        "threat_id": "TH-0115",
+        "element_id": "P-003",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Login flood/hash work exhausts CPU causing lockouts."
+      },
+      {
+        "threat_id": "TH-0116",
+        "element_id": "P-003",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Bypassing role checks on callback can escalate employer to admin."
+      },
+      {
+        "threat_id": "TH-0121",
+        "element_id": "P-004",
+        "stride": "S",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 8, "affected_users": 7, "discoverability": 8 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Email sender spoofing without authenticated channels."
+      },
+      {
+        "threat_id": "TH-0122",
+        "element_id": "P-004",
+        "stride": "T",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 8, "affected_users": 7, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Header injection via unvalidated input into email headers."
+      },
+      {
+        "threat_id": "TH-0123",
+        "element_id": "P-004",
+        "stride": "R",
+        "dread": { "damage": 5, "reproducibility": 8, "exploitability": 8, "affected_users": 6, "discoverability": 7 },
+        "score": 34,
+        "severity": "High",
+        "rationale": "Lack of delivery logs prevents proving notifications."
+      },
+      {
+        "threat_id": "TH-0124",
+        "element_id": "P-004",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "PII leakage over SMTP if TLS not enforced; leak in headers/subject."
+      },
+      {
+        "threat_id": "TH-0125",
+        "element_id": "P-004",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 8, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Email storm from retries/template issues overwhelms MTA."
+      },
+      {
+        "threat_id": "TH-0126",
+        "element_id": "P-004",
+        "stride": "E",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Template injection could execute code in mail service."
+      },
+      {
+        "threat_id": "TH-0131",
+        "element_id": "P-005",
+        "stride": "S",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Unauthorized invocation of reporting endpoints."
+      },
+      {
+        "threat_id": "TH-0132",
+        "element_id": "P-005",
+        "stride": "T",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Tampering with report parameters to alter scope/results."
+      },
+      {
+        "threat_id": "TH-0133",
+        "element_id": "P-005",
+        "stride": "R",
+        "dread": { "damage": 5, "reproducibility": 8, "exploitability": 8, "affected_users": 6, "discoverability": 7 },
+        "score": 34,
+        "severity": "High",
+        "rationale": "No audit of report generation/export enables repudiation."
+      },
+      {
+        "threat_id": "TH-0134",
+        "element_id": "P-005",
+        "stride": "I",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Reports may leak PII beyond need-to-know."
+      },
+      {
+        "threat_id": "TH-0135",
+        "element_id": "P-005",
+        "stride": "D",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Expensive queries can cause DB contention/DoS."
+      },
+      {
+        "threat_id": "TH-0136",
+        "element_id": "P-005",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Overbroad report scopes can be abused to elevate access."
+      },
+      {
+        "threat_id": "TH-0208",
+        "element_id": "P-005",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 8, "exploitability": 8, "affected_users": 7, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "CSV/Excel formula injection can execute commands or exfiltrate credentials."
+      },
+      {
+        "threat_id": "TH-0142",
+        "element_id": "P-006",
+        "stride": "T",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "SQL injection via ORM misuse/unsafe queries."
+      },
+      {
+        "threat_id": "TH-0143",
+        "element_id": "P-006",
+        "stride": "R",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "L lack of DB operation audits hinders accountability."
+      },
+      {
+        "threat_id": "TH-0144",
+        "element_id": "P-006",
+        "stride": "I",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Overprivileged DB credentials expose data beyond necessity."
+      },
+      {
+        "threat_id": "TH-0145",
+        "element_id": "P-006",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Long transactions lock tables reducing availability."
+      },
+      {
+        "threat_id": "TH-0146",
+        "element_id": "P-006",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Bypassing row-level checks at ORM enables unauthorized data access."
+      },
+      {
+        "threat_id": "TH-0151",
+        "element_id": "DS-001",
+        "stride": "S",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 6 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Shared/system DB accounts allow impersonation; weak auth controls."
+      },
+      {
+        "threat_id": "TH-0152",
+        "element_id": "DS-001",
+        "stride": "T",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "Unauthorized modification via SQLi or direct DB access."
+      },
+      {
+        "threat_id": "TH-0153",
+        "element_id": "DS-001",
+        "stride": "R",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Insufficient auditing prevents proving who changed records."
+      },
+      {
+        "threat_id": "TH-0154",
+        "element_id": "DS-001",
+        "stride": "I",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "PII disclosure from insecure queries/backups; at-rest controls needed."
+      },
+      {
+        "threat_id": "TH-0155",
+        "element_id": "DS-001",
+        "stride": "D",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Lock contention/saturation under load leads to timeouts."
+      },
+      {
+        "threat_id": "TH-0156",
+        "element_id": "DS-001",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Abusing stored procedures or DB scheduler to escalate privileges."
+      },
+      {
+        "threat_id": "TH-0212",
+        "element_id": "DS-001",
+        "stride": "I",
+        "dread": { "damage": 8, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Unencrypted DB transport (no TCPS/mTLS) risks interception/tampering."
+      },
+      {
+        "threat_id": "TH-0161",
+        "element_id": "DS-002",
+        "stride": "S",
+        "dread": { "damage": 9, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 8 },
+        "score": 41,
+        "severity": "Critical",
+        "rationale": "Predictable/weak session IDs enable session spoofing."
+      },
+      {
+        "threat_id": "TH-0162",
+        "element_id": "DS-002",
+        "stride": "T",
+        "dread": { "damage": 8, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Session fixation or unauthorized mutation of session state."
+      },
+      {
+        "threat_id": "TH-0163",
+        "element_id": "DS-002",
+        "stride": "R",
+        "dread": { "damage": 5, "reproducibility": 9, "exploitability": 8, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Lack of session event logs allows repudiation."
+      },
+      {
+        "threat_id": "TH-0164",
+        "element_id": "DS-002",
+        "stride": "I",
+        "dread": { "damage": 9, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 8 },
+        "score": 41,
+        "severity": "Critical",
+        "rationale": "Session IDs leaked via logs/referrers enable hijacking."
+      },
+      {
+        "threat_id": "TH-0165",
+        "element_id": "DS-002",
+        "stride": "D",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "Session store exhaustion causes widespread logouts/denials."
+      },
+      {
+        "threat_id": "TH-0166",
+        "element_id": "DS-002",
+        "stride": "E",
+        "dread": { "damage": 9, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 40,
+        "severity": "Critical",
+        "rationale": "Binding session to wrong principal enables privilege escalation."
+      },
+      {
+        "threat_id": "TH-0171",
+        "element_id": "DS-003",
+        "stride": "S",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 8, "affected_users": 7, "discoverability": 8 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Account enumeration via timing/error differences."
+      },
+      {
+        "threat_id": "TH-0172",
+        "element_id": "DS-003",
+        "stride": "T",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Tampering with password hashes/salts enables offline cracking."
+      },
+      {
+        "threat_id": "TH-0173",
+        "element_id": "DS-003",
+        "stride": "R",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 6, "discoverability": 7 },
+        "score": 34,
+        "severity": "High",
+        "rationale": "Insufficient audit of credential changes allows repudiation."
+      },
+      {
+        "threat_id": "TH-0174",
+        "element_id": "DS-003",
+        "stride": "I",
+        "dread": { "damage": 8, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Disclosure of hashed passwords risks offline cracking."
+      },
+      {
+        "threat_id": "TH-0175",
+        "element_id": "DS-003",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Frequent hashing under attack exhausts CPU, delaying auth."
+      },
+      {
+        "threat_id": "TH-0176",
+        "element_id": "DS-003",
+        "stride": "E",
+        "dread": { "damage": 9, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 7 },
+        "score": 40,
+        "severity": "Critical",
+        "rationale": "Weak hashing/work factors allow offline cracking and escalation."
+      },
+      {
+        "threat_id": "TH-0181",
+        "element_id": "DS-004",
+        "stride": "S",
+        "dread": { "damage": 6, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 34,
+        "severity": "High",
+        "rationale": "Forged log entries mislead investigations."
+      },
+      {
+        "threat_id": "TH-0182",
+        "element_id": "DS-004",
+        "stride": "T",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Log tampering/deletion without integrity controls."
+      },
+      {
+        "threat_id": "TH-0183",
+        "element_id": "DS-004",
+        "stride": "R",
+        "dread": { "damage": 6, "reproducibility": 9, "exploitability": 8, "affected_users": 7, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "If logs are mutable or missing, users can repudiate actions."
+      },
+      {
+        "threat_id": "TH-0184",
+        "element_id": "DS-004",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 8 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Sensitive data (tokens/PII) in logs leaks information."
+      },
+      {
+        "threat_id": "TH-0185",
+        "element_id": "DS-004",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Log flooding fills disk impacts availability."
+      },
+      {
+        "threat_id": "TH-0186",
+        "element_id": "DS-004",
+        "stride": "E",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Overbroad log viewer permissions expose sensitive data."
+      },
+      {
+        "threat_id": "TH-0041",
+        "element_id": "EXT-004",
+        "stride": "S",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Rogue IdP spoofing Shibboleth without strict metadata trust."
+      },
+      {
+        "threat_id": "TH-0042",
+        "element_id": "EXT-004",
+        "stride": "T",
+        "dread": { "damage": 9, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 38,
+        "severity": "High",
+        "rationale": "Tampered SAML responses if signatures/conditions not validated."
+      },
+      {
+        "threat_id": "TH-0043",
+        "element_id": "EXT-004",
+        "stride": "R",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "IdP/CES dispute over assertion use absent correlation IDs."
+      },
+      {
+        "threat_id": "TH-0044",
+        "element_id": "EXT-004",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Attribute over-release exposes unnecessary PII."
+      },
+      {
+        "threat_id": "TH-0045",
+        "element_id": "EXT-004",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 8, "discoverability": 6 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "IdP outage degrades availability of authentication."
+      },
+      {
+        "threat_id": "TH-0046",
+        "element_id": "EXT-004",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "If IdP sends elevated roles erroneously, users gain extra privileges."
+      },
+      {
+        "threat_id": "TH-0051",
+        "element_id": "EXT-005",
+        "stride": "S",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Untrusted reporting client impersonates trusted system."
+      },
+      {
+        "threat_id": "TH-0052",
+        "element_id": "EXT-005",
+        "stride": "T",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "External system tampers with report payloads."
+      },
+      {
+        "threat_id": "TH-0053",
+        "element_id": "EXT-005",
+        "stride": "R",
+        "dread": { "damage": 5, "reproducibility": 8, "exploitability": 8, "affected_users": 6, "discoverability": 7 },
+        "score": 34,
+        "severity": "High",
+        "rationale": "Lack of export logs prevents repudiation handling."
+      },
+      {
+        "threat_id": "TH-0054",
+        "element_id": "EXT-005",
+        "stride": "I",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "PII leakage via exported reports."
+      },
+      {
+        "threat_id": "TH-0055",
+        "element_id": "EXT-005",
+        "stride": "D",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Bulk report pulls overload CES/DB."
+      },
+      {
+        "threat_id": "TH-0056",
+        "element_id": "EXT-005",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "External system misuses elevated API scopes to access data."
+      },
+      {
+        "threat_id": "TH-0061",
+        "element_id": "EXT-006",
+        "stride": "S",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Impersonated mail server via DNS/MX poisoning."
+      },
+      {
+        "threat_id": "TH-0062",
+        "element_id": "EXT-006",
+        "stride": "T",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Tampering with messages via STARTTLS downgrade."
+      },
+      {
+        "threat_id": "TH-0063",
+        "element_id": "EXT-006",
+        "stride": "R",
+        "dread": { "damage": 5, "reproducibility": 8, "exploitability": 8, "affected_users": 6, "discoverability": 7 },
+        "score": 34,
+        "severity": "High",
+        "rationale": "No delivery receipts/audit trail causes repudiation."
+      },
+      {
+        "threat_id": "TH-0064",
+        "element_id": "EXT-006",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 8, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Email content disclosure over insecure links."
+      },
+      {
+        "threat_id": "TH-0065",
+        "element_id": "EXT-006",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Mail server throttle/outage delays notifications."
+      },
+      {
+        "threat_id": "TH-0066",
+        "element_id": "EXT-006",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 7, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Overprivileged CES creds on MTA enable abuse."
+      },
+      {
+        "threat_id": "TH-0071",
+        "element_id": "EXT-007",
+        "stride": "S",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Spoofed reverse proxy/misrouted DNS sends traffic to attacker."
+      },
+      {
+        "threat_id": "TH-0072",
+        "element_id": "EXT-007",
+        "stride": "T",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Header/body tampering at proxy; improper normalization."
+      },
+      {
+        "threat_id": "TH-0073",
+        "element_id": "EXT-007",
+        "stride": "R",
+        "dread": { "damage": 5, "reproducibility": 8, "exploitability": 8, "affected_users": 7, "discoverability": 7 },
+        "score": 35,
+        "severity": "High",
+        "rationale": "Lack of proxy access logs hinders traceability."
+      },
+      {
+        "threat_id": "TH-0074",
+        "element_id": "EXT-007",
+        "stride": "I",
+        "dread": { "damage": 7, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Proxy logs may disclose cookies/URLs."
+      },
+      {
+        "threat_id": "TH-0075",
+        "element_id": "EXT-007",
+        "stride": "D",
+        "dread": { "damage": 6, "reproducibility": 8, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 36,
+        "severity": "High",
+        "rationale": "Proxy overload blocks access to CES."
+      },
+      {
+        "threat_id": "TH-0076",
+        "element_id": "EXT-007",
+        "stride": "E",
+        "dread": { "damage": 8, "reproducibility": 7, "exploitability": 7, "affected_users": 8, "discoverability": 7 },
+        "score": 37,
+        "severity": "High",
+        "rationale": "Overbroad proxy rules could bypass app auth (path rewrites)."
+      },
+      {
+        "threat_id": "TH-0209",
+        "element_id": "EXT-007",
+        "stride": "I",
+        "dread": { "damage": 8, "reproducibility": 8, "exploitability": 8, "affected_users": 8, "discoverability": 8 },
+        "score": 40,
+        "severity": "Critical",
+        "rationale": "Cache poisoning/stale caching can disclose cross-user data."
+      },
+      {
+        "threat_id": "TH-0206",
+        "element_id": "EXT-007",
+        "stride": "E",
+        "dread": { "damage": 7, "reproducibility": 9, "exploitability": 8, "affected_users": 7, "discoverability": 8 },
+        "score": 39,
+        "severity": "High",
+        "rationale": "Clickjacking if edge lacks frame protections."
+      }
+    ]
+  },
+  "annotated_dfds": [
+    {
+      "schema_version": "1.0",
+      "run_id": "run-2025-09-13T00:00:00Z",
+      "dfd_id": "DFD-001",
+      "annotations": [
+        {
+          "annotation_id": "ANN-0001",
+          "target_id": "P-000",
+          "threat_ids": ["TH-0081","TH-0082","TH-0083","TH-0084","TH-0085","TH-0086","TH-0205"],
+          "note": "Client across TB-001/TB-008; enforce CSP/XFO, input sanitization, TLS, anti-automation, secure cookies."
+        },
+        {
+          "annotation_id": "ANN-0002",
+          "target_id": "P-001",
+          "threat_ids": ["TH-0091","TH-0092","TH-0093","TH-0094","TH-0095","TH-0096","TH-0201","TH-0202","TH-0207","TH-0210","TH-0211"],
+          "note": "App server across TB-001/TB-006/TB-003/TB-002/TB-004/TB-005/TB-008; enforce authZ, CSRF, validation, CORS, rate limits."
+        },
+        {
+          "annotation_id": "ANN-0003",
+          "target_id": "P-002",
+          "threat_ids": ["TH-0101","TH-0102","TH-0103","TH-0104","TH-0105","TH-0106","TH-0203","TH-0204","TH-0213"],
+          "note": "SSO ACS across TB-002; validate signatures/conditions, disable DTD/XXE, anti-replay, strict redirect allowlist."
+        },
+        {
+          "annotation_id": "ANN-0004",
+          "target_id": "P-003",
+          "threat_ids": ["TH-0111","TH-0112","TH-0113","TH-0114","TH-0115","TH-0116"],
+          "note": "Employer auth across TB-009/TB-008; add MFA, rate limits, secrets hygiene, audit."
+        },
+        {
+          "annotation_id": "ANN-0005",
+          "target_id": "P-004",
+          "threat_ids": ["TH-0121","TH-0122","TH-0123","TH-0124","TH-0125","TH-0126"],
+          "note": "Mail across TB-005; enforce TLS, SPF/DKIM/DMARC, header validation, avoid PII in headers."
+        },
+        {
+          "annotation_id": "ANN-0006",
+          "target_id": "P-005",
+          "threat_ids": ["TH-0131","TH-0132","TH-0133","TH-0134","TH-0135","TH-0136","TH-0208"],
+          "note": "Reporting across TB-004; require API authZ, audit, throttling, CSV sanitization."
+        },
+        {
+          "annotation_id": "ANN-0007",
+          "target_id": "P-006",
+          "threat_ids": ["TH-0142","TH-0143","TH-0144","TH-0145","TH-0146"],
+          "note": "Persistence across TB-003; use parameterized queries, least privilege, transaction limits, audit."
+        },
+        {
+          "annotation_id": "ANN-0008",
+          "target_id": "DS-001",
+          "threat_ids": ["TH-0151","TH-0152","TH-0153","TH-0154","TH-0155","TH-0156","TH-0212"],
+          "note": "Oracle DB behind TB-003; enforce TCPS/mTLS, strong auth, auditing, at-rest controls, performance limits."
+        },
+        {
+          "annotation_id": "ANN-0009",
+          "target_id": "DS-002",
+          "threat_ids": ["TH-0161","TH-0162","TH-0163","TH-0164","TH-0165","TH-0166"],
+          "note": "Session store in TB-008; strong ID entropy, rotation, quotas, detailed session auditing."
+        },
+        {
+          "annotation_id": "ANN-0010",
+          "target_id": "DS-003",
+          "threat_ids": ["TH-0171","TH-0172","TH-0173","TH-0174","TH-0175","TH-0176"],
+          "note": "Employer creds store in TB-009; strong hashing (bcrypt/argon2), anti-enum, change audit."
+        },
+        {
+          "annotation_id": "ANN-0011",
+          "target_id": "DS-004",
+          "threat_ids": ["TH-0181","TH-0182","TH-0183","TH-0184","TH-0185","TH-0186"],
+          "note": "Logs; apply WORM/append-only, integrity checks, redaction, quotas, least-privilege viewing."
+        },
+        {
+          "annotation_id": "ANN-0012",
+          "target_id": "EXT-004",
+          "threat_ids": ["TH-0041","TH-0042","TH-0043","TH-0044","TH-0045","TH-0046"],
+          "note": "Shibboleth across TB-002; trust metadata, validate signatures, minimize attributes, monitor availability."
+        },
+        {
+          "annotation_id": "ANN-0013",
+          "target_id": "EXT-005",
+          "threat_ids": ["TH-0051","TH-0052","TH-0053","TH-0054","TH-0055","TH-0056"],
+          "note": "External reporting across TB-004; authenticate, validate schemas, throttle, log exports."
+        },
+        {
+          "annotation_id": "ANN-0014",
+          "target_id": "EXT-006",
+          "threat_ids": ["TH-0061","TH-0062","TH-0063","TH-0064","TH-0065","TH-0066"],
+          "note": "ITS Mail across TB-005; enforce TLS and domain auth, minimize sensitive content, audit delivery."
+        },
+        {
+          "annotation_id": "ANN-0015",
+          "target_id": "EXT-007",
+          "threat_ids": ["TH-0071","TH-0072","TH-0073","TH-0074","TH-0075","TH-0076","TH-0209","TH-0206"],
+          "note": "Reverse proxy across TB-001/TB-006; harden headers, cache controls, CSP frame-ancestors, logging/rate limits."
+        }
+      ]
+    }
+  ],
+  "mitigations": {
+    "schema_version": "1.0",
+    "run_id": "run-2025-09-13T00:00:00Z",
+    "items": [
+      {
+        "id": "MIT-0001",
+        "title": "Session Security Hardening",
+        "description": "Use Secure/HttpOnly/SameSite cookies, rotate on auth, bind to client context, short TTLs, strict session invalidation and renewal.",
+        "threat_ids": ["TH-0091","TH-0201","TH-0161","TH-0162","TH-0164","TH-0165","TH-0166"],
+        "priority": 1,
+        "nist_csf": ["PR.AC-1","PR.AC-6","PR.PT-1"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0002",
+        "title": "Robust Input Validation and ORM Binding",
+        "description": "Validate/normalize inputs server-side, enforce strict schemas, use parameterized queries/ORM safe APIs, reject unexpected fields.",
+        "threat_ids": ["TH-0092","TH-0142","TH-0152","TH-0210"],
+        "priority": 2,
+        "nist_csf": ["PR.IP-1","PR.DS-5","PR.PT-3"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0003",
+        "title": "SAML Security Controls",
+        "description": "Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.",
+        "threat_ids": ["TH-0101","TH-0102","TH-0106","TH-0203","TH-0204","TH-0213","TH-0041","TH-0042"],
+        "priority": 3,
+        "nist_csf": ["PR.AC-1","PR.DS-2","PR.PT-4","DE.CM-7"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0004",
+        "title": "CSRF Protections",
+        "description": "Per-request CSRF tokens, SameSite=Lax/Strict, double-submit where needed, verify origin/referer, make state changes idempotent.",
+        "threat_ids": ["TH-0201"],
+        "priority": 4,
+        "nist_csf": ["PR.AC-3","PR.PT-3"],
+        "effort": "S",
+        "dependencies": ["MIT-0001"]
+      },
+      {
+        "id": "MIT-0005",
+        "title": "Access Control and Authorization",
+        "description": "Enforce least privilege, role- and attribute-based checks on every request, deny-by-default, secure admin paths, policy tests.",
+        "threat_ids": ["TH-0096","TH-0136","TH-0146","TH-0186","TH-0076","TH-0046"],
+        "priority": 5,
+        "nist_csf": ["PR.AC-4","PR.AC-6"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0006",
+        "title": "Immutable Logging and Audit Trails",
+        "description": "Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.",
+        "threat_ids": ["TH-0093","TH-0103","TH-0113","TH-0153","TH-0163","TH-0181","TH-0182","TH-0183"],
+        "priority": 6,
+        "nist_csf": ["PR.PT-1","DE.CM-1","DE.CM-7"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0007",
+        "title": "Rate Limiting and Anti-Automation",
+        "description": "Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.",
+        "threat_ids": ["TH-0095","TH-0105","TH-0111","TH-0115","TH-0135","TH-0155","TH-0075","TH-0055"],
+        "priority": 7,
+        "nist_csf": ["PR.PT-4","DE.CM-7"],
+        "effort": "S",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0008",
+        "title": "Email Channel Security",
+        "description": "Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.",
+        "threat_ids": ["TH-0121","TH-0122","TH-0124","TH-0125","TH-0061","TH-0062","TH-0064","TH-0066"],
+        "priority": 8,
+        "nist_csf": ["PR.DS-2","PR.PT-4"],
+        "effort": "S",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0009",
+        "title": "Reporting Export Hardening",
+        "description": "Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.",
+        "threat_ids": ["TH-0131","TH-0133","TH-0134","TH-0135","TH-0208","TH-0054","TH-0055"],
+        "priority": 9,
+        "nist_csf": ["PR.AC-4","PR.DS-5","DE.CM-7"],
+        "effort": "S",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0010",
+        "title": "Reverse Proxy Hardening and Caching Controls",
+        "description": "Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.",
+        "threat_ids": ["TH-0071","TH-0072","TH-0073","TH-0074","TH-0075","TH-0076","TH-0209","TH-0206","TH-0205"],
+        "priority": 10,
+        "nist_csf": ["PR.PT-4","PR.PT-3","DE.CM-7"],
+        "effort": "S",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0011",
+        "title": "CORS Lockdown",
+        "description": "Disallow cross-origin by default; if needed, strict allowlist, exact origins, no credentials unless required, validate preflights.",
+        "threat_ids": ["TH-0207"],
+        "priority": 11,
+        "nist_csf": ["PR.PT-4","PR.AC-3"],
+        "effort": "S",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0012",
+        "title": "Deserialization Protections",
+        "description": "Remove native Java serialization; use JSON/XML mappers; if unavoidable, enforce ObjectInputFilter/allowlists and disable gadgets.",
+        "threat_ids": ["TH-0202"],
+        "priority": 12,
+        "nist_csf": ["PR.PT-3","PR.IP-1"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0013",
+        "title": "Mass Assignment Defense",
+        "description": "Use DTOs/explicit binding allowlists; ignore unexpected fields; enforce server-side invariants on sensitive attributes.",
+        "threat_ids": ["TH-0210"],
+        "priority": 13,
+        "nist_csf": ["PR.IP-1","PR.AC-4"],
+        "effort": "S",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0014",
+        "title": "Database Security and Transport Encryption",
+        "description": "Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.",
+        "threat_ids": ["TH-0151","TH-0152","TH-0153","TH-0154","TH-0155","TH-0156","TH-0212","TH-0144"],
+        "priority": 14,
+        "nist_csf": ["PR.DS-1","PR.DS-2","PR.AC-4","DE.CM-7"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0015",
+        "title": "Session Store Hardening",
+        "description": "High-entropy IDs, secure generation, per-user limits, eviction policies, encryption at rest, detailed session lifecycle logs.",
+        "threat_ids": ["TH-0161","TH-0162","TH-0163","TH-0164","TH-0165","TH-0166"],
+        "priority": 15,
+        "nist_csf": ["PR.AC-1","PR.PT-1","PR.DS-1"],
+        "effort": "S",
+        "dependencies": ["MIT-0001","MIT-0006"]
+      },
+      {
+        "id": "MIT-0016",
+        "title": "Credential Store Hardening",
+        "description": "Use argon2/bcrypt with strong work factors, unique salts, HSM/secret vaults, anti-enumeration, change event audits.",
+        "threat_ids": ["TH-0171","TH-0172","TH-0173","TH-0174","TH-0175","TH-0176"],
+        "priority": 16,
+        "nist_csf": ["PR.AC-1","PR.DS-1","DE.CM-7"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0017",
+        "title": "Clickjacking Defense",
+        "description": "Set CSP frame-ancestors 'none' (or strict allowlist) and X-Frame-Options=DENY on state-changing routes at edge and app.",
+        "threat_ids": ["TH-0205","TH-0206"],
+        "priority": 17,
+        "nist_csf": ["PR.PT-3"],
+        "effort": "S",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0018",
+        "title": "Redirect/Forward Allowlisting",
+        "description": "Validate post-login return URLs/RelayState against allowlist; strip external hosts; avoid dangerous server-side forwards.",
+        "threat_ids": ["TH-0211","TH-0213"],
+        "priority": 18,
+        "nist_csf": ["PR.PT-3","PR.AC-3"],
+        "effort": "S",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0019",
+        "title": "XSS Mitigations",
+        "description": "Contextual output encoding, strict CSP, input sanitization, template auto-escaping, dependency review and SRI for assets.",
+        "threat_ids": ["TH-0082","TH-0086","TH-0094"],
+        "priority": 19,
+        "nist_csf": ["PR.PT-3","PR.IP-1"],
+        "effort": "M",
+        "dependencies": []
+      },
+      {
+        "id": "MIT-0020",
+        "title": "DoS Resilience and Capacity",
+        "description": "Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.",
+        "threat_ids": ["TH-0085","TH-0095","TH-0105","TH-0115","TH-0135","TH-0155","TH-0165","TH-0075","TH-0055","TH-0065"],
+        "priority": 20,
+        "nist_csf": ["PR.PT-4","RS.AN-1","RC.IM-1"],
+        "effort": "L",
+        "dependencies": ["MIT-0007"]
+      }
+    ]
+  }
+}

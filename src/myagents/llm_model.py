@@ -42,48 +42,54 @@ class LLMModel:
             raise ValueError(f"Unsupported model type: {self.model_type}")
      
     async def _call_openai_stylewithmessages(self, messages: List[dict]) -> str:
-        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) if self.base_url \
-            else AsyncOpenAI(api_key=self.api_key)
+        # choose the right client first
+        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) \
+            if self.base_url else AsyncOpenAI(api_key=self.api_key)
 
-        response = await client.chat.completions.create(
-            model=self.model_name,
-            messages=messages,
-        )
+        async with client as session:
+            response = await session.chat.completions.create(
+                model=self.model_name,
+                messages=messages,
+            )
         return response.choices[0].message.content or ""
 
     async def _call_openai_style(self, prompt: str) -> str:
-        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) if self.base_url \
-            else AsyncOpenAI(api_key=self.api_key)
+        # pick client first (conditional expression is fine here)
+        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) \
+            if self.base_url else AsyncOpenAI(api_key=self.api_key)
 
-        response = await client.chat.completions.create(
-            model=self.model_name,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        async with client as session:
+            response = await session.chat.completions.create(
+                model=self.model_name,
+                messages=[{"role": "user", "content": prompt}],
+            )
         return response.choices[0].message.content or ""
 
     async def _call_geminiwithmessages(self, messages: List[dict]) -> str:
-        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) if self.base_url \
-            else AsyncOpenAI(api_key=self.api_key)
+        # Choose the client first
+        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) \
+            if self.base_url else AsyncOpenAI(api_key=self.api_key)
 
-        response = await client.chat.completions.create(
-            model=self.model_name,
-            messages=messages,
-        )
-        return response.choices[0].message.content or "" 
+        async with client as session:
+            response = await session.chat.completions.create(
+                model=self.model_name,
+                messages=messages,
+            )
+        return response.choices[0].message.content or ""
 
     async def _call_gemini(self, prompt: str) -> str:
-        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) if self.base_url \
-            else AsyncOpenAI(api_key=self.api_key)
+        # choose the client first
+        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url) \
+            if self.base_url else AsyncOpenAI(api_key=self.api_key)
 
-        response = await client.chat.completions.create(
-            model=self.model_name,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        async with client as session:
+            response = await session.chat.completions.create(
+                model=self.model_name,
+                messages=[{"role": "user", "content": prompt}],
+            )
         return response.choices[0].message.content or ""
 
     async def _call_claudewithmessages(self, messages: List[Dict[str, Any]]) -> str:
-        client = AsyncAnthropic(api_key=self.api_key)
-
         # Extract system messages (Anthropic requires top-level system param)
         system_parts = []
         new_messages = []
@@ -96,7 +102,8 @@ class LLMModel:
                     system_parts.append(content)
                 elif isinstance(content, list):
                     system_parts.extend(
-                        b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text"
+                        b.get("text", "") for b in content
+                        if isinstance(b, dict) and b.get("type") == "text"
                     )
             else:
                 # Pass through user/assistant messages unchanged
@@ -104,12 +111,14 @@ class LLMModel:
 
         system_text = "\n".join(p for p in system_parts if p)
 
-        response = await client.messages.create(
-            model=self.model_name,
-            max_tokens=20000,
-            system=system_text or None,   # Top-level system field
-            messages=new_messages,        # Only user/assistant
-        )
+        async with AsyncAnthropic(api_key=self.api_key) as client:
+            response = await client.messages.create(
+                model=self.model_name,
+                max_tokens=20000,
+                system=system_text or None,  # Top-level system field
+                messages=new_messages,       # Only user/assistant
+            )
+
         return response.content[0].text
 
     async def _call_claude(self, prompt: str) -> str:

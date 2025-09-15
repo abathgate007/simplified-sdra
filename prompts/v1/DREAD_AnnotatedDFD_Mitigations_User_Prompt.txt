@@ -1,8 +1,3 @@
-Context (inputs produced by earlier steps):
-- trust_boundaries (JSON): <<TRUST_BOUNDARIES_JSON>>
-- dfds (JSON): <<DFDS_JSON>>
-- stride_matrix (JSON): <<STRIDE_MATRIX_JSON>>
-
 Task:
 Using the three inputs above:
 1) Produce DREAD risk ratings only for threats that truly apply (derived from stride_matrix rows where applies==true).

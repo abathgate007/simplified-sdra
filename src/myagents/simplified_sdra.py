@@ -394,29 +394,28 @@ class SimplifiedSecurityDesignReviewAgent:
         Prompts the user for the design folder (via file dialog).
         For now, it just returns 'Done' after capturing the folder path.
         """
-        #folder = self.prompt_for_design_folder()
-        #print(f"Selected design folder: {folder}")
-        #self.parse_design_folder(folder) #populates self.requirements
+        folder = self.prompt_for_design_folder()
+        print(f"Selected design folder: {folder}")
+        self.parse_design_folder(folder) #populates self.requirements
         
         #Read requirements from file - THIS IS JUST FOR TESTING
-        with open('parsedrequirements.txt', 'r', encoding='utf-8') as f:
-            self.requirements = f.read()
-        #print(f"Parsed requirements: {self.requirements[:1200]}")
+        #with open('parsedrequirements.txt', 'r', encoding='utf-8') as f:
+        #    self.requirements = f.read()
+        print(f"Parsed requirements: {self.requirements[:1200]}")
 
         #First phase
         first_system_prompt = self.load_prompt("Trust_DFD_STRIDE_System_Prompt.txt", "v1")
         first_user_prompt = self.load_prompt("Trust_DFD_STRIDE_User_Prompt.txt", "v1")
-        #print(f"First system prompt: {first_system_prompt}")
-        #print(f"First user prompt: {first_user_prompt}")
-        #phase1 = await self.run_phase1_trust_dfd_stride(first_system_prompt, first_user_prompt)
-        #print(f"✅ Phase 1 output preview: {str(phase1)[:1400]}")
-        #with open("firstphase_output.txt", "w", encoding="utf-8") as f:
-        #    f.write(phase1)
+        print(f"First system prompt: {first_system_prompt}")
+        print(f"First user prompt: {first_user_prompt}")
+        phase1 = await self.run_phase1_trust_dfd_stride(first_system_prompt, first_user_prompt)
+        print(f"✅ Phase 1 output preview: {str(phase1)[:1400]}")
+        with open("firstphase_output.txt", "w", encoding="utf-8") as f:
+            f.write(phase1)
 
         #Read firstphase_output.txt file and assign it to phase1
-        with open("firstphase_output.txt", "r", encoding="utf-8") as f:
-            phase1 = f.read()
-        print(f"✅ Phase 1 output preview: {str(phase1)[:1400]}")
+        #with open("firstphase_output.txt", "r", encoding="utf-8") as f:
+            #phase1 = f.read()
         
         
         #Second phase
@@ -424,32 +423,26 @@ class SimplifiedSecurityDesignReviewAgent:
         second_phase_user_prompt = "Context (inputs produced by earlier steps):" + phase1 + "\n\n" + self.load_prompt("DREAD_AnnotatedDFD_Mitigations_User_Prompt.txt", "v1")
         print(f"second_phase_system_prompt: {second_phase_system_prompt}")
         print(f"second_phase_user_prompt: {second_phase_user_prompt}")
-        #phase2 = self.run_phase2_dread_annotations_mitigations(second_phase_system_prompt, second_phase_user_prompt)
-        #models = self.build_models()
-        #phase2 = await self.eval_suggest_improve(second_phase_system_prompt, second_phase_user_prompt, models)
-        #with open("secondphase_output.txt", "w", encoding="utf-8") as f:
-            #f.write(phase2)
-        with open("secondphase_output.txt", "r", encoding="utf-8") as f:
-            phase2 = f.read()
+        phase2 = self.run_phase2_dread_annotations_mitigations(second_phase_system_prompt, second_phase_user_prompt)
+        models = self.build_models()
+        phase2 = await self.eval_suggest_improve(second_phase_system_prompt, second_phase_user_prompt, models)
+        with open("secondphase_output.txt", "w", encoding="utf-8") as f:
+            f.write(phase2)
+        #with open("secondphase_output.txt", "r", encoding="utf-8") as f:
+            #phase2 = f.read()
         print(f"✅ Phase 2 output preview: {str(phase2)[:1400]}")
 
         #Third phase
         finalDeliverySystemPrompt = self.load_prompt("finalDeliverySystemPrompt.txt", "v1")
         finalDeliveryUserPrompt = self.load_prompt("finalDeliveryUserPrompt.txt", "v1")
-        #finalReportTemplate = "Empty report template"
-        #with open("reportTeamplate.html", "r", encoding="utf-8") as f:
-            #finalReportTemplate = f.read()
-        # Add phase 1 to the final delivery user prompt
+        # Add phase 1+2 to the final delivery user prompt
         finalDeliveryUserPrompt = finalDeliveryUserPrompt + "\n\n" + phase1 + "\n\n" + phase2
-        #finalDeliveryUserPrompt = finalDeliveryUserPrompt.replace("<<PHASE2>>", phase2)
         with open("finalDeliveryUserPrompt.txt", 'w', encoding='utf-8') as f:
             f.write(finalDeliveryUserPrompt)
-        #finalDeliveryUserPrompt = finalDeliveryUserPrompt.replace("<<REPORT_TEMPLATE_HTML>>", finalReportTemplate)
           
         final_report = await self.run_phase3_final_report(finalDeliverySystemPrompt, finalDeliveryUserPrompt)
         
         # Save final report with datetime
-        
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"final_report_{timestamp}.html"
         with open(filename, 'w', encoding='utf-8') as f:

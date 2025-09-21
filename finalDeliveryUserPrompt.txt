@@ -1,6 +1,7 @@
-You are given the artifacts of a security design review including Trust boundaries, a stride matrix, dread analysis, mitigations  and annotated DFDs.
-Produce a Pretty Security Design Review Report complete with markdown
-
+Generate a Security Design Review Report in HTML using only the data provided below.  
+Follow exactly the structure and rules defined in the system prompt.  
+Do not invent information.  
+If a required section has no data, still include the section header and state “No data provided.” 
 
 {
   "trust_boundaries": {

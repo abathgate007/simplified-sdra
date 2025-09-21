@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Co-op Evaluation System – Security Design Review Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0e1116;
+      --card: #131823;
+      --muted: #9aa4b2;
+      --text: #e6e9ef;
+      --accent: #7cc4ff;
+      --border: #263042;
+      --critical: #ff5d5d;
+      --high: #ffae42;
+      --ok: #3ad29f;
+      --tableRow: #0f141d;
+      --tableRowAlt: #0c1018;
+      --hover: #1a2333;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    header {
+      margin-bottom: 16px;
+    }
+    header h1 {
+      margin: 0 0 6px 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    header .meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 14px 0;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
+    }
+    .card h2 {
+      font-size: 18px;
+      margin: 4px 0 10px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    .card p.note {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 6px 0 0 0;
+    }
+    ul {
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+    li { margin: 6px 0; }
+    .mermaid-wrap {
+      overflow: auto;
+      padding: 8px;
+      border-radius: 8px;
+      background: #0b0f16;
+      border: 1px solid var(--border);
+    }
+    .legend {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+      min-width: 700px;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #0c121b;
+      z-index: 2;
+      text-align: left;
+      font-weight: 600;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 10px;
+    }
+    tbody td {
+      padding: 10px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tbody tr:nth-child(odd) { background: var(--tableRow); }
+    tbody tr:nth-child(even) { background: var(--tableRowAlt); }
+    tbody tr:hover { background: var(--hover); }
+    .chip {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #0b1625;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .sev-critical { color: var(--critical); border-color: rgba(255,93,93,0.35); background: rgba(255,93,93,0.08); }
+    .sev-high { color: var(--high); border-color: rgba(255,174,66,0.35); background: rgba(255,174,66,0.08); }
+    .nowrap { white-space: nowrap; }
+    .muted { color: var(--muted); }
+    .center { text-align: center; }
+    .tick { color: var(--ok); font-weight: 700; }
+    .dash { color: var(--muted); }
+    .small { font-size: 12px; color: var(--muted); }
+    .kv {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      securityLevel: 'strict',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial'
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Co-op Evaluation System – Security Design Review Report</h1>
+      <div class="meta">Generated: 2025-09-21 • Source model: “Co-op Evaluation System Context and Data Flows”</div>
+    </header>
+
+    <section class="card">
+      <h2>Executive Summary</h2>
+      <ul>
+        <li>Risk posture: 102 modeled threats assessed – 10 Critical, 92 High (STRIDE coverage: 88%).</li>
+        <li>Critical findings present in: P-001 CES Web Application (CSRF, deserialization, CORS), P-002 SSO/SAML Controller (XXE), P-003 Employer Auth (credential stuffing), DS-002 Session Store (spoofing/leakage/escalation), DS-003 Employer Credentials Store (weak hashing), EXT-007 Reverse Proxy (cache poisoning).</li>
+        <li>Threats span clients, app/server tiers, SSO, reporting, database, email, proxy, and logging components across defined trust boundaries.</li>
+        <li>Mapped mitigations provided (e.g., session hardening, SAML controls, CSRF defenses, immutable logging, rate limiting, DB security, reverse proxy hardening). See Risk/Threat Register for per-threat mappings.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Trust Boundaries</h2>
+      <ul>
+        <li><strong>TB-001 – Public Internet Boundary</strong>: Boundary between end-user networks and CES; all browser traffic traverses the public Internet to the CES web application.</li>
+        <li><strong>TB-002 – SSO/Shibboleth Boundary</strong>: Trust boundary between CES and RIT Shibboleth IdP where SAML messages are exchanged.</li>
+        <li><strong>TB-003 – Database Network Boundary</strong>: Boundary protecting the Oracle SQL database reachable only from the application tier/persistence framework.</li>
+        <li><strong>TB-004 – Reporting API Boundary</strong>: Boundary between CES reporting service and external reporting system (Jim's Reporting).</li>
+        <li><strong>TB-005 – Mail Server Boundary</strong>: Boundary between CES notification service and ITS Mail Server over SMTP.</li>
+        <li><strong>TB-006 – Web Reverse Proxy to Application Server Boundary</strong>: Boundary between ITS DNS/Web front end (reverse proxy) and the CES application server (Tomcat).</li>
+        <li><strong>TB-008 – Session Management Boundary</strong>: Boundary spanning client and server handling session identifiers, cookies, and server-side session state.</li>
+        <li><strong>TB-009 – Employer Authentication Boundary</strong>: Boundary for custom employer login handling credentials and auth flows distinct from SSO.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Annotated DFD (Mermaid)</h2>
+      <div class="mermaid-wrap">
+<pre class="mermaid">
+flowchart TD
+  EXT_001["EXT-001 Student User"]
+  EXT_002["EXT-002 Employer User"]
+  EXT_003["EXT-003 Administrator"]
+  EXT_004["EXT-004 Shibboleth IdP"]
+  EXT_005["EXT-005 Reporting System Jim's Reporting"]
+  EXT_006["EXT-006 ITS Mail Server"]
+  EXT_007["EXT-007 ITS DNS_Web Server Reverse Proxy"]
+  P_000["P-000 Client Browser_UI JS_Angular"]
+  P_001["P-001 CES Web Application Servlet_JSP"]
+  P_002["P-002 SSO_SAML Controller"]
+  P_003["P-003 Employer Local Auth Controller"]
+  P_004["P-004 Email Notification Service"]
+  P_005["P-005 Reporting Service"]
+  P_006["P-006 Data Persistence Framework_ORM"]
+  DS_001["DS-001 Oracle SQL Database"]
+  DS_002["DS-002 Session Store"]
+  DS_003["DS-003 Employer Credentials Store"]
+  DS_004["DS-004 Audit_Logs"]
+
+  EXT_001 -->|User actions| P_000
+  EXT_002 -->|User actions employer| P_000
+  EXT_003 -->|User actions admin| P_000
+  EXT_007 <--> |HTTPS reverse proxy| P_001
+  P_000 <--> |HTTPS requests_responses, cookies| P_001
+  P_001 -->|Initiate SSO| P_002
+  P_002 <--> |SAML AuthnRequest_Response| EXT_004
+  P_002 -->|SSO callback & attributes| P_001
+  P_000 -->|Employer credentials username_password| P_003
+  P_003 <--> |Verify credentials hash compare| DS_003
+  P_003 -->|Establish session principal| P_001
+  P_001 <--> |Session create_read_update_destroy| DS_002
+  P_001 -->|Events| P_004
+  P_004 <--> |SMTP TLS| EXT_006
+  P_005 <--> |Export_Fetch reports| EXT_005
+  P_001 -->|CRUD requests| P_006
+  P_006 <--> |SQL_stored procedures| DS_001
+  P_005 -->|Report queries| DS_001
+  P_001 -->|App logs| DS_004
+  P_002 -->|Auth logs| DS_004
+  P_003 -->|Auth logs| DS_004
+  P_004 -->|Delivery logs| DS_004
+  P_005 -->|Report logs| DS_004
+  P_006 -->|DB ops logs| DS_004
+</pre>
+      </div>
+      <div class="legend">
+        <div class="kv">
+          <div><strong>Model title</strong></div><div>Co-op Evaluation System Context and Data Flows</div>
+          <div><strong>Included boundaries</strong></div><div>TB-001, TB-002, TB-003, TB-004, TB-005, TB-006, TB-008, TB-009</div>
+        </div>
+        <p class="note">Annotations</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Element</th>
+                <th>Threat IDs</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>P-000</td><td>TH-0081, TH-0082, TH-0083, TH-0084, TH-0085, TH-0086, TH-0205</td><td>Client across TB-001/TB-008; enforce CSP/XFO, input sanitization, TLS, anti-automation, secure cookies.</td></tr>
+              <tr><td>P-001</td><td>TH-0091, TH-0092, TH-0093, TH-0094, TH-0095, TH-0096, TH-0201, TH-0202, TH-0207, TH-0210, TH-0211</td><td>App server across TB-001/TB-006/TB-003/TB-002/TB-004/TB-005/TB-008; enforce authZ, CSRF, validation, CORS, rate limits.</td></tr>
+              <tr><td>P-002</td><td>TH-0101, TH-0102, TH-0103, TH-0104, TH-0105, TH-0106, TH-0203, TH-0204, TH-0213</td><td>SSO ACS across TB-002; validate signatures/conditions, disable DTD/XXE, anti-replay, strict redirect allowlist.</td></tr>
+              <tr><td>P-003</td><td>TH-0111, TH-0112, TH-0113, TH-0114, TH-0115, TH-0116</td><td>Employer auth across TB-009/TB-008; add MFA, rate limits, secrets hygiene, audit.</td></tr>
+              <tr><td>P-004</td><td>TH-0121, TH-0122, TH-0123, TH-0124, TH-0125, TH-0126</td><td>Mail across TB-005; enforce TLS, SPF/DKIM/DMARC, header validation, avoid PII in headers.</td></tr>
+              <tr><td>P-005</td><td>TH-0131, TH-0132, TH-0133, TH-0134, TH-0135, TH-0136, TH-0208</td><td>Reporting across TB-004; require API authZ, audit, throttling, CSV sanitization.</td></tr>
+              <tr><td>P-006</td><td>TH-0142, TH-0143, TH-0144, TH-0145, TH-0146</td><td>Persistence across TB-003; use parameterized queries, least privilege, transaction limits, audit.</td></tr>
+              <tr><td>DS-001</td><td>TH-0151, TH-0152, TH-0153, TH-0154, TH-0155, TH-0156, TH-0212</td><td>Oracle DB behind TB-003; enforce TCPS/mTLS, strong auth, auditing, at-rest controls, performance limits.</td></tr>
+              <tr><td>DS-002</td><td>TH-0161, TH-0162, TH-0163, TH-0164, TH-0165, TH-0166</td><td>Session store in TB-008; strong ID entropy, rotation, quotas, detailed session auditing.</td></tr>
+              <tr><td>DS-003</td><td>TH-0171, TH-0172, TH-0173, TH-0174, TH-0175, TH-0176</td><td>Employer creds store in TB-009; strong hashing (bcrypt/argon2), anti-enum, change audit.</td></tr>
+              <tr><td>DS-004</td><td>TH-0181, TH-0182, TH-0183, TH-0184, TH-0185, TH-0186</td><td>Logs; apply WORM/append-only, integrity checks, redaction, quotas, least-privilege viewing.</td></tr>
+              <tr><td>EXT-004</td><td>TH-0041, TH-0042, TH-0043, TH-0044, TH-0045, TH-0046</td><td>Shibboleth across TB-002; trust metadata, validate signatures, minimize attributes, monitor availability.</td></tr>
+              <tr><td>EXT-005</td><td>TH-0051, TH-0052, TH-0053, TH-0054, TH-0055, TH-0056</td><td>External reporting across TB-004; authenticate, validate schemas, throttle, log exports.</td></tr>
+              <tr><td>EXT-006</td><td>TH-0061, TH-0062, TH-0063, TH-0064, TH-0065, TH-0066</td><td>ITS Mail across TB-005; enforce TLS and domain auth, minimize sensitive content, audit delivery.</td></tr>
+              <tr><td>EXT-007</td><td>TH-0071, TH-0072, TH-0073, TH-0074, TH-0075, TH-0076, TH-0209, TH-0206</td><td>Reverse proxy across TB-001/TB-006; harden headers, cache controls, CSP frame-ancestors, logging/rate limits.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>STRIDE Matrix (Full)</h2>
+      <p class="note">Model coverage: 88%. Cells indicate whether the STRIDE category applies to the element.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th class="center nowrap">S</th>
+              <th class="center nowrap">T</th>
+              <th class="center nowrap">R</th>
+              <th class="center nowrap">I</th>
+              <th class="center nowrap">D</th>
+              <th class="center nowrap">E</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>P-000 – Client Browser/UI (JS/Angular)</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>P-001 – CES Web Application (Servlet/JSP)</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>P-002 – SSO/SAML Controller</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>P-003 – Employer Local Auth Controller</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>P-004 – Email Notification Service</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>P-005 – Reporting Service</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>P-006 – Data Persistence Framework/ORM</td><td class="center"><span class="dash">—</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+
+            <tr><td>DS-001 – Oracle SQL Database</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>DS-002 – Session Store</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>DS-003 – Employer Credentials Store</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>DS-004 – Audit/Logs</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+
+            <tr><td>EXT-001 – Student User</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>EXT-002 – Employer User</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>EXT-003 – Administrator</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>EXT-004 – Shibboleth IdP</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>EXT-005 – Reporting System (Jim's Reporting)</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>EXT-006 – ITS Mail Server</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+            <tr><td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td><td class="center"><span class="tick">✓</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Risk / Threat Register (Criticals &amp; Highs only)</h2>
+      <p class="note">This table lists all threats rated Critical or High with DREAD scores and mapped mitigations.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Threat ID</th>
+              <th>Component</th>
+              <th>Description</th>
+              <th class="nowrap">DREAD score</th>
+              <th>Mitigation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Critical -->
+            <tr>
+              <td><strong>TH-0202</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Insecure Java deserialization can enable remote code execution.</td>
+              <td>41</td>
+              <td>MIT-0012 – Deserialization Protections</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0161</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>DS-002 – Session Store</td>
+              <td>Predictable/weak session IDs enable session spoofing.</td>
+              <td>41</td>
+              <td>MIT-0001 – Session Security Hardening; MIT-0015 – Session Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0164</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>DS-002 – Session Store</td>
+              <td>Session IDs leaked via logs/referrers enable hijacking.</td>
+              <td>41</td>
+              <td>MIT-0001 – Session Security Hardening; MIT-0015 – Session Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0201</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>CSRF on state-changing endpoints can force victim actions with their privileges.</td>
+              <td>40</td>
+              <td>MIT-0001 – Session Security Hardening; MIT-0004 – CSRF Protections</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0207</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>CORS misconfig (e.g., '*' with credentials) enables cross-origin data exfil/abuse.</td>
+              <td>40</td>
+              <td>MIT-0011 – CORS Lockdown</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0203</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>SAML XML parser XXE may leak files or cause DoS unless DTD/XXE disabled.</td>
+              <td>40</td>
+              <td>MIT-0003 – SAML Security Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0111</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>P-003 – Employer Local Auth Controller</td>
+              <td>Credential stuffing/brute-force against employer login without rate limits/MFA.</td>
+              <td>40</td>
+              <td>MIT-0007 – Rate Limiting and Anti-Automation</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0166</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>DS-002 – Session Store</td>
+              <td>Binding session to wrong principal enables privilege escalation.</td>
+              <td>40</td>
+              <td>MIT-0001 – Session Security Hardening; MIT-0015 – Session Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0176</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>DS-003 – Employer Credentials Store</td>
+              <td>Weak hashing/work factors allow offline cracking and escalation.</td>
+              <td>40</td>
+              <td>MIT-0016 – Credential Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0209</strong> <span class="chip sev-critical">Critical</span></td>
+              <td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td>
+              <td>Cache poisoning/stale caching can disclose cross-user data.</td>
+              <td>40</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls</td>
+            </tr>
+
+            <!-- High -->
+            <tr>
+              <td><strong>TH-0081</strong> <span class="chip sev-high">High</span></td>
+              <td>P-000 – Client Browser/UI (JS/Angular)</td>
+              <td>Spoofed/automated client bypasses UI controls; server-side authz must not trust client type.</td>
+              <td>33</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0082</strong> <span class="chip sev-high">High</span></td>
+              <td>P-000 – Client Browser/UI (JS/Angular)</td>
+              <td>DOM tampering/XSS can alter requests and inject malicious payloads.</td>
+              <td>37</td>
+              <td>MIT-0019 – XSS Mitigations</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0083</strong> <span class="chip sev-high">High</span></td>
+              <td>P-000 – Client Browser/UI (JS/Angular)</td>
+              <td>Insufficient client request correlation enables denial of actions by users.</td>
+              <td>33</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0084</strong> <span class="chip sev-high">High</span></td>
+              <td>P-000 – Client Browser/UI (JS/Angular)</td>
+              <td>Sensitive data in URL, storage, or mixed content can leak via browser/referrers.</td>
+              <td>35</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0085</strong> <span class="chip sev-high">High</span></td>
+              <td>P-000 – Client Browser/UI (JS/Angular)</td>
+              <td>Heavy scripts/polling or automation can exhaust client/server resources.</td>
+              <td>37</td>
+              <td>MIT-0020 – DoS Resilience and Capacity</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0086</strong> <span class="chip sev-high">High</span></td>
+              <td>P-000 – Client Browser/UI (JS/Angular)</td>
+              <td>XSS can steal sessions/CSRF tokens and escalate privileges.</td>
+              <td>38</td>
+              <td>MIT-0019 – XSS Mitigations</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0205</strong> <span class="chip sev-high">High</span></td>
+              <td>P-000 – Client Browser/UI (JS/Angular)</td>
+              <td>Clickjacking via framing can trigger unintended state changes.</td>
+              <td>39</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls; MIT-0017 – Clickjacking Defense</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0091</strong> <span class="chip sev-high">High</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Session hijacking/forged cookies allow spoofing of authenticated users.</td>
+              <td>38</td>
+              <td>MIT-0001 – Session Security Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0092</strong> <span class="chip sev-high">High</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Input tampering/SQLi alters server state; insufficient validation/binding.</td>
+              <td>39</td>
+              <td>MIT-0002 – Robust Input Validation and ORM Binding</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0093</strong> <span class="chip sev-high">High</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Missing or weak audit logs hinder attribution of actions.</td>
+              <td>35</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0094</strong> <span class="chip sev-high">High</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Verbose errors/caching may disclose PII or stack traces.</td>
+              <td>35</td>
+              <td>MIT-0019 – XSS Mitigations</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0095</strong> <span class="chip sev-high">High</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Expensive endpoints and lack of rate limits can cause DoS.</td>
+              <td>38</td>
+              <td>MIT-0007 – Rate Limiting and Anti-Automation; MIT-0020 – DoS Resilience and Capacity</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0096</strong> <span class="chip sev-high">High</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Broken access control may allow role escalation (e.g., employer to admin).</td>
+              <td>39</td>
+              <td>MIT-0005 – Access Control and Authorization</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0210</strong> <span class="chip sev-high">High</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Mass assignment/over-posting may modify protected fields (e.g., role/status).</td>
+              <td>39</td>
+              <td>MIT-0002 – Robust Input Validation and ORM Binding; MIT-0013 – Mass Assignment Defense</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0211</strong> <span class="chip sev-high">High</span></td>
+              <td>P-001 – CES Web Application (Servlet/JSP)</td>
+              <td>Open redirect after login enables phishing and session confusion.</td>
+              <td>38</td>
+              <td>MIT-0018 – Redirect/Forward Allowlisting</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0101</strong> <span class="chip sev-high">High</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>Rogue IdP could spoof identities without strict issuer/metadata trust.</td>
+              <td>37</td>
+              <td>MIT-0003 – SAML Security Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0102</strong> <span class="chip sev-high">High</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>SAML message tampering (conditions/audience) if signatures not enforced.</td>
+              <td>38</td>
+              <td>MIT-0003 – SAML Security Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0103</strong> <span class="chip sev-high">High</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>Insufficient SSO audit trails hinder repudiation handling.</td>
+              <td>34</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0104</strong> <span class="chip sev-high">High</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>SAML attributes may leak via logs or referrers.</td>
+              <td>35</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0105</strong> <span class="chip sev-high">High</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>Flooding ACS with SAML responses exhausts XML parsing/CPU.</td>
+              <td>37</td>
+              <td>MIT-0007 – Rate Limiting and Anti-Automation; MIT-0020 – DoS Resilience and Capacity</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0106</strong> <span class="chip sev-high">High</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>Replay of valid assertions grants access without reuse protection.</td>
+              <td>37</td>
+              <td>MIT-0003 – SAML Security Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0204</strong> <span class="chip sev-high">High</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>XML Signature Wrapping can bypass signature checks and elevate access.</td>
+              <td>38</td>
+              <td>MIT-0003 – SAML Security Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0213</strong> <span class="chip sev-high">High</span></td>
+              <td>P-002 – SSO/SAML Controller</td>
+              <td>Unvalidated SSO redirect/RelayState manipulation can route users to attacker sites.</td>
+              <td>38</td>
+              <td>MIT-0003 – SAML Security Controls; MIT-0018 – Redirect/Forward Allowlisting</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0112</strong> <span class="chip sev-high">High</span></td>
+              <td>P-003 – Employer Local Auth Controller</td>
+              <td>Tampering with reset tokens/params could take over accounts.</td>
+              <td>36</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0113</strong> <span class="chip sev-high">High</span></td>
+              <td>P-003 – Employer Local Auth Controller</td>
+              <td>No auth attempt logging allows denial of abusive activity.</td>
+              <td>35</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0114</strong> <span class="chip sev-high">High</span></td>
+              <td>P-003 – Employer Local Auth Controller</td>
+              <td>Verbose errors/timing leaks reveal credentials/account existence.</td>
+              <td>36</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0115</strong> <span class="chip sev-high">High</span></td>
+              <td>P-003 – Employer Local Auth Controller</td>
+              <td>Login flood/hash work exhausts CPU causing lockouts.</td>
+              <td>35</td>
+              <td>MIT-0007 – Rate Limiting and Anti-Automation; MIT-0020 – DoS Resilience and Capacity</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0116</strong> <span class="chip sev-high">High</span></td>
+              <td>P-003 – Employer Local Auth Controller</td>
+              <td>Bypassing role checks on callback can escalate employer to admin.</td>
+              <td>36</td>
+              <td>MIT-0005 – Access Control and Authorization</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0121</strong> <span class="chip sev-high">High</span></td>
+              <td>P-004 – Email Notification Service</td>
+              <td>Email sender spoofing without authenticated channels.</td>
+              <td>37</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0122</strong> <span class="chip sev-high">High</span></td>
+              <td>P-004 – Email Notification Service</td>
+              <td>Header injection via unvalidated input into email headers.</td>
+              <td>37</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0123</strong> <span class="chip sev-high">High</span></td>
+              <td>P-004 – Email Notification Service</td>
+              <td>Lack of delivery logs prevents proving notifications.</td>
+              <td>34</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0124</strong> <span class="chip sev-high">High</span></td>
+              <td>P-004 – Email Notification Service</td>
+              <td>PII leakage over SMTP if TLS not enforced; leak in headers/subject.</td>
+              <td>36</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0125</strong> <span class="chip sev-high">High</span></td>
+              <td>P-004 – Email Notification Service</td>
+              <td>Email storm from retries/template issues overwhelms MTA.</td>
+              <td>36</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0126</strong> <span class="chip sev-high">High</span></td>
+              <td>P-004 – Email Notification Service</td>
+              <td>Template injection could execute code in mail service.</td>
+              <td>37</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0131</strong> <span class="chip sev-high">High</span></td>
+              <td>P-005 – Reporting Service</td>
+              <td>Unauthorized invocation of reporting endpoints.</td>
+              <td>36</td>
+              <td>MIT-0009 – Reporting Export Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0132</strong> <span class="chip sev-high">High</span></td>
+              <td>P-005 – Reporting Service</td>
+              <td>Tampering with report parameters to alter scope/results.</td>
+              <td>36</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0133</strong> <span class="chip sev-high">High</span></td>
+              <td>P-005 – Reporting Service</td>
+              <td>No audit of report generation/export enables repudiation.</td>
+              <td>34</td>
+              <td>MIT-0009 – Reporting Export Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0134</strong> <span class="chip sev-high">High</span></td>
+              <td>P-005 – Reporting Service</td>
+              <td>Reports may leak PII beyond need-to-know.</td>
+              <td>36</td>
+              <td>MIT-0009 – Reporting Export Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0135</strong> <span class="chip sev-high">High</span></td>
+              <td>P-005 – Reporting Service</td>
+              <td>Expensive queries can cause DB contention/DoS.</td>
+              <td>36</td>
+              <td>MIT-0007 – Rate Limiting and Anti-Automation; MIT-0020 – DoS Resilience and Capacity; MIT-0009 – Reporting Export Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0136</strong> <span class="chip sev-high">High</span></td>
+              <td>P-005 – Reporting Service</td>
+              <td>Overbroad report scopes can be abused to elevate access.</td>
+              <td>36</td>
+              <td>MIT-0005 – Access Control and Authorization</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0208</strong> <span class="chip sev-high">High</span></td>
+              <td>P-005 – Reporting Service</td>
+              <td>CSV/Excel formula injection can execute commands or exfiltrate credentials.</td>
+              <td>38</td>
+              <td>MIT-0009 – Reporting Export Hardening</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0142</strong> <span class="chip sev-high">High</span></td>
+              <td>P-006 – Data Persistence Framework/ORM</td>
+              <td>SQL injection via ORM misuse/unsafe queries.</td>
+              <td>38</td>
+              <td>MIT-0002 – Robust Input Validation and ORM Binding</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0143</strong> <span class="chip sev-high">High</span></td>
+              <td>P-006 – Data Persistence Framework/ORM</td>
+              <td>L lack of DB operation audits hinders accountability.</td>
+              <td>35</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0144</strong> <span class="chip sev-high">High</span></td>
+              <td>P-006 – Data Persistence Framework/ORM</td>
+              <td>Overprivileged DB credentials expose data beyond necessity.</td>
+              <td>37</td>
+              <td>MIT-0014 – Database Security and Transport Encryption</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0145</strong> <span class="chip sev-high">High</span></td>
+              <td>P-006 – Data Persistence Framework/ORM</td>
+              <td>Long transactions lock tables reducing availability.</td>
+              <td>35</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0146</strong> <span class="chip sev-high">High</span></td>
+              <td>P-006 – Data Persistence Framework/ORM</td>
+              <td>Bypassing row-level checks at ORM enables unauthorized data access.</td>
+              <td>37</td>
+              <td>MIT-0005 – Access Control and Authorization</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0151</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-001 – Oracle SQL Database</td>
+              <td>Shared/system DB accounts allow impersonation; weak auth controls.</td>
+              <td>35</td>
+              <td>MIT-0014 – Database Security and Transport Encryption</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0152</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-001 – Oracle SQL Database</td>
+              <td>Unauthorized modification via SQLi or direct DB access.</td>
+              <td>38</td>
+              <td>MIT-0002 – Robust Input Validation and ORM Binding; MIT-0014 – Database Security and Transport Encryption</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0153</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-001 – Oracle SQL Database</td>
+              <td>Insufficient auditing prevents proving who changed records.</td>
+              <td>35</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails; MIT-0014 – Database Security and Transport Encryption</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0154</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-001 – Oracle SQL Database</td>
+              <td>PII disclosure from insecure queries/backups; at-rest controls needed.</td>
+              <td>38</td>
+              <td>MIT-0014 – Database Security and Transport Encryption</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0155</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-001 – Oracle SQL Database</td>
+              <td>Lock contention/saturation under load leads to timeouts.</td>
+              <td>37</td>
+              <td>MIT-0007 – Rate Limiting and Anti-Automation; MIT-0020 – DoS Resilience and Capacity; MIT-0014 – Database Security and Transport Encryption</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0156</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-001 – Oracle SQL Database</td>
+              <td>Abusing stored procedures or DB scheduler to escalate privileges.</td>
+              <td>37</td>
+              <td>MIT-0014 – Database Security and Transport Encryption</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0212</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-001 – Oracle SQL Database</td>
+              <td>Unencrypted DB transport (no TCPS/mTLS) risks interception/tampering.</td>
+              <td>39</td>
+              <td>MIT-0014 – Database Security and Transport Encryption</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0162</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-002 – Session Store</td>
+              <td>Session fixation or unauthorized mutation of session state.</td>
+              <td>39</td>
+              <td>MIT-0001 – Session Security Hardening; MIT-0015 – Session Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0163</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-002 – Session Store</td>
+              <td>Lack of session event logs allows repudiation.</td>
+              <td>36</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails; MIT-0015 – Session Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0165</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-002 – Session Store</td>
+              <td>Session store exhaustion causes widespread logouts/denials.</td>
+              <td>38</td>
+              <td>MIT-0001 – Session Security Hardening; MIT-0015 – Session Store Hardening; MIT-0020 – DoS Resilience and Capacity</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0171</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-003 – Employer Credentials Store</td>
+              <td>Account enumeration via timing/error differences.</td>
+              <td>37</td>
+              <td>MIT-0016 – Credential Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0172</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-003 – Employer Credentials Store</td>
+              <td>Tampering with password hashes/salts enables offline cracking.</td>
+              <td>36</td>
+              <td>MIT-0016 – Credential Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0173</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-003 – Employer Credentials Store</td>
+              <td>Insufficient audit of credential changes allows repudiation.</td>
+              <td>34</td>
+              <td>MIT-0016 – Credential Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0174</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-003 – Employer Credentials Store</td>
+              <td>Disclosure of hashed passwords risks offline cracking.</td>
+              <td>39</td>
+              <td>MIT-0016 – Credential Store Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0175</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-003 – Employer Credentials Store</td>
+              <td>Frequent hashing under attack exhausts CPU, delaying auth.</td>
+              <td>35</td>
+              <td>MIT-0016 – Credential Store Hardening</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0181</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-004 – Audit/Logs</td>
+              <td>Forged log entries mislead investigations.</td>
+              <td>34</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0182</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-004 – Audit/Logs</td>
+              <td>Log tampering/deletion without integrity controls.</td>
+              <td>36</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0183</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-004 – Audit/Logs</td>
+              <td>If logs are mutable or missing, users can repudiate actions.</td>
+              <td>37</td>
+              <td>MIT-0006 – Immutable Logging and Audit Trails</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0184</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-004 – Audit/Logs</td>
+              <td>Sensitive data (tokens/PII) in logs leaks information.</td>
+              <td>39</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0185</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-004 – Audit/Logs</td>
+              <td>Log flooding fills disk impacts availability.</td>
+              <td>35</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0186</strong> <span class="chip sev-high">High</span></td>
+              <td>DS-004 – Audit/Logs</td>
+              <td>Overbroad log viewer permissions expose sensitive data.</td>
+              <td>35</td>
+              <td>MIT-0005 – Access Control and Authorization</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0041</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-004 – Shibboleth IdP</td>
+              <td>Rogue IdP spoofing Shibboleth without strict metadata trust.</td>
+              <td>37</td>
+              <td>MIT-0003 – SAML Security Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0042</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-004 – Shibboleth IdP</td>
+              <td>Tampered SAML responses if signatures/conditions not validated.</td>
+              <td>38</td>
+              <td>MIT-0003 – SAML Security Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0043</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-004 – Shibboleth IdP</td>
+              <td>IdP/CES dispute over assertion use absent correlation IDs.</td>
+              <td>35</td>
+              <td>MIT-0003 – SAML Security Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0044</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-004 – Shibboleth IdP</td>
+              <td>Attribute over-release exposes unnecessary PII.</td>
+              <td>36</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0045</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-004 – Shibboleth IdP</td>
+              <td>IdP outage degrades availability of authentication.</td>
+              <td>35</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0046</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-004 – Shibboleth IdP</td>
+              <td>If IdP sends elevated roles erroneously, users gain extra privileges.</td>
+              <td>37</td>
+              <td>MIT-0005 – Access Control and Authorization</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0051</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-005 – Reporting System (Jim's Reporting)</td>
+              <td>Untrusted reporting client impersonates trusted system.</td>
+              <td>35</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0052</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-005 – Reporting System (Jim's Reporting)</td>
+              <td>External system tampers with report payloads.</td>
+              <td>35</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0053</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-005 – Reporting System (Jim's Reporting)</td>
+              <td>Lack of export logs prevents repudiation handling.</td>
+              <td>34</td>
+              <td>MIT-0009 – Reporting Export Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0054</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-005 – Reporting System (Jim's Reporting)</td>
+              <td>PII leakage via exported reports.</td>
+              <td>37</td>
+              <td>MIT-0009 – Reporting Export Hardening</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0055</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-005 – Reporting System (Jim's Reporting)</td>
+              <td>Bulk report pulls overload CES/DB.</td>
+              <td>37</td>
+              <td>MIT-0007 – Rate Limiting and Anti-Automation; MIT-0009 – Reporting Export Hardening; MIT-0020 – DoS Resilience and Capacity</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0056</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-005 – Reporting System (Jim's Reporting)</td>
+              <td>External system misuses elevated API scopes to access data.</td>
+              <td>37</td>
+              <td>No mapped mitigation provided.</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0061</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-006 – ITS Mail Server</td>
+              <td>Impersonated mail server via DNS/MX poisoning.</td>
+              <td>35</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0062</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-006 – ITS Mail Server</td>
+              <td>Tampering with messages via STARTTLS downgrade.</td>
+              <td>35</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0063</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-006 – ITS Mail Server</td>
+              <td>No delivery receipts/audit trail causes repudiation.</td>
+              <td>34</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0064</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-006 – ITS Mail Server</td>
+              <td>Email content disclosure over insecure links.</td>
+              <td>37</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0065</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-006 – ITS Mail Server</td>
+              <td>Mail server throttle/outage delays notifications.</td>
+              <td>36</td>
+              <td>MIT-0020 – DoS Resilience and Capacity</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0066</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-006 – ITS Mail Server</td>
+              <td>Overprivileged CES creds on MTA enable abuse.</td>
+              <td>36</td>
+              <td>MIT-0008 – Email Channel Security</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-0071</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td>
+              <td>Spoofed reverse proxy/misrouted DNS sends traffic to attacker.</td>
+              <td>37</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0072</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td>
+              <td>Header/body tampering at proxy; improper normalization.</td>
+              <td>36</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0073</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td>
+              <td>Lack of proxy access logs hinders traceability.</td>
+              <td>35</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0074</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td>
+              <td>Proxy logs may disclose cookies/URLs.</td>
+              <td>36</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0075</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td>
+              <td>Proxy overload blocks access to CES.</td>
+              <td>36</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls; MIT-0020 – DoS Resilience and Capacity</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0076</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td>
+              <td>Overbroad proxy rules could bypass app auth (path rewrites).</td>
+              <td>37</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls; MIT-0005 – Access Control and Authorization</td>
+            </tr>
+            <tr>
+              <td><strong>TH-0206</strong> <span class="chip sev-high">High</span></td>
+              <td>EXT-007 – ITS DNS/Web Server (Reverse Proxy)</td>
+              <td>Clickjacking if edge lacks frame protections.</td>
+              <td>39</td>
+              <td>MIT-0010 – Reverse Proxy Hardening and Caching Controls; MIT-0017 – Clickjacking Defense</td>
+            </tr>
+
+            <tr>
+              <td><strong>TH-001??</strong></td>
+              <td class="muted" colspan="4">[Note: No additional Criticals beyond those listed. All remaining items in source are High and included above.]</td>
+            </tr>
+            <!-- End Highs -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Security Design Review Report</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1d212a;
+    --text: #e6e6e6;
+    --muted: #a0a7b4;
+    --accent: #7aa2f7;
+    --accent-2: #89ddff;
+    --warning: #ffcb6b;
+    --danger: #f7768e;
+    --ok: #9ece6a;
+    --border: #2a2f3a;
+    --hover: #222733;
+    --chip: #2b3140;
+  }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    line-height: 1.45;
+  }
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+  header h1 {
+    font-size: 1.6rem;
+    margin: 0 0 6px 0;
+    color: var(--text);
+  }
+  header .sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .card {
+    background: linear-gradient(180deg, var(--panel), var(--panel-2));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 18px;
+    margin: 18px 0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  }
+  .card h2 {
+    font-size: 1.2rem;
+    margin: 0 0 12px 0;
+    color: var(--accent);
+    letter-spacing: 0.2px;
+  }
+  .card h3 {
+    font-size: 1.05rem;
+    margin: 12px 0 8px 0;
+    color: var(--accent-2);
+  }
+  .muted { color: var(--muted); }
+  ul { margin: 8px 0 0 18px; padding: 0; }
+  li { margin: 6px 0; }
+  .pill {
+    display: inline-block;
+    background: var(--chip);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 10px;
+    margin: 2px 6px 2px 0;
+    font-size: 0.85rem;
+  }
+  .legend {
+    background: #10131a;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 12px 12px;
+    margin-top: 10px;
+  }
+
+  /* Tables */
+  .table-wrap {
+    overflow: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--panel-2);
+    font-size: 0.94rem;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #131722;
+    color: var(--text);
+    z-index: 2;
+  }
+  th, td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    text-align: left;
+  }
+  tbody tr:hover {
+    background: var(--hover);
+  }
+  .col-narrow { width: 110px; }
+  .col-id { width: 120px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+  .col-score { width: 120px; text-align: center; }
+  .nowrap { white-space: nowrap; }
+
+  /* Mermaid container */
+  .mermaid {
+    background: #0f121a;
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+
+  /* Section tags */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    margin-left: 8px;
+    color: var(--muted);
+    background: #131826;
+  }
+
+  /* Chips for boundary membership */
+  .chip {
+    display: inline-block;
+    margin: 2px 6px 2px 0;
+    padding: 2px 8px;
+    background: #1b2230;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+  }
+
+  /* Small helper text */
+  .small { font-size: 0.9rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Security Design Review Report</h1>
+    <div class="sub">Generated from provided data only • Dark theme • Mermaid included</div>
+  </header>
+
+  <section class="card">
+    <h2>Executive Summary</h2>
+    <ul>
+      <li>DFD: DFD-001 “Co-op Evaluation System Context and Data Flows”.</li>
+      <li>Trust boundaries defined: TB-001, TB-002, TB-003, TB-004, TB-005, TB-006, TB-008, TB-009.</li>
+      <li>STRIDE coverage: 88.0%.</li>
+      <li>Critical threats identified:
+        <ul>
+          <li>TH-0201 (P-001) – CSRF on state-changing endpoints can force victim actions with their privileges.</li>
+          <li>TH-0202 (P-001) – Insecure Java deserialization can enable remote code execution.</li>
+          <li>TH-0207 (P-001) – CORS misconfig (e.g., '*'' with credentials) enables cross-origin data exfil/abuse.</li>
+          <li>TH-0203 (P-002) – SAML XML parser XXE may leak files or cause DoS unless DTD/XXE disabled.</li>
+          <li>TH-0111 (P-003) – Credential stuffing/brute-force against employer login without rate limits/MFA.</li>
+          <li>TH-0161 (DS-002) – Predictable/weak session IDs enable session spoofing.</li>
+          <li>TH-0164 (DS-002) – Session IDs leaked via logs/referrers enable hijacking.</li>
+          <li>TH-0166 (DS-002) – Binding session to wrong principal enables privilege escalation.</li>
+          <li>TH-0176 (DS-003) – Weak hashing/work factors allow offline cracking and escalation.</li>
+          <li>TH-0209 (EXT-007) – Cache poisoning/stale caching can disclose cross-user data.</li>
+        </ul>
+      </li>
+      <li>Critical risks appear on components: P-001, P-002, P-003, DS-002, DS-003, EXT-007.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Trust Boundaries</h2>
+    <ul>
+      <li><span class="pill">TB-001</span> Public Internet Boundary — Boundary between end-user networks and CES; all browser traffic traverses the public Internet to the CES web application.</li>
+      <li><span class="pill">TB-002</span> SSO/Shibboleth Boundary — Trust boundary between CES and RIT Shibboleth IdP where SAML messages are exchanged.</li>
+      <li><span class="pill">TB-003</span> Database Network Boundary — Boundary protecting the Oracle SQL database reachable only from the application tier/persistence framework.</li>
+      <li><span class="pill">TB-004</span> Reporting API Boundary — Boundary between CES reporting service and external reporting system (Jim's Reporting).</li>
+      <li><span class="pill">TB-005</span> Mail Server Boundary — Boundary between CES notification service and ITS Mail Server over SMTP.</li>
+      <li><span class="pill">TB-006</span> Web Reverse Proxy to Application Server Boundary — Boundary between ITS DNS/Web front end (reverse proxy) and the CES application server (Tomcat).</li>
+      <li><span class="pill">TB-008</span> Session Management Boundary — Boundary spanning client and server handling session identifiers, cookies, and server-side session state.</li>
+      <li><span class="pill">TB-009</span> Employer Authentication Boundary — Boundary for custom employer login handling credentials and auth flows distinct from SSO.</li>
+    </ul>
+
+    <h3>Annotated DFD (Mermaid)</h3>
+    <div class="small">Mermaid auto-fixes applied: sanitized labels, wrapped, and ID normalization with underscores. Nodes shown once inside subgraphs; multi-boundary memberships are listed in the legend.</div>
+    <div class="mermaid">
+flowchart TD
+  %% Nodes grouped into trust boundary subgraphs; each node appears in at most one subgraph (legend lists full memberships)
+
+  subgraph TB_001["TB-001 Public Internet Boundary"]
+    EXT_001["EXT 001 Student User"]
+    EXT_002["EXT 002 Employer User"]
+    EXT_003["EXT 003 Administrator"]
+    EXT_007["EXT 007 ITS DNS Web Server Reverse Proxy"]
+    P_000["P 000 Client Browser UI JS Angular"]
+    P_001["P 001 CES Web Application Servlet JSP"]
+  end
+
+  subgraph TB_002["TB-002 SSO Shibboleth Boundary"]
+    P_002["P 002 SSO SAML Controller"]
+    EXT_004["EXT 004 Shibboleth IdP"]
+    P_003["P 003 Employer Local Auth Controller"]
+  end
+
+  subgraph TB_003["TB-003 Database Network Boundary"]
+    P_006["P 006 Data Persistence Framework ORM"]
+    DS_001["DS 001 Oracle SQL Database"]
+    P_005["P 005 Reporting Service"]
+  end
+
+  subgraph TB_004["TB-004 Reporting API Boundary"]
+    EXT_005["EXT 005 Reporting System Jim's Reporting"]
+    EXT_006["EXT 006 ITS Mail Server"]
+  end
+
+  subgraph TB_005["TB-005 Mail Server Boundary"]
+    P_004["P 004 Email Notification Service"]
+  end
+
+  subgraph TB_008["TB-008 Session Management Boundary"]
+    DS_002["DS 002 Session Store"]
+  end
+
+  subgraph TB_009["TB-009 Employer Authentication Boundary"]
+    DS_003["DS 003 Employer Credentials Store"]
+  end
+
+  DS_004["DS 004 Audit Logs"]
+
+  %% Edges (kept exactly, with normalized IDs)
+  EXT_001 -->|User actions| P_000
+  EXT_002 -->|User actions| P_000
+  EXT_003 -->|User actions| P_000
+  EXT_007 <--> |HTTPS reverse proxy| P_001
+  P_000 <--> |HTTPS requests/responses, cookies| P_001
+  P_001 -->|Initiate SSO| P_002
+  P_002 <--> |SAML AuthnRequest/Response| EXT_004
+  P_002 -->|SSO callback & attributes| P_001
+  P_000 -->|Employer credentials (username/password)| P_003
+  P_003 <--> |Verify credentials (hash compare)| DS_003
+  P_003 -->|Establish session (principal)| P_001
+  P_001 -->|Session create/read/update/destroy| DS_002
+  P_001 -->|Notification events (submission status)| P_004
+  P_004 <--> |SMTP (TLS)| EXT_006
+  P_005 <--> |Report export/import| EXT_005
+  P_001 -->|CRUD requests| P_006
+  P_006 <--> |SQL/stored procedures| DS_001
+  P_005 -->|Report queries| DS_001
+  P_001 -->|App logs| DS_004
+  P_002 -->|Auth logs| DS_004
+  P_003 -->|Auth logs| DS_004
+  P_004 -->|Delivery logs| DS_004
+  P_005 -->|Report logs| DS_004
+  P_006 -->|DB ops logs| DS_004
+    </div>
+
+    <div class="legend">
+      <h3>Diagram Legend</h3>
+      <div>
+        <strong>Annotations</strong>
+        <ul>
+          <li>P-000: Client across TB-001/TB-008; enforce CSP/XFO, input sanitization, TLS, anti-automation, secure cookies.</li>
+          <li>P-001: App server across TB-001/TB-006/TB-003/TB-002/TB-004/TB-005/TB-008; enforce authZ, CSRF, validation, CORS, rate limits.</li>
+          <li>P-002: SSO ACS across TB-002; validate signatures/conditions, disable DTD/XXE, anti-replay, strict redirect allowlist.</li>
+          <li>P-003: Employer auth across TB-009/TB-008; add MFA, rate limits, secrets hygiene, audit.</li>
+          <li>P-004: Mail across TB-005; enforce TLS, SPF/DKIM/DMARC, header validation, avoid PII in headers.</li>
+          <li>P-005: Reporting across TB-004; require API authZ, audit, throttling, CSV sanitization.</li>
+          <li>P-006: Persistence across TB-003; use parameterized queries, least privilege, transaction limits, audit.</li>
+          <li>DS-001: Oracle DB behind TB-003; enforce TCPS/mTLS, strong auth, auditing, at-rest controls, performance limits.</li>
+          <li>DS-002: Session store in TB-008; strong ID entropy, rotation, quotas, detailed session auditing.</li>
+          <li>DS-003: Employer creds store in TB-009; strong hashing (bcrypt/argon2), anti-enum, change audit.</li>
+          <li>DS-004: Logs; apply WORM/append-only, integrity checks, redaction, quotas, least-privilege viewing.</li>
+          <li>EXT-004: Shibboleth across TB-002; trust metadata, validate signatures, minimize attributes, monitor availability.</li>
+          <li>EXT-005: External reporting across TB-004; authenticate, validate schemas, throttle, log exports.</li>
+          <li>EXT-006: ITS Mail across TB-005; enforce TLS and domain auth, minimize sensitive content, audit delivery.</li>
+          <li>EXT-007: Reverse proxy across TB-001/TB-006; harden headers, cache controls, CSP frame-ancestors, logging/rate limits.</li>
+        </ul>
+      </div>
+      <div style="margin-top:8px;">
+        <strong>Boundary memberships per node</strong>
+        <ul>
+          <li>EXT-001 — TB-001</li>
+          <li>EXT-002 — TB-001, TB-009</li>
+          <li>EXT-003 — TB-001</li>
+          <li>EXT-004 — TB-002</li>
+          <li>EXT-005 — TB-004</li>
+          <li>EXT-006 — TB-005, TB-004</li>
+          <li>EXT-007 — TB-001, TB-006</li>
+          <li>P-000 — TB-001, TB-008</li>
+          <li>P-001 — TB-001, TB-002, TB-003, TB-006, TB-008</li>
+          <li>P-002 — TB-002, TB-006, TB-004</li>
+          <li>P-003 — TB-002, TB-009</li>
+          <li>P-004 — TB-005</li>
+          <li>P-005 — TB-004, TB-006, TB-003</li>
+          <li>P-006 — TB-003</li>
+          <li>DS-001 — TB-003</li>
+          <li>DS-002 — TB-008</li>
+          <li>DS-003 — TB-009</li>
+          <li>DS-004 — (no boundary listed)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>STRIDE Matrix (Full)</h2>
+    <div class="small">Each cell shows the exact textual threat description(s) from the provided data.</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-narrow">Component</th>
+            <th class="nowrap">S</th>
+            <th class="nowrap">T</th>
+            <th class="nowrap">R</th>
+            <th class="nowrap">I</th>
+            <th class="nowrap">D</th>
+            <th class="nowrap">E</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Client Browser/UI (JS/Angular)</td>
+            <td>Spoofed/automated client (malicious user agent) impersonates a legitimate browser to bypass UI controls.</td>
+            <td>DOM tampering/XSS via malicious input alters client-side state or requests.</td>
+            <td>User denies initiating actions; lack of client request correlation may hinder attribution.</td>
+            <td>Sensitive data exposed in browser storage/URL/referrer or through mixed content.</td>
+            <td>Resource exhaustion via heavy scripts or repeated polling degrades client/server.</td>
+            <td>XSS leads to session theft or CSRF token exfiltration, escalating privileges.</td>
+          </tr>
+          <tr>
+            <td>CES Web Application (Servlet/JSP)</td>
+            <td>Session hijacking or forged cookies allow spoofing of authenticated users.</td>
+            <td>Input tampering (e.g., parameter manipulation/SQLi) alters server state; enforce validation and ORM binding.</td>
+            <td>Missing or insufficient audit logs prevent tying actions to identities.</td>
+            <td>Verbose errors or misconfigured caching disclose PII or stack traces.</td>
+            <td>DoS via expensive endpoints or lack of rate limiting; server becomes unresponsive.</td>
+            <td>Broken access control lets users escalate roles (e.g., employer to admin).</td>
+          </tr>
+          <tr>
+            <td>SSO/SAML Controller</td>
+            <td>Attacker spins up rogue IdP to spoof identities; require issuer whitelist and signature verification.</td>
+            <td>SAML message tampering (audience/recipient/NotOnOrAfter) if signatures not enforced.</td>
+            <td>Lack of SSO audit makes login assertions non-repudiable by neither party.</td>
+            <td>SAML attributes (email, roles) leaked via logs or referers on POST binding.</td>
+            <td>Flooding ACS endpoint with SAML responses to exhaust CPU/XML parsing.</td>
+            <td>Replay of valid assertions grants elevated roles; enforce one-time use and audience.</td>
+          </tr>
+          <tr>
+            <td>Employer Local Auth Controller</td>
+            <td>Credential stuffing/brute-force against employer login; apply rate limits/MFA.</td>
+            <td>Tampering with password reset tokens or parameters to take over accounts.</td>
+            <td>No auth attempt logging; attackers can deny abusive activity.</td>
+            <td>Credential disclosure via verbose errors or timing/account enumeration.</td>
+            <td>DoS via login endpoint flood leading to lockout or CPU exhaustion (hashing).</td>
+            <td>Bypassing role checks on callback can escalate employer to admin.</td>
+          </tr>
+          <tr>
+            <td>Email Notification Service</td>
+            <td>Email sender/domain spoofing if not authenticated; use SMTP AUTH, DKIM, SPF, DMARC.</td>
+            <td>Header injection via unvalidated input into email headers.</td>
+            <td>Lack of delivery logs hinders proof of notification.</td>
+            <td>PII leakage over SMTP if TLS not enforced; avoid sensitive content in subject/headers.</td>
+            <td>Email storm from retry loops or template errors overwhelms MTA.</td>
+            <td>Template injection leading to code execution in mail service if unsafe rendering.</td>
+          </tr>
+          <tr>
+            <td>Reporting Service</td>
+            <td>Unauthorized actor invokes reporting endpoints without proper authz.</td>
+            <td>Tampering with report parameters to alter results or access other tenants.</td>
+            <td>No audit of report generation/export leads to repudiation.</td>
+            <td>Reports leak PII beyond need-to-know; ensure aggregation/minimization.</td>
+            <td>Expensive report queries cause DB contention/DoS.</td>
+            <td>Privilege escalation by exploiting overbroad report scopes.</td>
+          </tr>
+          <tr>
+            <td>Data Persistence Framework/ORM</td>
+            <td>N/A: ORM does not authenticate users; use least-privileged DB account.</td>
+            <td>SQL injection if bindings improperly used; ORM misuse can still permit tampering.</td>
+            <td>Lack of DB operation audit trails prevents accountability.</td>
+            <td>Overprivileged DB credentials disclose data beyond need.</td>
+            <td>Long-running transactions lock tables causing availability issues.</td>
+            <td>Bypassing row-level checks at ORM layer can elevate data access.</td>
+          </tr>
+          <tr>
+            <td>Oracle SQL Database</td>
+            <td>Impersonation using shared/system DB accounts; enforce strong auth and network ACLs.</td>
+            <td>Unauthorized modification of evaluations/work reports via SQLi or direct DB access.</td>
+            <td>Insufficient auditing prevents proving who changed records.</td>
+            <td>PII disclosure from insecure queries/backups; ensure encryption at rest and access control.</td>
+            <td>Lock contention or saturation under load leads to timeouts.</td>
+            <td>Abusing stored procedures or DB scheduler to escalate privileges.</td>
+          </tr>
+          <tr>
+            <td>Session Store</td>
+            <td>Predictable session IDs or weak randomness enable session spoofing.</td>
+            <td>Session fixation or unauthorized mutation of session state.</td>
+            <td>Lack of session event logs allows repudiation of actions tied to session.</td>
+            <td>Session IDs leaked via logs/referrers enable hijacking.</td>
+            <td>Session store exhaustion causes widespread logouts/denials.</td>
+            <td>Privilege escalation by binding session to wrong principal on auth.</td>
+          </tr>
+          <tr>
+            <td>Employer Credentials Store</td>
+            <td>Account enumeration via timing/error differences when verifying credentials.</td>
+            <td>Tampering with password hashes/salts enables offline cracking.</td>
+            <td>Insufficient audit of credential changes (resets) allows repudiation.</td>
+            <td>Disclosure of hashed passwords; enforce strong hashing (argon2/bcrypt) and secret handling.</td>
+            <td>Frequent hashing operations under attack exhaust CPU, delaying legit auth.</td>
+            <td>Weak hashing/work factors permit offline cracking and role escalation.</td>
+          </tr>
+          <tr>
+            <td>Audit/Logs</td>
+            <td>Forged log entries (spoofed source) mislead investigations.</td>
+            <td>Log tampering/deletion; protect with append-only/WORM and integrity checks.</td>
+            <td>If logs are mutable or missing, users can repudiate actions.</td>
+            <td>Sensitive data (tokens/PII) written to logs leaks information.</td>
+            <td>Log flooding fills disk, impacting availability.</td>
+            <td>Overbroad log viewer permissions expose admin-only data.</td>
+          </tr>
+          <tr>
+            <td>Student User</td>
+            <td>Attacker pretends to be a student user to gain access.</td>
+            <td>Malicious student input attempts to tamper with server-side data.</td>
+            <td>Student denies submitting/altering an evaluation; ensure audit.</td>
+            <td>Student could exfiltrate their own or others' data if improperly authorized.</td>
+            <td>Student client floods endpoints causing DoS.</td>
+            <td>Tries to escalate to admin features via IDOR or role misconfig.</td>
+          </tr>
+          <tr>
+            <td>Employer User</td>
+            <td>Fake employer attempts to access evaluations via custom login.</td>
+            <td>Tampering attempts against employer evaluation inputs.</td>
+            <td>Employer denies submitting an evaluation; correlate with IP/time and auth.</td>
+            <td>Employer may try to view other employers' data; enforce access control.</td>
+            <td>Credential stuffing floods login path causing lockouts.</td>
+            <td>Attempts to escalate to admin by manipulating roles.</td>
+          </tr>
+          <tr>
+            <td>Administrator</td>
+            <td>Attacker impersonates administrator to access management functions.</td>
+            <td>Admin-side parameter tampering risks system-wide changes.</td>
+            <td>Admin denies approving/denying co-ops; ensure immutable audit.</td>
+            <td>Admin device compromise leaks sensitive data.</td>
+            <td>Bulk admin operations can overload system.</td>
+            <td>Privilege escalation beyond intended admin scope.</td>
+          </tr>
+          <tr>
+            <td>Shibboleth IdP</td>
+            <td>Rogue IdP spoofing Shibboleth; enforce metadata trust and TLS pinning.</td>
+            <td>Tampered SAML responses if signatures/conditions not validated.</td>
+            <td>IdP/CES dispute over assertion use; maintain correlation IDs.</td>
+            <td>Attribute over-release exposes more data than necessary.</td>
+            <td>IdP outage degrades availability; implement graceful handling.</td>
+            <td>If IdP sends elevated roles erroneously, users may gain extra privileges.</td>
+          </tr>
+          <tr>
+            <td>Reporting System (Jim's Reporting)</td>
+            <td>Untrusted reporting client impersonates trusted system; use API auth.</td>
+            <td>External system tampers with report payloads; validate schemas.</td>
+            <td>Lack of export logs prevents repudiation handling.</td>
+            <td>PII leakage via exported reports; enforce minimization and protection.</td>
+            <td>Bulk report pulls overload CES/DB.</td>
+            <td>External system misuses elevated API scopes to access data.</td>
+          </tr>
+          <tr>
+            <td>ITS Mail Server</td>
+            <td>Impersonated mail server via MX/DNS poisoning; enforce MTAs and cert checks.</td>
+            <td>Tampering with messages if STARTTLS downgraded; require TLS.</td>
+            <td>No delivery receipts/audit trail causes repudiation.</td>
+            <td>Email content disclosure over insecure links; minimize sensitive data in email.</td>
+            <td>Mail server throttle/outage delays notifications.</td>
+            <td>If CES creds on MTA overprivileged, attacker can abuse to send as trusted domains.</td>
+          </tr>
+          <tr>
+            <td>ITS DNS/Web Server (Reverse Proxy)</td>
+            <td>Spoofed reverse proxy or misrouted DNS sends traffic to attacker.</td>
+            <td>Header/body tampering at proxy; enforce header allowlists and TLS.</td>
+            <td>Lack of proxy access logs hinders traceability.</td>
+            <td>Proxy logs may disclose cookies/URLs; scrub sensitive fields.</td>
+            <td>Proxy overload blocks access to CES.</td>
+            <td>Overbroad proxy rules could bypass app auth (path rewrites).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Risk / Threat Register (Criticals & Highs only)</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">Threat ID</th>
+            <th class="col-narrow">Component</th>
+            <th>Description</th>
+            <th class="col-score">DREAD score</th>
+            <th>Mitigation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Begin generated rows from DREAD dataset -->
+          <tr><td>TH-0081</td><td>Client Browser/UI (JS/Angular)</td><td>Spoofed/automated client bypasses UI controls; server-side authz must not trust client type.</td><td class="col-score">33 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0082</td><td>Client Browser/UI (JS/Angular)</td><td>DOM tampering/XSS can alter requests and inject malicious payloads.</td><td class="col-score">37 (High)</td><td>MIT-0019: XSS Mitigations — Contextual output encoding, strict CSP, input sanitization, template auto-escaping, dependency review and SRI for assets.</td></tr>
+          <tr><td>TH-0083</td><td>Client Browser/UI (JS/Angular)</td><td>Insufficient client request correlation enables denial of actions by users.</td><td class="col-score">33 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0084</td><td>Client Browser/UI (JS/Angular)</td><td>Sensitive data in URL, storage, or mixed content can leak via browser/referrers.</td><td class="col-score">35 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0085</td><td>Client Browser/UI (JS/Angular)</td><td>Heavy scripts/polling or automation can exhaust client/server resources.</td><td class="col-score">37 (High)</td><td>MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0086</td><td>Client Browser/UI (JS/Angular)</td><td>XSS can steal sessions/CSRF tokens and escalate privileges.</td><td class="col-score">38 (High)</td><td>MIT-0019: XSS Mitigations — Contextual output encoding, strict CSP, input sanitization, template auto-escaping, dependency review and SRI for assets.</td></tr>
+          <tr><td>TH-0205</td><td>Client Browser/UI (JS/Angular)</td><td>Clickjacking via framing can trigger unintended state changes.</td><td class="col-score">39 (High)</td><td>MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.; MIT-0017: Clickjacking Defense — Set CSP frame-ancestors 'none' (or strict allowlist) and X-Frame-Options=DENY on state-changing routes at edge and app.</td></tr>
+
+          <tr><td>TH-0091</td><td>CES Web Application (Servlet/JSP)</td><td>Session hijacking/forged cookies allow spoofing of authenticated users.</td><td class="col-score">38 (High)</td><td>MIT-0001: Session Security Hardening — Use Secure/HttpOnly/SameSite cookies, rotate on auth, bind to client context, short TTLs, strict session invalidation and renewal.</td></tr>
+          <tr><td>TH-0092</td><td>CES Web Application (Servlet/JSP)</td><td>Input tampering/SQLi alters server state; insufficient validation/binding.</td><td class="col-score">39 (High)</td><td>MIT-0002: Robust Input Validation and ORM Binding — Validate/normalize inputs server-side, enforce strict schemas, use parameterized queries/ORM safe APIs, reject unexpected fields.</td></tr>
+          <tr><td>TH-0093</td><td>CES Web Application (Servlet/JSP)</td><td>Missing or weak audit logs hinder attribution of actions.</td><td class="col-score">35 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0094</td><td>CES Web Application (Servlet/JSP)</td><td>Verbose errors/caching may disclose PII or stack traces.</td><td class="col-score">35 (High)</td><td>MIT-0019: XSS Mitigations — Contextual output encoding, strict CSP, input sanitization, template auto-escaping, dependency review and SRI for assets.</td></tr>
+          <tr><td>TH-0095</td><td>CES Web Application (Servlet/JSP)</td><td>Expensive endpoints and lack of rate limits can cause DoS.</td><td class="col-score">38 (High)</td><td>MIT-0007: Rate Limiting and Anti-Automation — Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.; MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0096</td><td>CES Web Application (Servlet/JSP)</td><td>Broken access control may allow role escalation (e.g., employer to admin).</td><td class="col-score">39 (High)</td><td>MIT-0005: Access Control and Authorization — Enforce least privilege, role- and attribute-based checks on every request, deny-by-default, secure admin paths, policy tests.</td></tr>
+          <tr><td>TH-0201</td><td>CES Web Application (Servlet/JSP)</td><td>CSRF on state-changing endpoints can force victim actions with their privileges.</td><td class="col-score">40 (Critical)</td><td>MIT-0001: Session Security Hardening — Use Secure/HttpOnly/SameSite cookies, rotate on auth, bind to client context, short TTLs, strict session invalidation and renewal.; MIT-0004: CSRF Protections — Per-request CSRF tokens, SameSite=Lax/Strict, double-submit where needed, verify origin/referer, make state changes idempotent.</td></tr>
+          <tr><td>TH-0202</td><td>CES Web Application (Servlet/JSP)</td><td>Insecure Java deserialization can enable remote code execution.</td><td class="col-score">41 (Critical)</td><td>MIT-0012: Deserialization Protections — Remove native Java serialization; use JSON/XML mappers; if unavoidable, enforce ObjectInputFilter/allowlists and disable gadgets.</td></tr>
+          <tr><td>TH-0210</td><td>CES Web Application (Servlet/JSP)</td><td>Mass assignment/over-posting may modify protected fields (e.g., role/status).</td><td class="col-score">39 (High)</td><td>MIT-0002: Robust Input Validation and ORM Binding — Validate/normalize inputs server-side, enforce strict schemas, use parameterized queries/ORM safe APIs, reject unexpected fields.; MIT-0013: Mass Assignment Defense — Use DTOs/explicit binding allowlists; ignore unexpected fields; enforce server-side invariants on sensitive attributes.</td></tr>
+          <tr><td>TH-0207</td><td>CES Web Application (Servlet/JSP)</td><td>CORS misconfig (e.g., '*' with credentials) enables cross-origin data exfil/abuse.</td><td class="col-score">40 (Critical)</td><td>MIT-0011: CORS Lockdown — Disallow cross-origin by default; if needed, strict allowlist, exact origins, no credentials unless required, validate preflights.</td></tr>
+          <tr><td>TH-0211</td><td>CES Web Application (Servlet/JSP)</td><td>Open redirect after login enables phishing and session confusion.</td><td class="col-score">38 (High)</td><td>MIT-0018: Redirect/Forward Allowlisting — Validate post-login return URLs/RelayState against allowlist; strip external hosts; avoid dangerous server-side forwards.</td></tr>
+
+          <tr><td>TH-0101</td><td>SSO/SAML Controller</td><td>Rogue IdP could spoof identities without strict issuer/metadata trust.</td><td class="col-score">37 (High)</td><td>MIT-0003: SAML Security Controls — Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.</td></tr>
+          <tr><td>TH-0102</td><td>SSO/SAML Controller</td><td>SAML message tampering (conditions/audience) if signatures not enforced.</td><td class="col-score">38 (High)</td><td>MIT-0003: SAML Security Controls — Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.</td></tr>
+          <tr><td>TH-0103</td><td>SSO/SAML Controller</td><td>Insufficient SSO audit trails hinder repudiation handling.</td><td class="col-score">34 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0104</td><td>SSO/SAML Controller</td><td>SAML attributes may leak via logs or referrers.</td><td class="col-score">35 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0105</td><td>SSO/SAML Controller</td><td>Flooding ACS with SAML responses exhausts XML parsing/CPU.</td><td class="col-score">37 (High)</td><td>MIT-0007: Rate Limiting and Anti-Automation — Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.; MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0106</td><td>SSO/SAML Controller</td><td>Replay of valid assertions grants access without reuse protection.</td><td class="col-score">37 (High)</td><td>MIT-0003: SAML Security Controls — Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.</td></tr>
+          <tr><td>TH-0203</td><td>SSO/SAML Controller</td><td>SAML XML parser XXE may leak files or cause DoS unless DTD/XXE disabled.</td><td class="col-score">40 (Critical)</td><td>MIT-0003: SAML Security Controls — Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.</td></tr>
+          <tr><td>TH-0204</td><td>SSO/SAML Controller</td><td>XML Signature Wrapping can bypass signature checks and elevate access.</td><td class="col-score">38 (High)</td><td>MIT-0003: SAML Security Controls — Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.</td></tr>
+          <tr><td>TH-0213</td><td>SSO/SAML Controller</td><td>Unvalidated SSO redirect/RelayState manipulation can route users to attacker sites.</td><td class="col-score">38 (High)</td><td>MIT-0003: SAML Security Controls — Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.; MIT-0018: Redirect/Forward Allowlisting — Validate post-login return URLs/RelayState against allowlist; strip external hosts; avoid dangerous server-side forwards.</td></tr>
+
+          <tr><td>TH-0111</td><td>Employer Local Auth Controller</td><td>Credential stuffing/brute-force against employer login without rate limits/MFA.</td><td class="col-score">40 (Critical)</td><td>MIT-0007: Rate Limiting and Anti-Automation — Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.</td></tr>
+          <tr><td>TH-0112</td><td>Employer Local Auth Controller</td><td>Tampering with reset tokens/params could take over accounts.</td><td class="col-score">36 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0113</td><td>Employer Local Auth Controller</td><td>No auth attempt logging allows denial of abusive activity.</td><td class="col-score">35 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0114</td><td>Employer Local Auth Controller</td><td>Verbose errors/timing leaks reveal credentials/account existence.</td><td class="col-score">36 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0115</td><td>Employer Local Auth Controller</td><td>Login flood/hash work exhausts CPU causing lockouts.</td><td class="col-score">35 (High)</td><td>MIT-0007: Rate Limiting and Anti-Automation — Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.; MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0116</td><td>Employer Local Auth Controller</td><td>Bypassing role checks on callback can escalate employer to admin.</td><td class="col-score">36 (High)</td><td>MIT-0005: Access Control and Authorization — Enforce least privilege, role- and attribute-based checks on every request, deny-by-default, secure admin paths, policy tests.</td></tr>
+
+          <tr><td>TH-0121</td><td>Email Notification Service</td><td>Email sender spoofing without authenticated channels.</td><td class="col-score">37 (High)</td><td>MIT-0008: Email Channel Security — Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.</td></tr>
+          <tr><td>TH-0122</td><td>Email Notification Service</td><td>Header injection via unvalidated input into email headers.</td><td class="col-score">37 (High)</td><td>MIT-0008: Email Channel Security — Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.</td></tr>
+          <tr><td>TH-0123</td><td>Email Notification Service</td><td>Lack of delivery logs prevents proving notifications.</td><td class="col-score">34 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0124</td><td>Email Notification Service</td><td>PII leakage over SMTP if TLS not enforced; leak in headers/subject.</td><td class="col-score">36 (High)</td><td>MIT-0008: Email Channel Security — Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.</td></tr>
+          <tr><td>TH-0125</td><td>Email Notification Service</td><td>Email storm from retries/template issues overwhelms MTA.</td><td class="col-score">36 (High)</td><td>MIT-0008: Email Channel Security — Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.</td></tr>
+          <tr><td>TH-0126</td><td>Email Notification Service</td><td>Template injection could execute code in mail service.</td><td class="col-score">37 (High)</td><td>No data provided.</td></tr>
+
+          <tr><td>TH-0131</td><td>Reporting Service</td><td>Unauthorized invocation of reporting endpoints.</td><td class="col-score">36 (High)</td><td>MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.</td></tr>
+          <tr><td>TH-0132</td><td>Reporting Service</td><td>Tampering with report parameters to alter scope/results.</td><td class="col-score">36 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0133</td><td>Reporting Service</td><td>No audit of report generation/export enables repudiation.</td><td class="col-score">34 (High)</td><td>MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.</td></tr>
+          <tr><td>TH-0134</td><td>Reporting Service</td><td>Reports may leak PII beyond need-to-know.</td><td class="col-score">36 (High)</td><td>MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.</td></tr>
+          <tr><td>TH-0135</td><td>Reporting Service</td><td>Expensive queries can cause DB contention/DoS.</td><td class="col-score">36 (High)</td><td>MIT-0007: Rate Limiting and Anti-Automation — Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.; MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.; MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0136</td><td>Reporting Service</td><td>Overbroad report scopes can be abused to elevate access.</td><td class="col-score">36 (High)</td><td>MIT-0005: Access Control and Authorization — Enforce least privilege, role- and attribute-based checks on every request, deny-by-default, secure admin paths, policy tests.</td></tr>
+          <tr><td>TH-0208</td><td>Reporting Service</td><td>CSV/Excel formula injection can execute commands or exfiltrate credentials.</td><td class="col-score">38 (High)</td><td>MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.</td></tr>
+
+          <tr><td>TH-0142</td><td>Data Persistence Framework/ORM</td><td>SQL injection via ORM misuse/unsafe queries.</td><td class="col-score">38 (High)</td><td>MIT-0002: Robust Input Validation and ORM Binding — Validate/normalize inputs server-side, enforce strict schemas, use parameterized queries/ORM safe APIs, reject unexpected fields.</td></tr>
+          <tr><td>TH-0143</td><td>Data Persistence Framework/ORM</td><td>L lack of DB operation audits hinders accountability.</td><td class="col-score">35 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0144</td><td>Data Persistence Framework/ORM</td><td>Overprivileged DB credentials expose data beyond necessity.</td><td class="col-score">37 (High)</td><td>MIT-0014: Database Security and Transport Encryption — Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.</td></tr>
+          <tr><td>TH-0145</td><td>Data Persistence Framework/ORM</td><td>Long transactions lock tables reducing availability.</td><td class="col-score">35 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0146</td><td>Data Persistence Framework/ORM</td><td>Bypassing row-level checks at ORM enables unauthorized data access.</td><td class="col-score">37 (High)</td><td>MIT-0005: Access Control and Authorization — Enforce least privilege, role- and attribute-based checks on every request, deny-by-default, secure admin paths, policy tests.</td></tr>
+
+          <tr><td>TH-0151</td><td>Oracle SQL Database</td><td>Shared/system DB accounts allow impersonation; weak auth controls.</td><td class="col-score">35 (High)</td><td>MIT-0014: Database Security and Transport Encryption — Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.</td></tr>
+          <tr><td>TH-0152</td><td>Oracle SQL Database</td><td>Unauthorized modification via SQLi or direct DB access.</td><td class="col-score">38 (High)</td><td>MIT-0002: Robust Input Validation and ORM Binding — Validate/normalize inputs server-side, enforce strict schemas, use parameterized queries/ORM safe APIs, reject unexpected fields.; MIT-0014: Database Security and Transport Encryption — Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.</td></tr>
+          <tr><td>TH-0153</td><td>Oracle SQL Database</td><td>Insufficient auditing prevents proving who changed records.</td><td class="col-score">35 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.; MIT-0014: Database Security and Transport Encryption — Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.</td></tr>
+          <tr><td>TH-0154</td><td>Oracle SQL Database</td><td>PII disclosure from insecure queries/backups; at-rest controls needed.</td><td class="col-score">38 (High)</td><td>MIT-0014: Database Security and Transport Encryption — Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.</td></tr>
+          <tr><td>TH-0155</td><td>Oracle SQL Database</td><td>Lock contention/saturation under load leads to timeouts.</td><td class="col-score">37 (High)</td><td>MIT-0007: Rate Limiting and Anti-Automation — Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.; MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.; MIT-0014: Database Security and Transport Encryption — Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.</td></tr>
+          <tr><td>TH-0156</td><td>Oracle SQL Database</td><td>Abusing stored procedures or DB scheduler to escalate privileges.</td><td class="col-score">37 (High)</td><td>MIT-0014: Database Security and Transport Encryption — Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.</td></tr>
+          <tr><td>TH-0212</td><td>Oracle SQL Database</td><td>Unencrypted DB transport (no TCPS/mTLS) risks interception/tampering.</td><td class="col-score">39 (High)</td><td>MIT-0014: Database Security and Transport Encryption — Least-privilege DB users, strong auth, auditing, TCPS with server cert validation/mTLS where possible, backup protection.</td></tr>
+
+          <tr><td>TH-0161</td><td>Session Store</td><td>Predictable/weak session IDs enable session spoofing.</td><td class="col-score">41 (Critical)</td><td>MIT-0001: Session Security Hardening — Use Secure/HttpOnly/SameSite cookies, rotate on auth, bind to client context, short TTLs, strict session invalidation and renewal.; MIT-0015: Session Store Hardening — High-entropy IDs, secure generation, per-user limits, eviction policies, encryption at rest, detailed session lifecycle logs.</td></tr>
+          <tr><td>TH-0162</td><td>Session Store</td><td>Session fixation or unauthorized mutation of session state.</td><td class="col-score">39 (High)</td><td>MIT-0001: Session Security Hardening — Use Secure/HttpOnly/SameSite cookies, rotate on auth, bind to client context, short TTLs, strict session invalidation and renewal.; MIT-0015: Session Store Hardening — High-entropy IDs, secure generation, per-user limits, eviction policies, encryption at rest, detailed session lifecycle logs.</td></tr>
+          <tr><td>TH-0163</td><td>Session Store</td><td>Lack of session event logs allows repudiation.</td><td class="col-score">36 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.; MIT-0015: Session Store Hardening — High-entropy IDs, secure generation, per-user limits, eviction policies, encryption at rest, detailed session lifecycle logs.</td></tr>
+          <tr><td>TH-0164</td><td>Session Store</td><td>Session IDs leaked via logs/referrers enable hijacking.</td><td class="col-score">41 (Critical)</td><td>MIT-0001: Session Security Hardening — Use Secure/HttpOnly/SameSite cookies, rotate on auth, bind to client context, short TTLs, strict session invalidation and renewal.; MIT-0015: Session Store Hardening — High-entropy IDs, secure generation, per-user limits, eviction policies, encryption at rest, detailed session lifecycle logs.</td></tr>
+          <tr><td>TH-0165</td><td>Session Store</td><td>Session store exhaustion causes widespread logouts/denials.</td><td class="col-score">38 (High)</td><td>MIT-0001: Session Security Hardening — Use Secure/HttpOnly/SameSite cookies, rotate on auth, bind to client context, short TTLs, strict session invalidation and renewal.; MIT-0015: Session Store Hardening — High-entropy IDs, secure generation, per-user limits, eviction policies, encryption at rest, detailed session lifecycle logs.; MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0166</td><td>Session Store</td><td>Binding session to wrong principal enables privilege escalation.</td><td class="col-score">40 (Critical)</td><td>MIT-0001: Session Security Hardening — Use Secure/HttpOnly/SameSite cookies, rotate on auth, bind to client context, short TTLs, strict session invalidation and renewal.; MIT-0015: Session Store Hardening — High-entropy IDs, secure generation, per-user limits, eviction policies, encryption at rest, detailed session lifecycle logs.</td></tr>
+
+          <tr><td>TH-0171</td><td>Employer Credentials Store</td><td>Account enumeration via timing/error differences.</td><td class="col-score">37 (High)</td><td>MIT-0016: Credential Store Hardening — Use argon2/bcrypt with strong work factors, unique salts, HSM/secret vaults, anti-enumeration, change event audits.</td></tr>
+          <tr><td>TH-0172</td><td>Employer Credentials Store</td><td>Tampering with password hashes/salts enables offline cracking.</td><td class="col-score">36 (High)</td><td>MIT-0016: Credential Store Hardening — Use argon2/bcrypt with strong work factors, unique salts, HSM/secret vaults, anti-enumeration, change event audits.</td></tr>
+          <tr><td>TH-0173</td><td>Employer Credentials Store</td><td>Insufficient audit of credential changes allows repudiation.</td><td class="col-score">34 (High)</td><td>MIT-0016: Credential Store Hardening — Use argon2/bcrypt with strong work factors, unique salts, HSM/secret vaults, anti-enumeration, change event audits.</td></tr>
+          <tr><td>TH-0174</td><td>Employer Credentials Store</td><td>Disclosure of hashed passwords risks offline cracking.</td><td class="col-score">39 (High)</td><td>MIT-0016: Credential Store Hardening — Use argon2/bcrypt with strong work factors, unique salts, HSM/secret vaults, anti-enumeration, change event audits.</td></tr>
+          <tr><td>TH-0175</td><td>Employer Credentials Store</td><td>Frequent hashing under attack exhausts CPU, delaying auth.</td><td class="col-score">35 (High)</td><td>MIT-0016: Credential Store Hardening — Use argon2/bcrypt with strong work factors, unique salts, HSM/secret vaults, anti-enumeration, change event audits.</td></tr>
+          <tr><td>TH-0176</td><td>Employer Credentials Store</td><td>Weak hashing/work factors allow offline cracking and escalation.</td><td class="col-score">40 (Critical)</td><td>MIT-0016: Credential Store Hardening — Use argon2/bcrypt with strong work factors, unique salts, HSM/secret vaults, anti-enumeration, change event audits.</td></tr>
+
+          <tr><td>TH-0181</td><td>Audit/Logs</td><td>Forged log entries mislead investigations.</td><td class="col-score">34 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0182</td><td>Audit/Logs</td><td>Log tampering/deletion without integrity controls.</td><td class="col-score">36 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0183</td><td>Audit/Logs</td><td>If logs are mutable or missing, users can repudiate actions.</td><td class="col-score">37 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0184</td><td>Audit/Logs</td><td>Sensitive data (tokens/PII) in logs leaks information.</td><td class="col-score">39 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0185</td><td>Audit/Logs</td><td>Log flooding fills disk impacts availability.</td><td class="col-score">35 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0186</td><td>Audit/Logs</td><td>Overbroad log viewer permissions expose sensitive data.</td><td class="col-score">35 (High)</td><td>MIT-0005: Access Control and Authorization — Enforce least privilege, role- and attribute-based checks on every request, deny-by-default, secure admin paths, policy tests.</td></tr>
+
+          <tr><td>TH-0041</td><td>Shibboleth IdP</td><td>Rogue IdP spoofing Shibboleth without strict metadata trust.</td><td class="col-score">37 (High)</td><td>MIT-0003: SAML Security Controls — Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.</td></tr>
+          <tr><td>TH-0042</td><td>Shibboleth IdP</td><td>Tampered SAML responses if signatures/conditions not validated.</td><td class="col-score">38 (High)</td><td>MIT-0003: SAML Security Controls — Pin IdP metadata, validate signatures/conditions/audience, disable DTD/XXE, enforce one-time use, clock skew limits, strict redirect allowlist.</td></tr>
+          <tr><td>TH-0043</td><td>Shibboleth IdP</td><td>IdP/CES dispute over assertion use absent correlation IDs.</td><td class="col-score">35 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0044</td><td>Shibboleth IdP</td><td>Attribute over-release exposes unnecessary PII.</td><td class="col-score">36 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0045</td><td>Shibboleth IdP</td><td>IdP outage degrades availability of authentication.</td><td class="col-score">35 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0046</td><td>Shibboleth IdP</td><td>If IdP sends elevated roles erroneously, users gain extra privileges.</td><td class="col-score">37 (High)</td><td>MIT-0005: Access Control and Authorization — Enforce least privilege, role- and attribute-based checks on every request, deny-by-default, secure admin paths, policy tests.</td></tr>
+
+          <tr><td>TH-0051</td><td>Reporting System (Jim's Reporting)</td><td>Untrusted reporting client impersonates trusted system.</td><td class="col-score">35 (High)</td><td>MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.</td></tr>
+          <tr><td>TH-0052</td><td>Reporting System (Jim's Reporting)</td><td>External system tampers with report payloads.</td><td class="col-score">35 (High)</td><td>No data provided.</td></tr>
+          <tr><td>TH-0053</td><td>Reporting System (Jim's Reporting)</td><td>Lack of export logs prevents repudiation handling.</td><td class="col-score">34 (High)</td><td>MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.</td></tr>
+          <tr><td>TH-0054</td><td>Reporting System (Jim's Reporting)</td><td>PII leakage via exported reports.</td><td class="col-score">37 (High)</td><td>MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.</td></tr>
+          <tr><td>TH-0055</td><td>Reporting System (Jim's Reporting)</td><td>Bulk report pulls overload CES/DB.</td><td class="col-score">37 (High)</td><td>MIT-0007: Rate Limiting and Anti-Automation — Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.; MIT-0009: Reporting Export Hardening — Authorize every report, log exports, throttle, sanitize CSV by prefixing dangerous chars or generate safe XLSX.; MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0056</td><td>Reporting System (Jim's Reporting)</td><td>External system misuses elevated API scopes to access data.</td><td class="col-score">37 (High)</td><td>No data provided.</td></tr>
+
+          <tr><td>TH-0061</td><td>ITS Mail Server</td><td>Impersonated mail server via DNS/MX poisoning.</td><td class="col-score">35 (High)</td><td>MIT-0008: Email Channel Security — Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.</td></tr>
+          <tr><td>TH-0062</td><td>ITS Mail Server</td><td>Tampering with messages via STARTTLS downgrade.</td><td class="col-score">35 (High)</td><td>MIT-0008: Email Channel Security — Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.</td></tr>
+          <tr><td>TH-0063</td><td>ITS Mail Server</td><td>No delivery receipts/audit trail causes repudiation.</td><td class="col-score">34 (High)</td><td>MIT-0006: Immutable Logging and Audit Trails — Centralize logs, enable WORM/append-only, integrity hashing, detailed audit for auth/session/DB ops, secure viewing and retention.</td></tr>
+          <tr><td>TH-0064</td><td>ITS Mail Server</td><td>Email content disclosure over insecure links.</td><td class="col-score">37 (High)</td><td>MIT-0008: Email Channel Security — Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.</td></tr>
+          <tr><td>TH-0065</td><td>ITS Mail Server</td><td>Mail server throttle/outage delays notifications.</td><td class="col-score">36 (High)</td><td>MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0066</td><td>ITS Mail Server</td><td>Overprivileged CES creds on MTA enable abuse.</td><td class="col-score">36 (High)</td><td>MIT-0008: Email Channel Security — Require TLS with certificate validation, SPF/DKIM/DMARC, sanitize headers, avoid PII in subject/headers, bounce handling.</td></tr>
+
+          <tr><td>TH-0071</td><td>ITS DNS/Web Server (Reverse Proxy)</td><td>Spoofed reverse proxy/misrouted DNS sends traffic to attacker.</td><td class="col-score">37 (High)</td><td>MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.</td></tr>
+          <tr><td>TH-0072</td><td>ITS DNS/Web Server (Reverse Proxy)</td><td>Header/body tampering at proxy; improper normalization.</td><td class="col-score">36 (High)</td><td>MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.</td></tr>
+          <tr><td>TH-0073</td><td>ITS DNS/Web Server (Reverse Proxy)</td><td>Lack of proxy access logs hinders traceability.</td><td class="col-score">35 (High)</td><td>MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.</td></tr>
+          <tr><td>TH-0074</td><td>ITS DNS/Web Server (Reverse Proxy)</td><td>Proxy logs may disclose cookies/URLs.</td><td class="col-score">36 (High)</td><td>MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.</td></tr>
+          <tr><td>TH-0075</td><td>ITS DNS/Web Server (Reverse Proxy)</td><td>Proxy overload blocks access to CES.</td><td class="col-score">36 (High)</td><td>MIT-0007: Rate Limiting and Anti-Automation — Apply IP/user-based throttling, CAPTCHA/risk-based challenges, account lockouts with safe backoff, per-endpoint budgets.; MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.; MIT-0020: DoS Resilience and Capacity — Pre-compute caches, queue work, circuit breakers, timeouts, autoscaling, per-endpoint budgets, backpressure and graceful degradation.</td></tr>
+          <tr><td>TH-0076</td><td>ITS DNS/Web Server (Reverse Proxy)</td><td>Overbroad proxy rules could bypass app auth (path rewrites).</td><td class="col-score">37 (High)</td><td>MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.; MIT-0005: Access Control and Authorization — Enforce least privilege, role- and attribute-based checks on every request, deny-by-default, secure admin paths, policy tests.</td></tr>
+          <tr><td>TH-0209</td><td>ITS DNS/Web Server (Reverse Proxy)</td><td>Cache poisoning/stale caching can disclose cross-user data.</td><td class="col-score">40 (Critical)</td><td>MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.</td></tr>
+          <tr><td>TH-0206</td><td>ITS DNS/Web Server (Reverse Proxy)</td><td>Clickjacking if edge lacks frame protections.</td><td class="col-score">39 (High)</td><td>MIT-0010: Reverse Proxy Hardening and Caching Controls — Normalize/allowlist headers, auth-aware caching, strip hop-by-hop headers, set Cache-Control, enable CSP frame-ancestors.; MIT-0017: Clickjacking Defense — Set CSP frame-ancestors 'none' (or strict allowlist) and X-Frame-Options=DENY on state-changing routes at edge and app.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Required sections with no data would display "No data provided." -->
+</div>
+
+<!-- Mermaid loader (dark theme) -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    flowchart: { curve: 'basis' },
+    securityLevel: 'strict'
+  });
+</script>
+</body>
+</html>

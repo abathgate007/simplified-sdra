@@ -34,7 +34,7 @@ class DiagramToMermaidConverter:
                 {"type": "image_url", "image_url": {"url": data_url}},
             ]},
         ]
-        resp = self.client.chat.completions.create(model=self.model_name, messages=messages, temperature=0)
+        resp = self.client.chat.completions.create(model=self.model_name, messages=messages, temperature=1)
         mermaid = self._extract_mermaid(resp.choices[0].message.content or "")
         if output_path and mermaid:
             Path(output_path).write_text(mermaid, encoding="utf-8")

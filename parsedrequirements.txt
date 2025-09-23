@@ -544,10 +544,10 @@ interconnections, and external interfaces. 
 12
 [MERMAID DIAGRAM]
 flowchart TD
-    A[ITS DNS/Web Server] -->|connects to| B[Co-op Evaluation System]
-    C[ITS Mail Server] -->|connects to| B
-    D[Shiboleth] -->|connects to| B
-    E[Oracle SQL Database] -->|connects to| B
+  dns[ITS DNS/Web Server] --> sys[Co-op Evaluation System]
+  shib[Shibboleth] --> sys
+  db[Oracle SQL Database] --> sys
+  sys --> mail[ITS Mail Server]
 
 
 # [PDF:SoftwareArchitectureDocumentation.pdf] Page 13
@@ -562,28 +562,40 @@ the interaction between technologies involved. 
 13
 [MERMAID DIAGRAM]
 flowchart TD
-    A[RIT] --> B[Administrator]
-    A --> C[Evaluator]
-    B --> D[PC]
-    C --> D
-    D --> E[Co-op Evaluation System]
-    E --> F[Server]
-    E --> G[PC]
-    G --> H[Student]
-    G --> I[Employer]
+  subgraph RIT
+    A[Administrator]
+    V[Evaluator]
+  end
+
+  A --> PC1[PC]
+  V --> PC2[PC]
+
+  subgraph CES[Co-op Evaluation System]
+    S[Server]
+  end
+
+  PC1 --> S
+  PC2 --> S
+
+  Stu[Student] --> PC3[PC]
+  Emp[Employer] --> PC4[PC]
+
+  PC3 --> S
+  PC4 --> S
 
 [MERMAID DIAGRAM]
 flowchart TD
-    A[CAS Login] --> B[Simplicity]
-    C[Campus Solutions (SIS) Co-op Feed] --> D[OCES's SQL Server Co-op Registration]
-    D --> E[Co-op Placement]
-    F[OCES's Co-op Input File] --> D
-
-    G[Shibboleth Authentication] --> H[Co-op Evaluation System]
-    I[Custom Employer Login] --> H
-    H --> J[Co-op Evaluation Database]
-    H --> K[Jim's Reporting]
-    H --> L[ITS Mail Server]
+  A(CAS Login) --> B[Simplicity]
+  C[Campus Solutions (SIS) Co-op Feed] --> D[OCES's SQL Server Co-op Registration]
+  E[Co-op Placement] --> D
+  B --> D
+  D --> F[OCES's Co-op Input File]
+  F --> G[Co-op Evaluation Database]
+  G --> H[Co-op Evaluation System]
+  I(Shibboleth Authentication) --> H
+  J(Custom Employer Login) --> H
+  H --> K[Jim's Reporting]
+  H --> L(ITS Mail Server)
 
 
 # [PDF:SoftwareArchitectureDocumentation.pdf] Page 14
@@ -733,29 +745,34 @@ Logical (Layered) View
 Figure 4. A layered view of the Co­op Evaluation System 
 18
 [MERMAID DIAGRAM]
-classDiagram
-    class Users
-    class ExternalAPIs
-    class Client {
-        +Presentation Layer
-        +HTML
-        +AngularJS
-        +CSS/Sass
-        +Bootstrap
-    }
-    class Server {
-        +Service Layer
-        +Application Logic Layer
-        +Domain Model Layer
-        +Data Access Layer
-        +Data Mappers
-        +Data Source Layer
-        +Oracle Database
-    }
+flowchart TD
+  u[Users]
+  api[External APIs]
 
-    Users --> Client
-    ExternalAPIs --> Server
-    Client --> Server
+  subgraph client[Client]
+    subgraph pres[Presentation Layer]
+      html[HTML]
+      ang[AngularJS]
+      css[CSS/Sass]
+      boot[Bootstrap]
+    end
+  end
+
+  subgraph server[Server]
+    svc[Service Layer]
+    app[Application Logic Layer]
+    dm[Domain Model Layer]
+    subgraph dal[Data Access Layer]
+      mappers[Data Mappers]
+    end
+    subgraph ds[Data Source Layer]
+      oracle[Oracle Database]
+    end
+  end
+
+  u --> pres
+  pres --> svc
+  svc --> api
 
 
 # [PDF:SoftwareArchitectureDocumentation.pdf] Page 19
@@ -857,33 +874,28 @@ an id or other identifying property, whereas GetAll will return all t
 21
 [MERMAID DIAGRAM]
 classDiagram
-    class DataAccessLayer {
-        <<folder>>
-    }
-    class ObjectMapper {
-    }
-    class DataMapper {
-        <<interface>>
-        + Insert()
-        + Update()
-        + Delete()
-        + GetOne()
-        + GetAll()
-    }
-    class DomainModelLayer {
-    }
-    class DataSourceLayer {
-    }
+class "Data Access Layer" as DAL
+class ObjectMapper
+class DataMapper {
+  +Insert()
+  +Update()
+  +Delete()
+  +GetOne()
+  +GetAll()
+}
+<<interface>> DataMapper
+class "Domain Model Layer" as DML
+class "Data Source Layer" as DSL
 
-    DataAccessLayer --> ObjectMapper
-    ObjectMapper --> DataMapper
-    DataMapper --> DomainModelLayer
-    DataMapper --> DataSourceLayer
+DAL *-- ObjectMapper
+DAL --> DataMapper
+DataMapper --> DML
+DataMapper --> DSL
 
 [MERMAID DIAGRAM]
 flowchart TD
-    A[Co-op Evaluation System] -->|Request| B[API]
-    B <--> C[External System]
+  CES[Co-op Evaluation System] --> API[API]
+  API --> EXT[External System]
 
 
 # [PDF:SoftwareArchitectureDocumentation.pdf] Page 22
@@ -942,15 +954,21 @@ Figure 5. A client­server view of the Co­op Evaluation System 
 23
 [MERMAID DIAGRAM]
 flowchart TD
-    A[Client Machine] -->|Uses| B[Web Browser]
-    B -->|Requests| C[Servlet]
-    B -->|Requests| D[JSP Page]
-    C -->|Processes| E[Data Persistence Framework]
-    D -->|Processes| E
-    E -->|Queries| F[Oracle SQL Database]
-    F -->|Returns Data| E
-    E -->|Responds| C
-    E -->|Responds| D
+  subgraph CM[Client Machine]
+    WB[Web Browser]
+  end
+  subgraph JAS[Java Application Server]
+    subgraph TC[Tomcat]
+      SV[Servlet]
+      JSP[JSP Page]
+    end
+    DPF[Data Persistence Framework]
+  end
+  DB[(Oracle SQL Database)]
+
+  WB <--> TC
+  TC <--> DPF
+  DPF <--> DB
 
 
 # [PDF:SoftwareArchitectureDocumentation.pdf] Page 24
@@ -1023,16 +1041,15 @@ then mapped into Java objects through use of the DataMapper interface.
 25
 [MERMAID DIAGRAM]
 classDiagram
-    class Client
-    class ExternalAPIs
-    class ServiceInterface <<interface>>
-    class ConcreteService
-    class ApplicationLayer
-
-    Client --> ConcreteService
-    ExternalAPIs --> ConcreteService
-    ConcreteService --> ApplicationLayer
-    ServiceInterface <|-- ConcreteService
+class Client
+class ConcreteService
+class "Application Layer" as AppLayer
+class "External APIs" as ExtAPIs
+interface ServiceInterface
+ConcreteService ..|> ServiceInterface
+Client --> ConcreteService
+ExtAPIs --> ConcreteService
+ConcreteService --> AppLayer
 
 
 # [PDF:SoftwareArchitectureDocumentation.pdf] Page 26

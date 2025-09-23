@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Security Design Review Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #151923;
+      --panel-2: #1b2030;
+      --text: #e6eaf2;
+      --muted: #9aa4b2;
+      --accent: #7cc7ff;
+      --border: #283046;
+      --danger: #ff6b6b;
+      --warn: #ffd166;
+      --ok: #6ee7b7;
+      --link: #8ab4ff;
+    }
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.45;
+    }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 12px;
+      font-weight: 650;
+      letter-spacing: 0.2px;
+    }
+    h1 { font-size: 28px; margin-bottom: 16px; }
+    h2 { font-size: 22px; margin-top: 28px; }
+    h3 { font-size: 18px; margin-top: 20px; }
+    .muted { color: var(--muted); }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 18px;
+      margin: 16px 0;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+
+    ul {
+      margin: 8px 0 8px 20px;
+    }
+
+    .mermaid {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px;
+      overflow: auto;
+    }
+
+    .legend {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 8px;
+      padding-left: 2px;
+    }
+    .legend ul { margin-left: 18px; }
+
+    .tbl-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 900px;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #1a2233;
+      color: var(--text);
+      text-align: left;
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--border);
+      z-index: 2;
+    }
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--text);
+    }
+    tbody tr:hover {
+      background: rgba(124, 199, 255, 0.05);
+    }
+    .nowrap { white-space: nowrap; }
+
+    .pill {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #101522;
+      color: var(--muted);
+      margin-right: 6px;
+    }
+    .pill.crit { color: #fff; background: rgba(255,107,107,0.16); border-color: rgba(255,107,107,0.4); }
+    .pill.high { color: #fff; background: rgba(255,209,102,0.12); border-color: rgba(255,209,102,0.4); }
+    .pill.med { color: #fff; background: rgba(122,162,247,0.12); border-color: rgba(122,162,247,0.35); }
+
+    .kpi {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 8px 0 2px;
+    }
+    .kpi .item {
+      background: #121826;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .kpi .item b { color: var(--text); }
+    .subtle { font-size: 13px; color: var(--muted); }
+
+    .footnote {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Security Design Review Report</h1>
+
+    <div class="card">
+      <h2>Executive Summary</h2>
+      <div class="kpi">
+        <div class="item">Modeled DFDs: <b>1</b> (DFD-001)</div>
+        <div class="item">Trust Boundaries: <b>11</b></div>
+        <div class="item">STRIDE Coverage: <b>100%</b></div>
+        <div class="item">Threats Rated (DREAD): <b>68</b></div>
+        <div class="item">Critical: <span class="pill crit">1</span> High: <span class="pill high">44</span> Medium: <span class="pill med">23</span></div>
+        <div class="item">Mitigation Items: <b>16</b></div>
+      </div>
+      <ul>
+        <li>Critical risk: TH-0005 Volumetric or L7 DoS at the web front door impacting all users.</li>
+        <li>High risks concentrated across web front door, app servers, SAML SP, employer auth, reporting, ETL, database, queueing, and logging components.</li>
+        <li>Full STRIDE coverage achieved across modeled components; mapped mitigations provided for identified High/Critical threats.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Trust Boundaries</h2>
+      <ul>
+        <li><b>TB-001 – Public Internet</b>: Untrusted networks used by end users and external actors to access CES over HTTPS.</li>
+        <li><b>TB-002 – RIT Web Front Door (Reverse Proxy/Load Balancer)</b>: Reverse proxy/load balancer in front of CES. TLS terminates here with header normalization (e.g., X-Forwarded-Proto/For). Enforces HTTPS-only and routes to multiple app servers.</li>
+        <li><b>TB-003 – RIT Application Zone (CES App Tier)</b>: CES application servers and supporting services. Contains web apps, Shibboleth SP, employer auth, email worker, reporting, ETL ingestion, distributed session store, and message queue.</li>
+        <li><b>TB-004 – RIT Database Zone</b>: Oracle SQL database hosting CES data. ACID transactions and restricted network access.</li>
+        <li><b>TB-005 – RIT Identity Zone (Shibboleth IdP)</b>: Institutional identity provider handling SAML authentication for RIT users.</li>
+        <li><b>TB-006 – RIT Email Infrastructure</b>: Institutional SMTP service for outbound email with STARTTLS.</li>
+        <li><b>TB-007 – RIT Logging/SIEM</b>: Centralized logging/SIEM receiving structured logs over TLS for audit and monitoring.</li>
+        <li><b>TB-008 – OCES Data Zone</b>: OCES-managed systems producing the Co-op Input File and hosting the Co-op Registration SQL Server.</li>
+        <li><b>TB-009 – RIT SIS/Simplicity Zone</b>: Upstream data providers for co-op feeds and placements.</li>
+        <li><b>TB-010 – RIT Reporting Zone</b>: External consumer of CES outputs (e.g., exports via API/SFTP).</li>
+        <li><b>TB-011 – RIT DNS</b>: Authoritative DNS resolving CES hostnames.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Annotated DFD (Mermaid)</h2>
+      <div class="mermaid">
+flowchart TD
+  %% Nodes grouped by Trust Boundaries (subgraphs)
+  subgraph TB_001_Public_Internet
+    EXT_011["Student Browser"]
+    EXT_012["Employer Browser"]
+    EXT_013["Admin Evaluator Browser"]
+    EXT_006["Custom Employer Login"]
+    EXT_004["External APIs"]
+  end
+
+  subgraph TB_002_RIT_Web_Front_Door
+    P_000["Reverse Proxy  Load Balancer"]
+  end
+
+  subgraph TB_003_RIT_Application_Zone
+    P_001["CES Web App  App Server 1"]
+    P_007["CES Web App  App Server 2"]
+    P_002["Reporting Service"]
+    P_003["Email Sender"]
+    P_004["Data Ingestion  ETL"]
+    P_005["Employer Auth  Local_Custom"]
+    P_006["Shibboleth SP"]
+    DS_004["Distributed Session Store"]
+    DS_005["Message Queue"]
+    DS_002["Application Logs"]
+  end
+
+  subgraph TB_004_RIT_Database_Zone
+    DS_001["Oracle Co-op Evaluation DB"]
+  end
+
+  subgraph TB_005_RIT_Identity_Zone
+    EXT_002["Shibboleth IdP"]
+  end
+
+  subgraph TB_006_RIT_Email_Infrastructure
+    EXT_005["ITS Mail Server"]
+  end
+
+  subgraph TB_007_RIT_Logging_SIEM
+    DS_006["Central Logging_SIEM"]
+  end
+
+  subgraph TB_008_OCES_Data_Zone
+    EXT_009["OCES SQL Server Co-op Registration"]
+    DS_003["OCES Co-op Input File  Staging"]
+  end
+
+  subgraph TB_009_RIT_SIS_Simplicity_Zone
+    EXT_007["SIS Co-op Feed"]
+    EXT_008["Simplicity"]
+  end
+
+  subgraph TB_010_RIT_Reporting_Zone
+    EXT_010["Jim's Reporting"]
+  end
+
+  subgraph TB_011_RIT_DNS
+    EXT_001["RIT DNS"]
+  end
+
+  %% Edges (sanitized labels)
+  EXT_011 --|HTTPS|--> P_000
+  EXT_012 --|HTTPS|--> P_000
+  EXT_013 --|HTTPS|--> P_000
+  EXT_006 --|HTTPS credentials|--> P_000
+  EXT_011 --|DNS query|--> EXT_001
+  EXT_001 --|DNS response|--> EXT_011
+  P_000 --|HTTPS LB routing|--> P_001
+  P_000 --|HTTPS LB routing|--> P_007
+  P_000 --|Route  employer_login|--> P_005
+  P_005 --|SQL credential check|--> DS_001
+  P_005 --|Session_claims|--> P_001
+  P_000 --|Invoke SP for protected routes|--> P_006
+  P_006 --|SAML2 over HTTPS|--> EXT_002
+  EXT_002 --|SAML2 Response|--> P_006
+  P_006 --|Assertion_session|--> P_001
+  P_001 --|SQL_TCP  ACID|--> DS_001
+  DS_001 --|SQL_TCP  ACID|--> P_001
+  P_007 --|SQL_TCP  ACID|--> DS_001
+  DS_001 --|SQL_TCP  ACID|--> P_007
+  P_001 --|Session read_write|--> DS_004
+  DS_004 --|Session read_write|--> P_001
+  P_007 --|Session read_write|--> DS_004
+  DS_004 --|Session read_write|--> P_007
+  P_001 --|Enqueue email job|--> DS_005
+  P_007 --|Enqueue email job|--> DS_005
+  P_003 --|Dequeue|--> DS_005
+  P_003 --|SMTP STARTTLS|--> EXT_005
+  P_002 --|Read aggregates|--> DS_001
+  P_002 --|CSV_API over SFTP_HTTPS|--> EXT_010
+  EXT_007 --|SIS internal feed|--> EXT_009
+  EXT_008 --|Placements feed|--> EXT_009
+  EXT_009 --|Export co-op input  SFTP|--> DS_003
+  P_004 --|Read file  SFTP_FTPS|--> DS_003
+  P_004 --|Load  ETL|--> DS_001
+  P_000 --|Structured logs  TLS|--> DS_006
+  P_001 --|Structured logs  TLS|--> DS_006
+  P_007 --|Structured logs  TLS|--> DS_006
+  P_002 --|Structured logs  TLS|--> DS_006
+  P_003 --|Structured logs  TLS|--> DS_006
+  P_004 --|Structured logs  TLS|--> DS_006
+  P_005 --|Structured logs  TLS|--> DS_006
+  P_006 --|Structured logs  TLS|--> DS_006
+  P_000 --|HTTPS responses|--> EXT_011
+  P_000 --|HTTPS responses|--> EXT_012
+  P_000 --|HTTPS responses|--> EXT_013
+  P_001 --|Application log entries|--> DS_002
+  P_001 --|API calls_HTTPS|--> EXT_004
+  EXT_006 --|HTTPS auth requests|--> P_005
+      </div>
+      <div class="legend">
+        <h3>Legend: Annotations</h3>
+        <ul>
+          <li><b>P-000</b>: Front door (RIT Web Front Door): enforce TLS/HSTS, header normalization, strict routing, and DDoS/WAF at trust boundary.</li>
+          <li><b>P-001</b>: CES App Srv 1 (Tomcat): session binding, CSRF/XSS defenses, robust authZ (IDOR), error handling, query cost guards.</li>
+          <li><b>P-007</b>: CES App Srv 2 (Tomcat): consistency across nodes, disable debug, deserialization hardening, circuit breaking.</li>
+          <li><b>P-006</b>: Shibboleth SP: validate signatures/audience/time, disable XXE, guard against sig wrapping, strict attribute mapping, log SSO.</li>
+          <li><b>P-005</b>: Employer Auth: rate-limit, credential policy, signed short-lived reset tokens, MFA, detailed login audit.</li>
+          <li><b>P-003</b>: Email Sender: auth to SMTP with STARTTLS, DKIM/DMARC, queue integrity, delivery tracking, abuse controls.</li>
+          <li><b>P-004</b>: ETL: SFTP/FTPS with checksums, AV scan/quarantine, whitelist paths, file size/row limits, full provenance logging.</li>
+          <li><b>P-002</b>: Reporting: strong API auth, parameter validation, export audit, PII minimization, CSV formula sanitization.</li>
+          <li><b>DS-001</b>: Oracle DB: parameterized access, least-priv DB roles, auditing, backup encryption, connection/lock limits.</li>
+          <li><b>DS-004</b>: Distributed Session Store: secure, audited, access-controlled; plan for outage/resync; avoid PII in session.</li>
+          <li><b>DS-005</b>: Message Queue: validate payloads, enforce producer identity, size/rate limits, DLQ and monitoring.</li>
+          <li><b>DS-006</b>: SIEM: tamper-evident storage, PII redaction controls, access restrictions, buffering during outage.</li>
+          <li><b>DS-002</b>: App Logs: protect from tampering/deletion, redact sensitive fields, manage retention/rotation to avoid fill.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>STRIDE Matrix (Full)</h2>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="nowrap">Component</th>
+              <th class="nowrap">S</th>
+              <th class="nowrap">T</th>
+              <th class="nowrap">R</th>
+              <th class="nowrap">I</th>
+              <th class="nowrap">D</th>
+              <th class="nowrap">E</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>P-000</td>
+              <td>Client IP/header spoofing (e.g., X-Forwarded-For) to bypass access controls at the app.</td>
+              <td>Proxy config tampering (routes, TLS ciphers) leading to insecure paths.</td>
+              <td>Lack of request logging prevents attribution.</td>
+              <td>TLS misconfig or HTTP fallback leaks credentials or session cookies.</td>
+              <td>Volumetric DoS saturates proxy or LB pools.</td>
+              <td>Header injection/caching quirks enable path traversal to admin endpoints.</td>
+            </tr>
+            <tr>
+              <td>P-001</td>
+              <td>Session spoofing or fixation to impersonate users.</td>
+              <td>CSRF on state-changing endpoints; stored/DOM XSS via user input.</td>
+              <td>Insufficient audit of CRUD actions on evaluations prevents accountability.</td>
+              <td>Sensitive data leakage via verbose errors or unsecured responses.</td>
+              <td>Expensive report queries cause resource exhaustion.</td>
+              <td>Privilege escalation via missing authorization on service layer endpoints.</td>
+            </tr>
+            <tr>
+              <td>P-007</td>
+              <td>Replay of session tokens across nodes if not bound to client.</td>
+              <td>Deserialization or injection via JSON payloads.</td>
+              <td>Node-specific actions not correlated due to missing node ID in logs.</td>
+              <td>Info leakage through debug endpoints on one node.</td>
+              <td>LB directs excess traffic causing node exhaustion.</td>
+              <td>Bypass authorization on one node due to config drift.</td>
+            </tr>
+            <tr>
+              <td>P-006</td>
+              <td>Forged SAML assertions if SP does not validate issuer.</td>
+              <td>Assertion tampering or replay without NotBefore/NotOnOrAfter checks.</td>
+              <td>Missing authn event logs hinder tracing federated logins.</td>
+              <td>Disclosure of SAML responses in logs or error pages.</td>
+              <td>IdP outage prevents RIT user logins.</td>
+              <td>SP misconfig allows elevation via forged attributes (e.g., admin role).</td>
+            </tr>
+            <tr>
+              <td>P-005</td>
+              <td>Credential stuffing/brute force against employer login.</td>
+              <td>Tampering with password reset token to take over accounts.</td>
+              <td>Lack of login attempt logs impedes investigation.</td>
+              <td>Password disclosure via verbose error or weak transport.</td>
+              <td>Auth endpoint targeted by DoS blocking employer access.</td>
+              <td>Missing MFA/weak policy enables privilege escalation.</td>
+            </tr>
+            <tr>
+              <td>P-003</td>
+              <td>Spoofed sender if SMTP not authenticated or DKIM missing.</td>
+              <td>Tampering with queued messages (content/recipient).</td>
+              <td>No proof of notification delivery or sending user.</td>
+              <td>PII leakage via plaintext SMTP without STARTTLS.</td>
+              <td>Queue backlog or MTA refusal causes email outage.</td>
+              <td>Abuse of email worker to send admin-only emails.</td>
+            </tr>
+            <tr>
+              <td>P-004</td>
+              <td>Impersonated upstream source provides malicious file.</td>
+              <td>Tampering with input file in transit or at rest (checksum mismatch).</td>
+              <td>No audit of ingestion runs and source file provenance.</td>
+              <td>Exposure of staging files containing PII.</td>
+              <td>Large file ingestion overwhelms DB or ETL worker.</td>
+              <td>Path traversal in file handling to read/write arbitrary files.</td>
+            </tr>
+            <tr>
+              <td>P-002</td>
+              <td>API key/token spoofing for reporting exports.</td>
+              <td>Tampering with report parameters to exfiltrate unauthorized data.</td>
+              <td>No audit of exports (who/what/when).</td>
+              <td>PII disclosure in exported CSV/API without masking.</td>
+              <td>Long-running report jobs degrade service.</td>
+              <td>Export endpoint allows elevation to broader datasets.</td>
+            </tr>
+            <tr>
+              <td>DS-001</td>
+              <td>N/A for data stores (handled by access control at processes).</td>
+              <td>Unauthorized writes/SQL injection altering evaluations.</td>
+              <td>Missing DB audit trails hinders change attribution.</td>
+              <td>PII disclosure via unencrypted backups or broad SELECTs.</td>
+              <td>Resource exhaustion (locks, connections) causing outage.</td>
+              <td>N/A for data stores (privilege managed by app/DB roles).</td>
+            </tr>
+            <tr>
+              <td>DS-004</td>
+              <td>N/A (session identity spoofing handled at app/proxy).</td>
+              <td>Session fixation or tampering with session records.</td>
+              <td>No audit of session creation/destruction.</td>
+              <td>Disclosure of session data enabling impersonation.</td>
+              <td>Session store outage logs out all users.</td>
+              <td>N/A (managed by app authz).</td>
+            </tr>
+            <tr>
+              <td>DS-005</td>
+              <td>N/A (identity at producers/consumers).</td>
+              <td>Poison pill messages cause worker crashes.</td>
+              <td>No audit of who enqueued messages.</td>
+              <td>Disclosure of queued content with PII.</td>
+              <td>Queue flood leads to system unavailability.</td>
+              <td>N/A.</td>
+            </tr>
+            <tr>
+              <td>DS-006</td>
+              <td>N/A.</td>
+              <td>Log tampering to hide malicious actions.</td>
+              <td>Lack of immutable logs prevents non-repudiation.</td>
+              <td>Sensitive data exposed in logs (PII, tokens).</td>
+              <td>SIEM outage impacts monitoring/incident response.</td>
+              <td>N/A.</td>
+            </tr>
+            <tr>
+              <td>DS-002</td>
+              <td>N/A - Data stores do not authenticate</td>
+              <td>Log tampering conceals security incidents</td>
+              <td>Logs could be deleted to hide unauthorized access</td>
+              <td>Log files exposed revealing system internals and user data</td>
+              <td>Log storage full prevents new log entries</td>
+              <td>N/A - Data stores do not execute with privileges</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="subtle">Coverage: 100% of modeled components and STRIDE categories as provided.</div>
+    </div>
+
+    <div class="card">
+      <h2>Risk / Threat Register (Criticals & Highs only)</h2>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="nowrap">Threat ID</th>
+              <th>Component</th>
+              <th>Description</th>
+              <th class="nowrap">DREAD Score</th>
+              <th>Mitigation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>TH-0001</td><td>P-000 (Reverse Proxy / Load Balancer)</td><td>Header/IP spoofing at the front door can bypass IP-based controls and poison logs if headers are trusted; highly repeatable and impacts many users.</td><td>36 (High)</td><td>Web Front Door TLS and Header Hardening<br>Component Mapping and Trust Boundary Documentation</td></tr>
+            <tr><td>TH-0002</td><td>P-000 (Reverse Proxy / Load Balancer)</td><td>Proxy/LB config tampering (routes/TLS/ciphers) can force insecure paths or bypass auth; change requires access but impact is broad.</td><td>36 (High)</td><td>Web Front Door TLS and Header Hardening<br>Component Mapping and Trust Boundary Documentation</td></tr>
+            <tr><td>TH-0004</td><td>P-000 (Reverse Proxy / Load Balancer)</td><td>TLS/HSTS misconfig or HTTP fallback risks credential/session exposure; high impact and broadly discoverable.</td><td>37 (High)</td><td>Web Front Door TLS and Header Hardening<br>Component Mapping and Trust Boundary Documentation</td></tr>
+            <tr><td>TH-0005</td><td>P-000 (Reverse Proxy / Load Balancer)</td><td>Volumetric or L7 DoS at the front door can saturate pools and take down service for all users; trivial to repeat from the internet.</td><td>40 (Critical)</td><td>Edge DDoS/L7 Rate Limiting and Backpressure</td></tr>
+            <tr><td>TH-0006</td><td>P-000 (Reverse Proxy / Load Balancer)</td><td>Header injection or routing quirks could expose admin paths or elevate privileges if upstream trust is misplaced.</td><td>35 (High)</td><td>Web Front Door TLS and Header Hardening<br>Component Mapping and Trust Boundary Documentation</td></tr>
+
+            <tr><td>TH-0007</td><td>P-001 (CES Web App (App Server 1))</td><td>Session spoofing/fixation can enable account takeover if IDs not rotated/bound; affects many endpoints.</td><td>34 (High)</td><td>Session Management and Binding</td></tr>
+            <tr><td>TH-0008</td><td>P-001 (CES Web App (App Server 1))</td><td>CSRF on state changes and XSS/DOM injection lead to data tampering and token theft; common and repeatable.</td><td>38 (High)</td><td>CSRF/XSS and Template Injection Defenses</td></tr>
+            <tr><td>TH-0011</td><td>P-001 (CES Web App (App Server 1))</td><td>Expensive queries or heavy endpoints can exhaust app/DB resources causing partial outage.</td><td>33 (High)</td><td>Edge DDoS/L7 Rate Limiting and Backpressure<br>Component Mapping and Trust Boundary Documentation</td></tr>
+            <tr><td>TH-0012</td><td>P-001 (CES Web App (App Server 1))</td><td>Missing or weak authorization checks allow privilege escalation or IDOR, exposing sensitive evaluations.</td><td>36 (High)</td><td>Robust Authorization and Object Scoping</td></tr>
+
+            <tr><td>TH-0013</td><td>P-007 (CES Web App (App Server 2))</td><td>Session replay across nodes if not client-bound can enable impersonation across the cluster.</td><td>33 (High)</td><td>Session Management and Binding</td></tr>
+            <tr><td>TH-0014</td><td>P-007 (CES Web App (App Server 2))</td><td>Deserialization/JSON injection can yield RCE or data tampering; well-known exploitation patterns exist.</td><td>38 (High)</td><td>CSRF/XSS and Template Injection Defenses</td></tr>
+            <tr><td>TH-0017</td><td>P-007 (CES Web App (App Server 2))</td><td>LB imbalance or lack of circuit-breaking can overload a node, degrading availability.</td><td>32 (High)</td><td>Cluster Consistency and Safe Defaults<br>Edge DDoS/L7 Rate Limiting and Backpressure</td></tr>
+            <tr><td>TH-0018</td><td>P-007 (CES Web App (App Server 2))</td><td>Config drift on one node could bypass authorization or enable admin-only functions.</td><td>33 (High)</td><td>Cluster Consistency and Safe Defaults</td></tr>
+
+            <tr><td>TH-0019</td><td>P-006 (Shibboleth SP)</td><td>Forged SAML assertions (issuer/signature not validated) enable full impersonation of RIT users.</td><td>38 (High)</td><td>SAML SP Hardening (Validation, XXE, Sig-Wrap)</td></tr>
+            <tr><td>TH-0020</td><td>P-006 (Shibboleth SP)</td><td>Assertion tampering/replay if NotBefore/NotOnOrAfter/audience not enforced; high privilege impact.</td><td>36 (High)</td><td>SAML SP Hardening (Validation, XXE, Sig-Wrap)</td></tr>
+            <tr><td>TH-0024</td><td>P-006 (Shibboleth SP)</td><td>SP attribute mapping errors can grant admin roles to normal users.</td><td>36 (High)</td><td>SAML SP Hardening (Validation, XXE, Sig-Wrap)</td></tr>
+
+            <tr><td>TH-0025</td><td>P-005 (Employer Auth (Local/Custom))</td><td>Credential stuffing/brute force is easy and effective without rate limits/MFA.</td><td>36 (High)</td><td>Employer Authentication Hardening</td></tr>
+            <tr><td>TH-0026</td><td>P-005 (Employer Auth (Local/Custom))</td><td>Password reset token tampering/guessing can hijack employer accounts if tokens weak or long-lived.</td><td>32 (High)</td><td>Employer Authentication Hardening</td></tr>
+            <tr><td>TH-0029</td><td>P-005 (Employer Auth (Local/Custom))</td><td>Focused DoS on auth endpoints blocks employers; easy to repeat.</td><td>32 (High)</td><td>Employer Authentication Hardening<br>Edge DDoS/L7 Rate Limiting and Backpressure</td></tr>
+            <tr><td>TH-0030</td><td>P-005 (Employer Auth (Local/Custom))</td><td>Weak policy or absent MFA allows elevation via compromised passwords.</td><td>35 (High)</td><td>Employer Authentication Hardening</td></tr>
+
+            <tr><td>TH-0032</td><td>P-003 (Email Sender)</td><td>Tampering with queued messages could alter recipients/content; moderate breadth of impact.</td><td>30 (High)</td><td>Secure Email and Queue Protections</td></tr>
+            <tr><td>TH-0034</td><td>P-003 (Email Sender)</td><td>PII in emails could be exposed if SMTP STARTTLS not enforced or downgraded.</td><td>32 (High)</td><td>Secure Email and Queue Protections</td></tr>
+            <tr><td>TH-0035</td><td>P-003 (Email Sender)</td><td>Queue backlog/MTA refusal prevents outbound notifications; affects timely workflows.</td><td>30 (High)</td><td>Secure Email and Queue Protections<br>Edge DDoS/L7 Rate Limiting and Backpressure</td></tr>
+            <tr><td>TH-0036</td><td>P-003 (Email Sender)</td><td>Abuse of email worker or templates could send privileged content broadly.</td><td>30 (High)</td><td>Secure Email and Queue Protections</td></tr>
+
+            <tr><td>TH-0037</td><td>P-004 (Data Ingestion (ETL))</td><td>Impersonated upstream source can supply malicious ETL file; trust-on-first-use risks.</td><td>31 (High)</td><td>ETL File Security and Malware Scanning</td></tr>
+            <tr><td>TH-0038</td><td>P-004 (Data Ingestion (ETL))</td><td>Tampering with input files in transit or at rest can corrupt loads; checksums/signatures required.</td><td>32 (High)</td><td>ETL File Security and Malware Scanning</td></tr>
+            <tr><td>TH-0040</td><td>P-004 (Data Ingestion (ETL))</td><td>Staging files may contain PII; exposure risks confidentiality.</td><td>32 (High)</td><td>ETL File Security and Malware Scanning</td></tr>
+            <tr><td>TH-0041</td><td>P-004 (Data Ingestion (ETL))</td><td>Large or malformed files can overwhelm ETL/DB resources, causing ingestion and service delays.</td><td>31 (High)</td><td>ETL File Security and Malware Scanning<br>Edge DDoS/L7 Rate Limiting and Backpressure</td></tr>
+            <tr><td>TH-0042</td><td>P-004 (Data Ingestion (ETL))</td><td>Path traversal or unsafe file handling may allow reading/writing arbitrary files.</td><td>35 (High)</td><td>ETL File Security and Malware Scanning</td></tr>
+
+            <tr><td>TH-0043</td><td>P-002 (Reporting Service)</td><td>API key/token spoofing for exports could allow unauthorized report pulls.</td><td>31 (High)</td><td>Reporting Export Controls and CSV Safety</td></tr>
+            <tr><td>TH-0044</td><td>P-002 (Reporting Service)</td><td>Report parameter tampering can bypass filters and exfiltrate unauthorized data.</td><td>34 (High)</td><td>Robust Authorization and Object Scoping<br>Reporting Export Controls and CSV Safety</td></tr>
+            <tr><td>TH-0046</td><td>P-002 (Reporting Service)</td><td>PII disclosure through exports without masking/minimization; CSV formula injection risks on open.</td><td>34 (High)</td><td>Reporting Export Controls and CSV Safety</td></tr>
+            <tr><td>TH-0047</td><td>P-002 (Reporting Service)</td><td>Long-running report jobs degrade app responsiveness for other users.</td><td>31 (High)</td><td>Edge DDoS/L7 Rate Limiting and Backpressure<br>Component Mapping and Trust Boundary Documentation</td></tr>
+            <tr><td>TH-0048</td><td>P-002 (Reporting Service)</td><td>Export endpoint may allow elevation to broader datasets if authorization scopes are weak.</td><td>33 (High)</td><td>Robust Authorization and Object Scoping<br>Reporting Export Controls and CSV Safety</td></tr>
+
+            <tr><td>TH-0049</td><td>DS-001 (Oracle Co-op Evaluation DB)</td><td>SQL injection/unauthorized writes corrupt evaluations; core system of record at risk.</td><td>37 (High)</td><td>Database Secure Coding and Operations</td></tr>
+            <tr><td>TH-0051</td><td>DS-001 (Oracle Co-op Evaluation DB)</td><td>PII disclosure via backups or broad SELECTs; high sensitivity and user impact.</td><td>36 (High)</td><td>Database Secure Coding and Operations</td></tr>
+            <tr><td>TH-0052</td><td>DS-001 (Oracle Co-op Evaluation DB)</td><td>DB locks/connection exhaustion can cause system-wide outage.</td><td>34 (High)</td><td>Database Secure Coding and Operations<br>Edge DDoS/L7 Rate Limiting and Backpressure</td></tr>
+
+            <tr><td>TH-0053</td><td>DS-004 (Distributed Session Store)</td><td>Session fixation/tampering at store can enable impersonation; moderate to high impact.</td><td>35 (High)</td><td>Session Management and Binding</td></tr>
+            <tr><td>TH-0055</td><td>DS-004 (Distributed Session Store)</td><td>Disclosure of server-side session data may leak identifiers/claims enabling abuse.</td><td>33 (High)</td><td>Session Management and Binding</td></tr>
+
+            <tr><td>TH-0057</td><td>DS-005 (Message Queue)</td><td>Poison pill messages crash workers or block queues; can be crafted repeatedly.</td><td>32 (High)</td><td>Secure Email and Queue Protections</td></tr>
+            <tr><td>TH-0059</td><td>DS-005 (Message Queue)</td><td>Queued content may include PII; disclosure risks confidentiality.</td><td>31 (High)</td><td>Secure Email and Queue Protections</td></tr>
+            <tr><td>TH-0060</td><td>DS-005 (Message Queue)</td><td>Queue floods cause backlog and unavailability of async functions (emails).</td><td>33 (High)</td><td>Secure Email and Queue Protections<br>Edge DDoS/L7 Rate Limiting and Backpressure</td></tr>
+
+            <tr><td>TH-0061</td><td>DS-006 (Central Logging/SIEM)</td><td>Log tampering in SIEM hides attacks; enables dwell time and evasion.</td><td>31 (High)</td><td>Centralized Audit Logging and Correlation<br>Log Hygiene, Redaction, and Retention</td></tr>
+            <tr><td>TH-0063</td><td>DS-006 (Central Logging/SIEM)</td><td>Sensitive data in logs (PII/tokens) increases breach blast radius if SIEM is accessed.</td><td>33 (High)</td><td>Log Hygiene, Redaction, and Retention</td></tr>
+
+            <tr><td>TH-0067</td><td>DS-002 (Application Logs)</td><td>Logs may expose PII or secrets (tokens), increasing breach severity if accessed.</td><td>33 (High)</td><td>Log Hygiene, Redaction, and Retention</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footnote">Note: Diagram labels sanitized per rules (special characters replaced; bidirectional labeled edges split). Mermaid theme: dark.</div>
+
+  </div>
+
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "dark",
+      securityLevel: "loose"
+    });
+  </script>
+</body>
+</html>
